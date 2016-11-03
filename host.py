@@ -1,10 +1,10 @@
 from link import linkqueue()
 import flow
-class Host:
+class host:
 	"""A Host: end points of the network"""
 	def __init__(self, id, link):
 		super(Host, self).__init__()
-		self.arg = arg
+		self.id = id
 		self.link = link
 		linkqueue = linkqueue()
 
