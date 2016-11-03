@@ -10,7 +10,8 @@ class event_queue:
     def dequeue(self):
         '''
             Returns the event with the smallest time property
-            The function gets the first event in the eventLIst and 
+            The function gets the first event in the eventList, removes it
+            from the list, and returns it
         '''
         ret_event = self.eventList[0]   # Get event to dequeue
         del self.eventList[0]           # Remove this event from queue
