@@ -7,3 +7,10 @@ class event:
 		'''
 		self.type = event_type
 		self.time = time
+
+	def getTime(self):
+		return self.time
+
+	def getEvent(self):
+		return self.event_type
+	
