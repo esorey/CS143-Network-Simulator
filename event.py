@@ -11,6 +11,5 @@ class event:
 	def getTime(self):
 		return self.time
 
-	def getEvent(self):
+	def getEventType(self):
 		return self.event_type
-	
