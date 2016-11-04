@@ -5,7 +5,7 @@ class event_queue:
             itemList is a list of events that is sorted (as elements are 
                 added) in order of each event's time property
         '''
-        eventList = [];
+        self.eventList = [];
 
     def dequeue(self):
         '''
@@ -25,7 +25,7 @@ class event_queue:
             events in order of the time the event should be executed.
         '''
         # Determine index to insert event based on time property
-        ind_to_insert = getIndextoInsert(self, event.getTime())
+        ind_to_insert = self.getIndextoInsert(self, event.getTime())
 
         self.eventList.insert(ind_to_insert, event)  # Insert/enqueue event
 
