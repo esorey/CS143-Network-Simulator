@@ -22,7 +22,7 @@ class flow:
 		sendPckts = []
 		if len(droppedPackets) != 0: 
 			# send packets from dropped packets
-			if len(droppedPackets) > windowSize:
+			if len(droppedPackets) >= windowSize:
 				sendPckts = droppedPackets[:windowSize]
 			elif len(droppedPackets) < windowSize:
 				sendPckts.append(droppedPackets)
@@ -39,9 +39,12 @@ class flow:
 	flow deals with packet loss.'''
 	def getACK(packetID):
 		if packetID  > currACK+1:  // dropped a packet
-		append(droppedPacket, range(currACK+1, packetID))
+			append(droppedPacket, range(currACK+1, packetID))
 		currACK += 1
 		elif packetID < currACK: 
 		Delete packetID from droppedPacket
 		else:
 		currACK += 1
+
+# Global ID variable for packet ID
+# Check by flow
