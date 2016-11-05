@@ -5,6 +5,7 @@ class event_queue:
             itemList is a list of events that is sorted (as elements are 
                 added) in order of each event's time property
         '''
+        # Global time variable
         self.eventList = [];
 
     def dequeue(self):
@@ -16,6 +17,7 @@ class event_queue:
         ret_event = self.eventList[0]   # Get event to dequeue
         del self.eventList[0]           # Remove this event from queue
 
+        # Update global time
         return ret_event                # And return this event
 
     def enqueue(self, event):
