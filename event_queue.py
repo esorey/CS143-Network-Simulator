@@ -1,12 +1,8 @@
 from event import getTime
 class event_queue:
     def __init__(self):
-        '''
-            itemList is a list of events that is sorted (as elements are 
-                added) in order of each event's time property
-        '''
-        # Global time variable
-        self.eventList = [];
+        self.currentTime = 0       # Current time
+        self.eventList = []         # List of events (sorted by time property)
 
     def dequeue(self):
         '''
@@ -17,7 +13,8 @@ class event_queue:
         ret_event = self.eventList[0]   # Get event to dequeue
         del self.eventList[0]           # Remove this event from queue
 
-        # Update global time
+        # Update time variable
+        self.currentTime = ret_event.getTime()
         return ret_event                # And return this event
 
     def enqueue(self, event):
