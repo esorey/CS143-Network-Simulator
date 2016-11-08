@@ -54,7 +54,7 @@ class event_queue:
 
         if len(self.eventList) == 0:     # If the list is empty, insert element  
             return 0                    #   at index 0
-        
+
         left = 0
         right = len(self.eventList)-1
 
@@ -62,7 +62,7 @@ class event_queue:
             m = (left + right)//2       # Get index between left and right
             event_m = self.eventList[m] # Get the event at this middle index
 
-            if right - left == 1:       # If left and right are adjacent
+            if right - left <= 1:       # If left and right are adjacent
                 return right            # Insert element at right index
 
             # Otherwise narrow the interval
