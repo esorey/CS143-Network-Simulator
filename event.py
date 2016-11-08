@@ -7,13 +7,13 @@ class event:
 		pckt_send = 2
 		pckt_drop = 3
 		flow_start = 4
-	def __init__(self, type, time):
+	def __init__(self, ev_type, time):
 		'''
 			event_type - enumerated type that indicates what sort of event 
 						 this is 
 			time - integer, when the event occurs
 		'''
-		self.type = event_type.type
+		self.event_type = ev_type
 		self.time = time
 
 	def getTime(self):
