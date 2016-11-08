@@ -15,10 +15,10 @@ class RoutingTablePacket(Packet):
 
 class DataPacket(Packet):
     def __init__(self, packet_id, origin_id, destination_id, flow_id):
-        super().__init__(packet_id, origin_id, destination_id, constants.DATA_PACKET_SIZE)
+        super().__init__(packet_id, origin_id, destination_id, constants.DATA_PKT_SIZE)
         self.flow_id = flow_id
 
 class AckPacket(Packet):
     def __init__(self, packet_id, origin_id, destination_id, flow_id):
-        super().__init__(packet_id, origin_id, destination_id, constants.ACK_PACKET_SIZE)
+        super().__init__(packet_id, origin_id, destination_id, constants.ACK_PKT_SIZE)
         self.flow_id = flow_id
