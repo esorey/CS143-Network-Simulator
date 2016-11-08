@@ -1,11 +1,19 @@
+from enum import Enum
+
+
 class event:
-	def __init__(self, event_type, time):
+	class event_type(Enum):
+		pckt_rcv = 1
+		pckt_send = 2
+		pckt_drop = 3
+		flow_start = 4
+	def __init__(self, type, time):
 		'''
 			event_type - enumerated type that indicates what sort of event 
 						 this is 
 			time - integer, when the event occurs
 		'''
-		self.type = event_type
+		self.type = event_type.type
 		self.time = time
 
 	def getTime(self):
