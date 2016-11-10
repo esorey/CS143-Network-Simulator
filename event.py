@@ -28,3 +28,19 @@ class event:
 
 	def getEventType(self):
 		return self.event_type
+
+	''' Dealing with events:
+		pckt_rcv:
+			needs: host, packet, time
+				if data packet: call host.receivePackets(packet)
+				if ack packet: call flow.getAck(packetID)
+				if routing table packet: 
+		flow_start:
+			needs: flow, time
+				call flow.flowSendPackets()
+
+		link_free:
+			needs: link, time
+				call handle_link_free
+		
+	#		if host re

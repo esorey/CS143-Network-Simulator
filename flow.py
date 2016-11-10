@@ -21,7 +21,7 @@ class flow:
 		# Packet that we will send next, if this is equal to num_packets
 		#	then we have attempted to send all packets. Packets should now be
 		#	sent from dropped array, if there are no packets there, we are
-		#	. 
+		#	done with this flow. 
 		self.currPCK = 0
 
 
@@ -52,9 +52,11 @@ class flow:
 			temp = windowSize - len(droppedPackets)
 
 			# If we reach the end of all the packets to send
-			if self.currPCK + temp > self.num_packets + 1:
-				end_pckt_index = self.num_packets + 1
-			else:	# Otherwise
+			if self.currPCK + temp >= self.num_packets - 1:
+				# Set end packet index to send the last packet, and to indicate
+				#	that the last packet has been sent
+				end_pckt_index = self.num_packets 
+			else:				# Otherwise
 				end_pckt_index = self.currPCK + temp
 
 			getPcktsToSend = self.generatePackets(self, range(self.currPCK, end_pckt_index))
@@ -70,12 +72,20 @@ class flow:
 		function for the flow to update what packets have been received. The 
 		flow deals with packet loss.'''
 	def getACK(self, packetID):
-		if currACK == 
-		if packetID  > currACK+1:  # if we dropped a packet
+		# If we've sent all the packets AND we've received the ACK for the
+		#	last packet AND we haven't dropped any packets, then we are done
+		#	with this flow
+		if self.currPCK == num_packets and packetID == self.num_packets-1 and len(droppedPackets) == 0:
+			# TODO: indicate flow is done, might need some things for
+			#	analytics class
+			return 
+
+		# Otherwise check the acknowledgments
+		if packetID  > currACK+1:		# if we dropped a packet
 			# Add the packets we dropped to the droppedPackets list
 			self.droppedPackets.append(range(currACK+1, packetID))
-			currACK += 1
-		elif packetID < currACK: 	# If we receive an ack for packet that was dropped
+			currACK = packetID 			# Update the current ack
+		elif packetID < currACK: 		# If we receive an ack for dropped packet
 			# Remove this packet from list of dropped packets
 			self.droppedPackets.remove(packetID)
 		else:
