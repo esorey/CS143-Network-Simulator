@@ -4,7 +4,8 @@ from host import Host
 
 def EventHandler(cur_event):
     if cur_event.event_type == Event.flow_start:
-    	(cur_event.data[0]).flowSendPackets()
+        cur_flow = cur_event.data[0]
+    	cur_flow.flowSendPackets()
 
     elif cur_event.event_type == Event.pckt_rcv:
     	rcv_host = cur_event.data[0]
@@ -27,6 +28,12 @@ def EventHandler(cur_event):
 
         cur_flow.getACK(packetID)
 
+    elif cur_event.event_type == Event.pckt_send:
+        cur_link = cur_event.data[0]
+        cur_pckt = cur_event.data[1]
+
+        cur_link.enqueue_packet(cur_pckt)
+
     ''' Dealing with events:
         pckt_rcv:
             needs: host, packet, time
@@ -47,4 +54,8 @@ def EventHandler(cur_event):
 
         ack_rcv:
             needs: packet ID and flow ID 
-                call flow.getACK'''
+                call flow.getACK
+
+        pckt_send:
+            needs: link, packet
+                call link.enqueue_packet(packet)'''

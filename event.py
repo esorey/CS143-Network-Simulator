@@ -4,6 +4,7 @@ class Event:
 	link_free = 3
 	flow_src_send_packets = 4
 	ack_rcv = 5
+	pckt_send = 6
 
 	def __init__(self, ev_type, time, data):
 		'''
@@ -39,4 +40,8 @@ class Event:
 
         ack_rcv:
             needs: packet ID and flow ID 
-                call flow.getACK'''
+                call flow.getACK
+
+        pckt_send:
+        	needs: link, packet
+        		call link.enqueue_packet(packet)'''
