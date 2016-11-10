@@ -1,4 +1,4 @@
-import Link
+import link
 import flow
 import packet
 

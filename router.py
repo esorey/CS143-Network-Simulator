@@ -7,6 +7,9 @@ class router:
 		self.id = id
 		self.routingTable = []
 
+	def initialize():
+		
+		
 	'''Bellman-Ford Algorithm: Update routing tables based
 	on congestion information'''
 	def bellmanFord():
