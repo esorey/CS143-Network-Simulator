@@ -22,7 +22,7 @@ class Flow:
 		# Packet that we will send next, if this is equal to num_packets
 		#	then we have attempted to send all packets. Packets should now be
 		#	sent from dropped array, if there are no packets there, we are
-		#	. 
+		#	done. 
 		self.currPCK = 0
 
 
