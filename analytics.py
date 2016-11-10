@@ -43,14 +43,38 @@ class Analytics:
         if linkID in link_buff_occupancy:
             link_buff_occupancy[linkID].append((currTime, buffOccupancy))
         else:
-            link_buff_occupancy[linkID] = (currTime, buffOccupancy)
+            link_buff_occupancy[linkID] = [(currTime, buffOccupancy)]
 
     ''' link flow rate calculation stores number of packets properly
     sent through flow in the span between current time to previous time'''
     def log_flow_rate(linkID, numPackets, currTime, prevTime): 
         rate = numPackets/(currTime - prevTime)
         if linkID in link_flow_rate:
-            link_flow_rate[linkID].append(currTime, rate)
+            link_flow_rate[linkID].append((currTime, rate))
         else:
-            link_flow_rate[linkID] = (currTime, rate)
+            link_flow_rate[linkID] = [(currTime, rate)]
 
+    '''flow send rate should read the updating window sizes, which
+    decide the send rate of each flow, and update it to the relevant time'''
+    def log_flow_send_rate(linkID, windowSize, currTime):
+        if linkID in flow_send_rate:
+            flow_send_rate[linkID].append((windowSize, currTime))
+        else:
+            flow_send_rate[linkID] = [(windowSize, currTime)]
+
+    # TODO: what is receive rate?
+    def log_flow_receive_rate(linkID, currTime, receive):
+        pass
+
+    # time start is queued in immediately
+    # time end is when the ack with the right packetID is sent
+    # get the time for that ack in event queue
+    def log_packet_RTD(packetID, timeStart, timeEnd):
+        flow_packet_RTD[packetID] = timeEnd - timeStart
+
+
+    def log_host_send_rate():
+        pass
+
+    def log_host_receive_rate():
+        pass
