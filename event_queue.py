@@ -1,4 +1,4 @@
-from event import getTime
+import event
 class event_queue:
     def __init__(self):
         self.currentTime = 0       # Current time
