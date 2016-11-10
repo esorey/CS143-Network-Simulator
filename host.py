@@ -17,13 +17,10 @@ class Host:
 
 	'''Receive the packets from the link queue'''
 	def receivePacket(packet):
-		# 2 = acknowledgment packet --> confirm received ack
+		# 2 = acknowledgment packet --> event queue will deal with ack
 		# 1 = Data packet --> send ack
-		# 0 = routing packet --> do nothing
-		if type(packet) is AckPacket:
-			# inform that acknowledgmetn received
-			flow.getAck(packet.ID)
-		elif type(packet) is DataPacket: # Data packet
+		# 0 = routing packet --> do nothing	
+		if type(packet) is DataPacket: # Data packet
 			# create an acknowledgment packet
 			ackpckt = AckPacket(packet.packet_id, packet.origin_id, packet.destination_id, flow.ID)
 			# push the new acknowledgment
