@@ -1,4 +1,5 @@
-from host import Host
+from link import Link
+import host as host
 import constants
 
 class flow:
@@ -66,11 +67,11 @@ class flow:
 		# Tell the host to send the packets
 		(self.source).sendPackets(packets_to_send)
 
+
 	''' When a host receives an acknowledgement packet it will call this 
 		function for the flow to update what packets have been received. The 
 		flow deals with packet loss.'''
 	def getACK(self, packetID):
-		if currACK == 
 		if packetID  > currACK+1:  # if we dropped a packet
 			# Add the packets we dropped to the droppedPackets list
 			self.droppedPackets.append(range(currACK+1, packetID))
