@@ -3,8 +3,10 @@ import constants
 
 class flow:
 	"""Flow Class"""
-	def __init__(self, source, destination, data_amt, start, ):
+	def __init__(self, ID, source, destination, data_amt, start):
 		super(ClassName, self).__init__()
+		self.ID = ID
+
 		self.source = source
 		self.dest = destination
 		self.data_amt = data_amt	# Size of data in MB
@@ -16,7 +18,9 @@ class flow:
 
 		# Number of data packets the flow needs to send
 		self.num_packets = data_amt * constants.MBTOBYTES / constants.DATA_PKT_SIZE
-		
+		self.currPCK = 0			# current packet that we're sending
+
+
 	def congestionControlAlg(pcktReceived, pcktSent): 
 		# run congestion control alg
 		# TCP Reno
@@ -26,17 +30,23 @@ class flow:
 
 	def hostSendPckts(self): 
 		packets_to_send = []
-		if len(self.droppedPackets) != 0: 
-			# send packets from dropped packets
+		if len(self.droppedPackets) != 0: 		# Send packets from dropped packets
+			# send ALL packets from dropped packets
 			if len(self.droppedPackets) >= self.windowSize:
-				packets_to_send = self.droppedPackets[:(self.windowSize)]
-			elif len(self.droppedPackets) < self.windowSize:
-				sendPckts.append(self.droppedPackets)
-				temp = windowSize - len(droppedPackets)
+				packets_to_send = generatePackets(self, self.droppedPackets[:(self.windowSize)])
 
-				# This needs to be fixed (where to get the other packets to
-				#	send?)
-				sendPckts.append(other[temp:])
+			# send SOME packets from dropped packets and SOME from new packets
+			elif len(self.droppedPackets) < self.windowSize:
+				# Generate and get ready to send packets from dropped packets
+				getPcktsToSend = generatePackets(self, self.droppedPackets)
+				sendPckts.append(getPcktsToSend)
+
+				# Generate and get ready to send new packets
+				temp = windowSize - len(droppedPackets)
+				getPcktsToSend = generatePackets(self, range(self.currPCK, self.currPCK+temp))
+				sendPckts.append(getPcktsToSend)
+
+				self.currPCK = self.currPCK+temp
 			else:
 				# This also needs to be fixed
 				sendPckts.append(other[:windowSize])
@@ -58,3 +68,6 @@ class flow:
 			self.droppedPackets.remove(packetID)
 		else:
 			currACK += 1 	# We received correct packet, increment currACK
+	
+
+	def generatePackets(self, listPacketIDs):

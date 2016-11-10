@@ -1,4 +1,4 @@
-from link import linkqueue()
+from link import linkqueue
 import flow
 class router:
 	"""Router: end points of the network"""
@@ -7,6 +7,9 @@ class router:
 		self.id = id
 		self.routingTable = []
 
+	def initialize():
+		
+		
 	'''Bellman-Ford Algorithm: Update routing tables based
 	on congestion information'''
 	def bellmanFord():
