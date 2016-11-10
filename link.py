@@ -33,6 +33,8 @@ class Link:
         '''Enqueue a packet to the buffer of this link. If the buffer is full, log a dropped packet in the analytics class.'''
         try:
             self.buffer.put_no_wait(packet)
+            # TODO: If the link was free/buffer was empty, send packet across immediately (and determine when the link will be free)
+            #   otherwise just add to buffer
         except queue.Full: # The buffer is full; this packet is dropped.
             Analytics.log_dropped_packet(self.ID, curr_time) # TODO: figure out global time/analytics objects. This logs that this link dropped a packet
                                                              # at the current time.
