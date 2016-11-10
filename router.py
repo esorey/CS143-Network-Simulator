@@ -1,4 +1,4 @@
-from link import linkqueue()
+from link import linkqueue
 import flow
 class router:
 	"""Router: end points of the network"""
