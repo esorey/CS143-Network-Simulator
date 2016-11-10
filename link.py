@@ -1,5 +1,6 @@
 import constants
 import queue
+import analytics as Analytics
 class Link:
     '''A uni-directional link. Data can only flow from A to B.'''
 
@@ -33,7 +34,7 @@ class Link:
         try:
             self.buffer.put_no_wait(packet)
         except queue.Full: # The buffer is full; this packet is dropped.
-            analytics.log_dropped_packet(self.ID, curr_time) # TODO: figure out global time/analytics objects. This logs that this link dropped a packet
+            Analytics.log_dropped_packet(self.ID, curr_time) # TODO: figure out global time/analytics objects. This logs that this link dropped a packet
                                                              # at the current time.
             
 
