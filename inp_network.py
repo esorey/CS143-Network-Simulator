@@ -32,13 +32,13 @@ def inp_network(file, L=[], F=[], H=[], R=[]):
             # Put hosts in array
             # Order by host number and then link number
             if params[1][0] == 'H':
-                H[2*int(params[1][1])]= Host(params[1],params[0]+'a')
+                H[2*(int(params[1][1])-1)]= Host(params[1],params[0]+'a')
             # Put routers in array
             # Order by router number
             elif params[1][0] == 'R':
                 pass
             if params[2][0] == 'H':
-                H[2*int(params[2][1]+1)] = Host(params[2],params[0]+'b')
+                H[2*(int(params[2][1]-1)+1)] = Host(params[2],params[0]+'b')
             elif params[2][0] == 'R':
                 pass
 

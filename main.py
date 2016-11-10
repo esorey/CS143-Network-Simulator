@@ -1,8 +1,8 @@
 import sys
 import event_queue
-from event import Event
 from flow import Flow
 from inp_network import inp_network
+from event import Event
 
 if __name__ == "__main__":
 	# Need absolute path
