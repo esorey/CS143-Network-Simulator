@@ -1,6 +1,6 @@
 from link import Link
-from flow import flow
-from host import host
+from flow import Flow
+from host import Host
 
 def inp_network(file, L=[], F=[], H=[], R=[]):
     # Open relevant file
@@ -23,22 +23,29 @@ def inp_network(file, L=[], F=[], H=[], R=[]):
         # Update link and host/router parameters
         # Return these instances in arrays: flows, links, hosts, routers
         if sec_count == 0:
+            # Set up first link direction (a)
             temp_link = Link(params[0]+'a',float(params[3]),float(params[4]),params[1],params[2],float(params[5]))
             L.append(temp_link)
-            temp_link = Link(params[0]+'b',float(params[3]),float(params[4]),params[2]),params[1],float(params[5]))
+            # Set up other link direction (b)
+            temp_link = Link(params[0]+'b',float(params[3]),float(params[4]),params[2],params[1],float(params[5]))
             L.append(temp_link)
+            # Put hosts in array
+            # Order by host number and then link number
             if params[1][0] == 'H':
-                H.append(host(params[1],params[0]+'a'))
+                H[2*int(params[1][1])]= Host(params[1],params[0]+'a')
+            # Put routers in array
+            # Order by router number
             elif params[1][0] == 'R':
                 pass
             if params[2][0] == 'H':
-                H.append(host(params[2],params[0]+'b'))
+                H[2*int(params[2][1]+1)] = Host(params[2],params[0]+'b')
             elif params[2][0] == 'R':
                 pass
 
         # Flow parameters
+        # Assume input file puts flows in order
         if sec_count == 1:
-            F.append(flow(params[0],params[1],params[2],params[3],params[4]))
+            F.append(Flow(params[0],params[1],params[2],params[3],params[4]))
     f.close()
 
 '''
