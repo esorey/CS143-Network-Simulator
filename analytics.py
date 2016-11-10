@@ -1,4 +1,4 @@
-class analytics:
+class Analytics:
 
     def __init__(self):
         time_step = []      # Holds the time step (from global time variable)

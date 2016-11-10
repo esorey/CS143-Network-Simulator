@@ -1,5 +1,5 @@
-from event import event
-class event_queue:
+from event import Event
+class EventQueue:
     def __init__(self):
         self.currentTime = 0       # Current time
         self.eventList = []         # List of events (sorted by time property)
@@ -76,4 +76,6 @@ class event_queue:
             #   next to middle element
             elif event_time == event_m.getTime():
                 return m+1
+
+
 

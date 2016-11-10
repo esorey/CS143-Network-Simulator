@@ -1,33 +1,31 @@
 from enum import Enum
+from flow import Flow
 
-class event:
-	class event_type(Enum):
-		pckt_rcv = 1
-		pckt_send = 2
-		flow_start = 3
-		link_inuse = 4
-		link_free = 5
-	def __init__(self, ev_type, time):
+class Event:
+	flow_start = 1
+	pckt_rcv = 2
+	link_free = 3
+
+	def __init__(self, ev_type, time, data):
 		'''
 			event_type - enumerated type that indicates what sort of event 
 						 this is 
 			time - integer, when the event occurs
+			data - information required for the events (list of varying size
+				   depending on event)
+				   flow_start data: [flow]
+				   pckt_rcv data: [host, packet]
+				   link_free data: [link]
 		'''
 		self.event_type = ev_type
 		self.time = time
-		'''
-		pckt_rcv = origin, destination, flowID
-		pckt_send = origin, destination, flowID
-		flow_start = flowID
-		link_inuse = flowID
-		link_free = flowID
-		'''
+		self.data = data
+    
+    def handleEvent(self):
+        if self.event_type == Event.flow_start:
+        	(self.data[0]).flowSendPackts()
 
-	def getTime(self):
-		return self.time
-
-	def getEventType(self):
-		return self.event_type
+        elif self.event_type == Event.
 
 	''' Dealing with events:
 		pckt_rcv:
@@ -41,6 +39,5 @@ class event:
 
 		link_free:
 			needs: link, time
-				call handle_link_free
-		
-	#		if host re
+				call handle_link_free '''
+

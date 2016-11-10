@@ -1,8 +1,8 @@
 from link import Link
-from flow import flow
+from flow import Flow
 from packet import Packet
 
-class host:
+class Host:
 	"""A Host: end points of the network"""
 	def __init__(self, id, link):
 		super(Host, self).__init__()

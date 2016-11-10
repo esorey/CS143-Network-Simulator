@@ -1,7 +1,7 @@
 from host import Host
 import constants
 
-class flow:
+class Flow:
 	"""Flow Class"""
 	def __init__(self, ID, source, destination, data_amt, start):
 		self.ID = ID 				# Flow ID
