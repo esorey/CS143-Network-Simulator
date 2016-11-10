@@ -1,6 +1,3 @@
-from flow import Flow
-from link import Link
-
 class Event:
 	flow_start = 1
 	pckt_rcv = 2
@@ -22,8 +19,7 @@ class Event:
 		self.event_type = ev_type
 		self.time = time
 		self.data = data
-
-    ''' Dealing with events:
+		''' Dealing with events:
         pckt_rcv:
             needs: host, packet, time
                 changed to calling receive packet

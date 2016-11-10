@@ -1,6 +1,6 @@
 import constants
 import queue
-import analytics as Analytics
+import analytics
 class Link:
     '''A uni-directional link. Data can only flow from A to B.'''
 

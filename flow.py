@@ -1,5 +1,5 @@
 from event import Event
-from packets import DataPacket
+from packet import DataPacket
 from event_queue import EventQueue
 import constants
 

@@ -1,6 +1,18 @@
 from link import Link
 from flow import Flow
 from host import Host
+'''
+# Test code
+fil = 'C:\\Users\\Sophia\\Documents\\GitHub\\CS143-Network-Simulator\\inp2.txt'
+links = []
+flows = []
+hosts = []
+routers = []
+l = {}
+inp_network(fil,links,flows,hosts,routers)
+print lnks
+print flws
+'''
 
 def inp_network(file, L=[], F=[], H=[], R=[]):
     # Open relevant file
@@ -48,15 +60,3 @@ def inp_network(file, L=[], F=[], H=[], R=[]):
             F.append(Flow(params[0],params[1],params[2],params[3],params[4]))
     f.close()
 
-'''
-# Test code
-fil = 'C:\Users\Sophia\Documents\GitHub\CS143-Network-Simulator\inp2.txt'
-links = []
-flows = []
-hosts = []
-routers = []
-l = {}
-inp_network(fil,links,flows,hosts,routers)
-print lnks
-print flws
-'''
