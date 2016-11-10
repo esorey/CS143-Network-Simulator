@@ -1,5 +1,6 @@
-from link import Link
-import host as host
+from event import Event
+from packets import DataPacket
+from event_queue import EventQueue
 import constants
 
 class Flow:
@@ -64,9 +65,9 @@ class Flow:
 			# Update the current packet we want to send
 			self.currPCK = end_pckt_index
 
-		# Tell the host to send the packets
-		(self.source).sendPackets(packets_to_send)
-
+		# Enqueue event that will tell hosts to send packets
+		event_to_send = Event(Event.flow_src_send_packets, system_EQ.currentTime, [self.source, packets_to_send])
+		system_EQ.enqueue(event_to_send)
 
 	''' When a host receives an acknowledgement packet it will call this 
 		function for the flow to update what packets have been received. The 
