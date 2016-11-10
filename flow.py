@@ -1,14 +1,13 @@
-from host import sendPackets
+from host import Host
 import constants
 
 class flow:
 	"""Flow Class"""
 	def __init__(self, ID, source, destination, data_amt, start):
-		super(ClassName, self).__init__()
-		self.ID = ID
+		self.ID = ID 				# Flow ID
 
-		self.source = source
-		self.dest = destination
+		self.source = source		# Source host
+		self.dest = destination		# Destination host
 		self.data_amt = data_amt	# Size of data in MB
 		self.start = start 			# Time at which flow begins
 		
@@ -18,7 +17,12 @@ class flow:
 
 		# Number of data packets the flow needs to send
 		self.num_packets = data_amt * constants.MBTOBYTES / constants.DATA_PKT_SIZE
-		self.currPCK = 0			# current packet that we're sending
+
+		# Packet that we will send next, if this is equal to num_packets
+		#	then we have attempted to send all packets. Packets should now be
+		#	sent from dropped array, if there are no packets there, we are
+		#	done with this flow. 
+		self.currPCK = 0
 
 
 	def congestionControlAlg(pcktReceived, pcktSent): 
@@ -28,46 +32,75 @@ class flow:
 		windowSize = 100
 		return windowSize
 
-	def hostSendPckts(self): 
+	''' Sends a list of packets depending on the windowSize to the host. The
+		function sends packets from dropped packets and new packets (gives 
+		dropped packets priority). If there are not enough packets, the
+		function sends whatever packets it can. '''
+	def flowSendPackts(self): 
 		packets_to_send = []
-		if len(self.droppedPackets) != 0: 		# Send packets from dropped packets
-			# send ALL packets from dropped packets
-			if len(self.droppedPackets) >= self.windowSize:
-				packets_to_send = generatePackets(self, self.droppedPackets[:(self.windowSize)])
+		# Send ALL packets from dropped packets
+		if len(self.droppedPackets) >= self.windowSize:
+			packets_to_send = self.generatePackets(self, self.droppedPackets[:(self.windowSize)])
 
-			# send SOME packets from dropped packets and SOME from new packets
-			elif len(self.droppedPackets) < self.windowSize:
-				# Generate and get ready to send packets from dropped packets
-				getPcktsToSend = generatePackets(self, self.droppedPackets)
-				sendPckts.append(getPcktsToSend)
+		# send SOME (could be 0) packets from dropped packets and SOME from new packets
+		else:
+			# Generate and get ready to send packets from dropped packets
+			getPcktsToSend = self.generatePackets(self, self.droppedPackets)
+			packets_to_send.extend(getPcktsToSend)
 
-				# Generate and get ready to send new packets
-				temp = windowSize - len(droppedPackets)
-				getPcktsToSend = generatePackets(self, range(self.currPCK, self.currPCK+temp))
-				sendPckts.append(getPcktsToSend)
+			# Generate and get ready to send new packets
+			temp = windowSize - len(droppedPackets)
 
-				self.currPCK = self.currPCK+temp
-			else:
-				# This also needs to be fixed
-				sendPckts.append(other[:windowSize])
+			# If we reach the end of all the packets to send
+			if self.currPCK + temp >= self.num_packets - 1:
+				# Set end packet index to send the last packet, and to indicate
+				#	that the last packet has been sent
+				end_pckt_index = self.num_packets 
+			else:				# Otherwise
+				end_pckt_index = self.currPCK + temp
 
-	def sendPckts(packets, destination): 
-		sendPackets(packets, destination)
+			getPcktsToSend = self.generatePackets(self, range(self.currPCK, end_pckt_index))
+			packets_to_send.extend(getPcktsToSend)
+
+			# Update the current packet we want to send
+			self.currPCK = end_pckt_index
+
+		# Tell the host to send the packets
+		(self.source).sendPackets(packets_to_send)
 
 	''' When a host receives an acknowledgement packet it will call this 
-	function for the flow to update what packets have been received. The 
-	flow deals with packet loss.'''
+		function for the flow to update what packets have been received. The 
+		flow deals with packet loss.'''
 	def getACK(self, packetID):
-		if packetID  > currACK+1:  # if we dropped a packet
+		# If we've sent all the packets AND we've received the ACK for the
+		#	last packet AND we haven't dropped any packets, then we are done
+		#	with this flow
+		if self.currPCK == num_packets and packetID == self.num_packets-1 and len(droppedPackets) == 0:
+			# TODO: indicate flow is done, might need some things for
+			#	analytics class
+			return 
+
+		# Otherwise check the acknowledgments
+		if packetID  > currACK+1:		# if we dropped a packet
 			# Add the packets we dropped to the droppedPackets list
 			self.droppedPackets.append(range(currACK+1, packetID))
-			currACK += 1
-		elif packetID < currACK: 	# If we receive an ack for packet that was
-									# 	dropped
+			currACK = packetID 			# Update the current ack
+		elif packetID < currACK: 		# If we receive an ack for dropped packet
 			# Remove this packet from list of dropped packets
 			self.droppedPackets.remove(packetID)
 		else:
 			currACK += 1 	# We received correct packet, increment currACK
-	
+		
 
-	def generatePackets(self, listPacketIDs):
+	''' Generates data packets with the given IDs and returns a list of the 
+		packets. '''
+	def generateDataPackets(self, listPacketIDs):
+		packets_list = []
+		for PID in listPacketIDs:
+			pckt = DataPacket(PID, self.source, self.dest, self.ID)
+			packets_list.append(pckt)
+
+		return packets_list
+
+
+

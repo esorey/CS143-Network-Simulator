@@ -1,6 +1,6 @@
-import link
-import flow
-import packet
+from link import Link
+from flow import flow
+from packet import Packet
 
 class host:
 	"""A Host: end points of the network"""
@@ -11,12 +11,12 @@ class host:
 
 	'''Add the passed packets to the link queue of the 
 	link it is connected to'''
-	def sendPackets(packets, destination):
-		linkqueue.sendPackets(packets)
+	def sendPackets(packets):
+		for packet in packets:
+			link.send_packets(packet)
 
 	'''Receive the packets from the link queue'''
-	def receivePackets():
-		packet = linkqueue.get()
+	def receivePacket(packet):
 		# 2 = acknowledgment packet --> confirm received ack
 		# 1 = Data packet --> send ack
 		# 0 = routing packet --> do nothing
@@ -28,3 +28,4 @@ class host:
 			ackpckt = AckPacket(packet.packet_id, packet.origin_id, packet.destination_id, flow.ID)
 			# push the new acknowledgment
 			Link.send_packet(ackpckt)
+

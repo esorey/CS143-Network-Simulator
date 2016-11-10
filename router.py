@@ -1,5 +1,5 @@
-from link import linkqueue
-import flow
+from link import link
+from flow import flow
 class router:
 	"""Router: end points of the network"""
 	def __init__(self, id):
