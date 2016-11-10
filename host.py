@@ -1,4 +1,4 @@
-import link
+from link import Link
 import flow
 import packet
 
@@ -12,11 +12,11 @@ class host:
 	'''Add the passed packets to the link queue of the 
 	link it is connected to'''
 	def sendPackets(packets, destination):
-		linkqueue.sendPackets(packets)
+		for packet in packets:
+			link.send_packets(packet)
 
 	'''Receive the packets from the link queue'''
-	def receivePackets():
-		packet = linkqueue.get()
+	def receivePacket(packet):
 		# 2 = acknowledgment packet --> confirm received ack
 		# 1 = Data packet --> send ack
 		# 0 = routing packet --> do nothing
