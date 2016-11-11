@@ -18,7 +18,7 @@ class Flow:
 		self.droppedPackets = [] 	# dropped packets (IDs)
 
 		# Number of data packets the flow needs to send
-		self.num_packets = data_amt * constants.MBTOBYTES / constants.DATA_PKT_SIZE
+		self.num_packets = data_amt * constants.MB_TO_BYTES / constants.DATA_PKT_SIZE
 
 		# Packet that we will send next, if this is equal to num_packets
 		#	then we have attempted to send all packets. Packets should now be
