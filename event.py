@@ -12,14 +12,12 @@ class Event:
 						 this is 
 			time - integer, when the event occurs
 			data - information required for the events (list of varying size
-				   depending on event)
-				   flow_start data: [flow]
-				   pckt_rcv data: [host, packet]
-				   link_free data: [link]
+				   depending on event, see below for details.
 		'''
 		self.event_type = ev_type
 		self.time = time
 		self.data = data
+		
 		''' Dealing with events:
         pckt_rcv:
             needs: host, packet, time
