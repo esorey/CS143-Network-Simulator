@@ -56,9 +56,9 @@ class EventQueue:
         if event_time < self.eventList[0].getTime():
             return 0
 
-        if event_time > self.eventList[-1].getTime():
+        # If the value is greater than or equal to the last element in the array
+        if event_time >= self.eventList[-1].getTime():
             return self.getSize()
-
 
         left = 0
         right = self.getSize()
@@ -71,7 +71,7 @@ class EventQueue:
                 return right            # Insert element at right index
 
             # Otherwise narrow the interval
-            elif event_time > event_m.getTime():
+            elif event_time >= event_m.getTime():
                 left = m
             elif event_time < event_m.getTime():
                 right = m
