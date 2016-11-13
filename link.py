@@ -44,10 +44,11 @@ class Link:
             self.handle_link_free()             # Handle the fact that the link is free by putting link in use
 
         elif self.buffer.full():                # If buffer is full, log that we dropped a packet
-            system_analytics.log_dropped_packet(self.ID, system_EQ.currentTime)
+            constants.system_analytics.log_dropped_packet(self.ID, constants.system_EQ.currentTime)
 
         else:       # Otherwise either link is in use or buffer has some elements, so add pkt to buffer
             self.buffer.put_nowait(pkt)         # Enqueue the packet into link buffer
+            constants.system_analytics.log_buff_occupancy(self.ID, constants.system_EQ.currentTime, self.buffer.getSize())
             
 
     def get_packet_travel_time(self, packet):
