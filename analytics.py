@@ -47,8 +47,8 @@ class Analytics:
 
     ''' link flow rate calculation stores number of packets properly
     sent through flow in the span between current time to previous time'''
-    def log_flow_rate(linkID, numPackets, currTime, prevTime): 
-        rate = numPackets/(currTime - prevTime)
+    def log_flow_rate(linkID, numBytes, currTime, prevTime): 
+        rate = numBytes/(currTime - prevTime)
         if linkID in link_flow_rate:
             link_flow_rate[linkID].append((currTime, rate))
         else:

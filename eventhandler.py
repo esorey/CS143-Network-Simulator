@@ -36,7 +36,7 @@ def EventHandler(cur_event):
 
     ''' Dealing with events:
         pckt_rcv:
-            needs: host, packet, time
+            needs: host/router, packet, time
                 changed to calling receive packet
                 if data packet: call host.receivePackets(packet)
                 if ack packet: call flow.getAck(packetID)
@@ -55,6 +55,8 @@ def EventHandler(cur_event):
         ack_rcv:
             needs: packet ID and flow ID 
                 call flow.getACK
+                this is called by a host when it realizes it has
+                received an ack
 
         pckt_send:
             needs: link, packet

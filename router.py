@@ -45,3 +45,6 @@ class router:
 	    return d, p
 
 		'''
+
+	def receivePackets(self, pckt):
+		pass

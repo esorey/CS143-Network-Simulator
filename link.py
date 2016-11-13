@@ -1,6 +1,9 @@
 import constants
 import queue
 import analytics
+# TODO: Fix link buffer implementation, currently it is limited by number
+#   of packets, but it should be limited by bytes (i.e. it should be 
+#   able to hold more ACK packets than DATA packets)
 class Link:
     '''A uni-directional link. Data can only flow from A to B.'''
 
@@ -35,6 +38,8 @@ class Link:
             constants.system_EQ.enqueue(link_free_event)
             constants.system_EQ.enqueue(pkt_receive_event)
 
+            constants.system_analytics.log(self.ID, pkt.size, constants.system_EQ.currentTime, travel_time)
+
     def enqueue_packet(self, pkt):
         '''Enqueue a packet to the buffer of this link. If the buffer is full, log a dropped packet in the analytics class.
            If the buffer is empty then send the packet immediately across the link.'''
@@ -48,6 +53,7 @@ class Link:
 
         else:       # Otherwise either link is in use or buffer has some elements, so add pkt to buffer
             self.buffer.put_nowait(pkt)         # Enqueue the packet into link buffer
+            #TODO this should send the number of bytes to the analytics (but now getSize is number of packets)
             constants.system_analytics.log_buff_occupancy(self.ID, constants.system_EQ.currentTime, self.buffer.getSize())
             
 
