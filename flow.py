@@ -54,8 +54,8 @@ class Flow:
 			temp = windowSize - len(droppedPackets)
 
 			# If we reach the end of all the packets to send
-			if self.currPCK + temp > self.num_packets + 1:
-				end_pckt_index = self.num_packets + 1
+			if self.currPCK + temp >= self.num_packets:
+				end_pckt_index = self.num_packets + 1 	# Indicate we have sent all packets
 			else:	# Otherwise
 				end_pckt_index = self.currPCK + temp
 
@@ -67,7 +67,7 @@ class Flow:
 
 		# Enqueue event that will tell hosts to send packets
 		event_to_send = Event(Event.flow_src_send_packets, system_EQ.currentTime, [self.source, packets_to_send])
-		system_EQ.enqueue(event_to_send)
+		constants.system_EQ.enqueue(event_to_send)
 
 	''' When a host receives an acknowledgement packet it will call this 
 		function for the flow to update what packets have been received. The 
