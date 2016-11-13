@@ -24,7 +24,7 @@ class Link:
 
         else:
             pkt = self.buffer.get_no_wait() # Dequeue a packet
-            travel_time = system_EQ.currentTime + self.get_packet_travel_time(pkt)
+            travel_time = constants.system_EQ.currentTime + self.get_packet_travel_time(pkt)
             self.in_use = True              # Link is in use
             
             # Generate link free and packet receive events at the appropriate times
@@ -32,8 +32,8 @@ class Link:
             pkt_receive_event = Event(Event.pckt_rcv, travel_time, [self.B, pkt])
 
             # Enqueue these events in global Event Queue
-            system_EQ.enqueue(link_free_event)
-            system_EQ.enqueue(pkt_receive_event)
+            constants.system_EQ.enqueue(link_free_event)
+            constants.system_EQ.enqueue(pkt_receive_event)
 
     def enqueue_packet(self, pkt):
         '''Enqueue a packet to the buffer of this link. If the buffer is full, log a dropped packet in the analytics class.
@@ -52,5 +52,4 @@ class Link:
 
     def get_packet_travel_time(self, packet):
         '''Compute the travel time for a packet. Will involve the current time and the transmission time.'''
-        # TODO: Is this the right way to compute travel time??
         return self.delay + constants.SEC_TO_MS * (packet.size / (constants.MB_TO_BYTES * self.rate))
