@@ -1,5 +1,7 @@
 import sys
 import event_queue
+import constants
+from eventhandler import EventHandler
 from flow import Flow
 from inp_network import inp_network
 from event import Event
@@ -16,16 +18,19 @@ if __name__ == "__main__":
 	flows = []
 	hosts = []
 	routers = []
+
+	# Initialize event queue
+	constants.system_eq = EventQueue();
 	# Set up network
 	inp_network(inFile,links,flows,hosts,routers)
 	# Enqueue all the flows
-	for flow in flows:
-		start = Event(flow_start,flow.start)
-		EventQueue.enqueue(start)
+	for flow_obj in flows:
+		flow_event = Event(Event.flow_start, flow_obj.start, [flow_obj])
+		constants.system_eq.enqueue(flow_event)
 	# Continue to dequeue events until it is empty
-	while (EventQueue.isempty()):
-		curr_event = EventQueue.dequeue
-		Event.handleEvent(curr_event)
+	while(!constant.system_eq.isempty()):
+		curr_event = constants.system_eq.dequeue()
+		EventHandler(curr_event)
 	# If done with while loop, have finished all events
 	# Output analytics in a text file
 
