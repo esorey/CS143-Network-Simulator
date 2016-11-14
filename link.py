@@ -39,6 +39,7 @@ class Link:
             constants.system_EQ.enqueue(link_free_event)
             constants.system_EQ.enqueue(pkt_receive_event)
 
+            # not sure what this is trying to log? doesn't have corresponding analytic on file
             constants.system_analytics.log(self.ID, pkt.size, constants.system_EQ.currentTime, travel_time)
 
     def enqueue_packet(self, pkt):
@@ -64,6 +65,7 @@ class Link:
     def get_packet_travel_time(self, packet):
         '''Compute the travel time for a packet. Will involve the current time and the transmission time.'''
         travel_time = self.delay + constants.SEC_TO_MS * (packet.size / (constants.MB_TO_BYTES * self.rate))
-        constants.system_analytics.log_link_rate(self.ID, constants.system_EQ.currentTime, travel_time)
+        link_rate = float(constants.DATA_PKT_SIZE / travel_time)
+        constants.system_analytics.log_link_rate(self.ID, constants.system_EQ.currentTime, link_rate)
         return travel_time
         

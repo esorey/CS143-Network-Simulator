@@ -33,4 +33,5 @@ if __name__ == "__main__":
 		EventHandler(curr_event)
 	# If done with while loop, have finished all events
 	# Output analytics in a text file
+	
 

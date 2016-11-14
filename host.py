@@ -38,7 +38,6 @@ class Host:
 			sendAckPckt = Event(Event.pckt_send, constants.system_EQ.currentTime, [self.link, ackpckt])
 			constants.system_EQ.enqueue(sendAckPckt)
 			# Add to analytics
-			# should we start at 0?
 			if flow.ID in self.pckt_counters:
 				self.pckt_counters[flow.ID] += 1
 			else:
