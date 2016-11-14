@@ -3,6 +3,7 @@ class Analytics:
     def __init__(self):
         time_step = []      # Holds the time step (from global time variable)
                             #   at which data was recorded
+                            # Do we need this?
 
         '''
         The data types below are dictionaries with:
@@ -22,8 +23,9 @@ class Analytics:
                                     #   receive event occurs.
 
         # Still need per flow: send/receive rate, packet round trip delay
-        flow_send_rate = {}
-        flow_receive_rate = {}
+        flow_rate = {}
+        # Receive rate should be same as send rate
+        #flow_receive_rate = {} 
         flow_packet_RTD = {}
 
         # and per host: send/receive rate
@@ -56,15 +58,16 @@ class Analytics:
 
     '''flow send rate should read the updating window sizes, which
     decide the send rate of each flow, and update it to the relevant time'''
-    def log_flow_send_rate(linkID, windowSize, currTime):
-        if linkID in flow_send_rate:
-            flow_send_rate[linkID].append((windowSize, currTime))
+    def log_flow_send_rate(flowID, windowSize, currTime):
+        if flowID in flow_rate:
+            flow_rate[flowID].append((windowSize, currTime))
         else:
-            flow_send_rate[linkID] = [(windowSize, currTime)]
+            flow_rate[flowID] = [(windowSize, currTime)]
 
     # TODO: what is receive rate?
-    def log_flow_receive_rate(linkID, currTime, receive):
-        pass
+    def log_flow_receive_rate(flowID, currTime, receive_order):
+        if flowID in flow_rate:
+        	flow_rate[flowID][receive_order].append(currTime)
 
     # time start is queued in immediately
     # time end is when the ack with the right packetID is sent

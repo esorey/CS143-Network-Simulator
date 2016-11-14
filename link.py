@@ -14,8 +14,9 @@ class Link:
         self.delay = delay
         self.A = A
         self.B = B
-        self.buffer_capacity = buffer_cap
-        self.buffer = queue.Queue(maxsize=self.buffer_capacity)
+        self.buffer_capacity = buffer_cap * 1000
+        self.buffer_ind = 0
+        self.buffer = queue.Queue()
 
 
     def handle_link_free(self):
@@ -46,13 +47,16 @@ class Link:
         # If the buffer is empty and the link is free, immediately send the packet over the link
         if self.buffer.empty() and self.in_use == False:
             self.buffer.put_no_wait(pkt)        # Enqueue the packet
+            self.buffer_ind += pkt.size
             self.handle_link_free()             # Handle the fact that the link is free by putting link in use
 
-        elif self.buffer.full():                # If buffer is full, log that we dropped a packet
+        # If buffer is full, log that we dropped a packet
+        elif self.buffer_ind + pkt.size > self.buffer_capacity:                
             constants.system_analytics.log_dropped_packet(self.ID, constants.system_EQ.currentTime)
 
         else:       # Otherwise either link is in use or buffer has some elements, so add pkt to buffer
             self.buffer.put_nowait(pkt)         # Enqueue the packet into link buffer
+            self.buffer_ind += pkt.size
             #TODO this should send the number of bytes to the analytics (but now getSize is number of packets)
             constants.system_analytics.log_buff_occupancy(self.ID, constants.system_EQ.currentTime, self.buffer.getSize())
             
