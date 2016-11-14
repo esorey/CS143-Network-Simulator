@@ -58,5 +58,6 @@ def inp_network(file, L=[], F=[], H=[], R=[]):
         # Assume input file puts flows in order
         if sec_count == 1:
             F.append(Flow(params[0],params[1],params[2],params[3],params[4]))
+
     f.close()
 
