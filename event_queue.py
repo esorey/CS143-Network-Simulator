@@ -1,5 +1,5 @@
-import event
-class event_queue:
+from event import Event
+class EventQueue:
     def __init__(self):
         self.currentTime = 0       # Current time
         self.eventList = []         # List of events (sorted by time property)
@@ -49,15 +49,19 @@ class event_queue:
             The function returns the index at which to insert the element.
         '''
 
-        if len(self.getSize) == 0:     # If the list is empty, insert element  
+        if self.getSize() == 0:     # If the list is empty, insert element  
             return 0                   #   at index 0
 
-        if len(self.getSize) == 1:      # If there's only one element in array
-            return 1
+        # If the value is smaller than the first element in the array
+        if event_time < self.eventList[0].getTime():
+            return 0
 
+        # If the value is greater than or equal to the last element in the array
+        if event_time >= self.eventList[-1].getTime():
+            return self.getSize()
 
         left = 0
-        right = len(self.eventList)-1
+        right = self.getSize()
 
         while True:
             m = (left + right)//2       # Get index between left and right
@@ -67,7 +71,7 @@ class event_queue:
                 return right            # Insert element at right index
 
             # Otherwise narrow the interval
-            elif event_time > event_m.getTime():
+            elif event_time >= event_m.getTime():
                 left = m
             elif event_time < event_m.getTime():
                 right = m
@@ -76,4 +80,6 @@ class event_queue:
             #   next to middle element
             elif event_time == event_m.getTime():
                 return m+1
+
+
 

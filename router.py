@@ -1,5 +1,5 @@
-from link import linkqueue
-import flow
+from link import Link
+from flow import flow
 class router:
 	"""Router: end points of the network"""
 	def __init__(self, id):
@@ -7,8 +7,8 @@ class router:
 		self.id = id
 		self.routingTable = []
 
-''' Pseudo code below change later'''
-	def initialize(graph, source):
+	''' Pseudo code below change later'''
+	def initialize(self, graph, source):
 		dest = {} # destination
 		pred = {} # predecessor
 		for node in graph:
@@ -19,7 +19,8 @@ class router:
 		
 	'''Bellman-Ford Algorithm: Update routing tables based
 	on congestion information'''
-	def bellmanFord(graph, source):
+	def bellmanFord(self, graph, source):
+		pass
 		# run bellman ford
 '''
 		def relax(node, neighbour, graph, d, p):
@@ -44,3 +45,6 @@ class router:
 	    return d, p
 
 		'''
+
+	def receivePackets(self, pckt):
+		pass
