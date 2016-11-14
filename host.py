@@ -2,6 +2,7 @@ import constants
 from packet import Packet
 from event_queue import EventQueue
 from event import Event
+from analytics import Analytics
 
 class Host:
 	"""A Host: end points of the network"""
@@ -9,6 +10,10 @@ class Host:
 		super(Host, self).__init__()
 		self.id = id
 		self.link = link
+		self.pckt_counters = {}
+		# possibly needed for host send/receive rate
+		self.num_received = 0
+		self.num_sent = 0
 
 	'''Add the passed packets to the link queue of the 
 	link it is connected to'''
@@ -32,4 +37,12 @@ class Host:
 			# push the new acknowledgment
 			sendAckPckt = Event(Event.pckt_send, constants.system_EQ.currentTime, [self.link, ackpckt])
 			constants.system_EQ.enqueue(sendAckPckt)
+			# Add to analytics
+			# should we start at 0?
+			if flow.ID in self.pckt_counters:
+				self.pckt_counters[flow.ID] += 1
+			else:
+				self.pckt_counters[flow.ID] = 1
+			constants.system_analytics.log_flow_receive_rate(flow.ID, constants.system_EQ.currentTime, self.pckt_counters[flow.ID])
+
 
