@@ -52,6 +52,7 @@ class Link:
             self.buffer.put_nowait(pkt)        # Enqueue the packet
             self.buffer_space_used += pkt.size
             self.packet_entered_link(pkt)       # Record the time the packet entered the link
+            constants.system_analytics.log_buff_occupancy(self.ID, constants.system_EQ.currentTime, 0)
             self.handle_link_free()             # Handle the fact that the link is free by putting link in use
 
         # If buffer is full, log that we dropped a packet
