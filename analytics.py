@@ -1,4 +1,5 @@
 import constants
+import matplotlib.pyplot as plt
 
 debug = True
 class Analytics:
@@ -103,7 +104,7 @@ class Analytics:
     '''link rate should read the time that this delay was calculated for the 
     link and update the relevant link delay'''
     def log_link_rate(self, linkID, pktsize, duration, currTime):
-        rate = pktsize/duration
+        rate = (pktsize/constants.MB_TO_BYTES)/duration
 
         if linkID in self.link_flow_rate:
             self.link_flow_rate[linkID].append((currTime, rate))
@@ -126,3 +127,6 @@ class Analytics:
         self.outFile.write(str(self.link_packet_lost))
         self.outFile.write("link flow rate: ")
         self.outFile.write(str(self.link_flow_rate))
+
+    def plotOutput(self):
+        plt.figure(1)

@@ -2,6 +2,7 @@ from event import Event
 from packet import DataPacket
 from event_queue import EventQueue
 import constants
+import math
 debug = True
 class Flow:
 	"""Flow Class"""
@@ -13,12 +14,12 @@ class Flow:
 		self.data_amt = data_amt	# Size of data in MB
 		self.start = start 			# Time at which flow begins
 		
-		self.windowSize = 5 		# set in congestion control algorithm 
+		self.windowSize = 50		# set in congestion control algorithm 
 		self.currACK = 0 			# the last acknowledged packet ID
 		self.droppedPackets = [] 	# dropped packets (IDs)
 
 		# Number of data packets the flow needs to send
-		self.num_packets = data_amt * constants.MB_TO_BYTES / constants.DATA_PKT_SIZE
+		self.num_packets = math.ceil(data_amt * constants.MB_TO_BYTES / constants.DATA_PKT_SIZE)
 
 		# Packet that we will send next, if this is equal to num_packets
 		#	then we have attempted to send all packets. Packets should now be
