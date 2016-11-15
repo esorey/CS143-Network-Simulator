@@ -6,10 +6,9 @@ from analytics import Analytics
 
 class Host:
 	"""A Host: end points of the network"""
-        def __init__(self, id, in_link, out_link):
+        def __init__(self, id, out_link):
 		super(Host, self).__init__()
 		self.id = id
-                self.in_link = in_link
                 self.out_link = out_link
 		self.pckt_counters = {}
 		# possibly needed for host send/receive rate
