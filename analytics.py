@@ -1,6 +1,6 @@
 class Analytics:
 
-    def __init__(self):
+    def __init__(self, outFile):
         time_step = []      # Holds the time step (from global time variable)
                             #   at which data was recorded
                             # Do we need this?
@@ -32,7 +32,10 @@ class Analytics:
         # and per host: send/receive rate
         self.host_send_rate = {}
         self.host_receive_rate = {}
+
         # not sure how to implement/compute these
+        # file that we are writing to
+        self.outFile = outFile
 
     '''This logs that this link dropped a packet at the current time.'''
     def log_dropped_packet(self, linkID, currTime):
@@ -108,3 +111,14 @@ class Analytics:
             self.flow_window_size[flowID].append((currTime, windowSize))
         else:
             self.flow_window_size[flowID] = [(currTime, delay)]
+
+    def generatePlots():
+        pass
+
+    def writeOutput(self):
+        self.outFile.write("link buff occupancy: ")
+        self.outFile.write(str(self.link_buff_occupancy))
+        self.outFile.write("link packet lost:  ")
+        self.outFile.write(str(self.link_packet_lost))
+        self.outFile.write("link flow rate: ")
+        self.outFile.write(str(self.link_flow_rate))

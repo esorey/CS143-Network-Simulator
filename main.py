@@ -13,7 +13,8 @@ if __name__ == "__main__":
     # Assume input file has links and flows in number order
     inFile = sys.argv[1]
     # Output file (analytics)
-    outFile = sys.argv[2]
+    outFile = open(sys.argv[2], 'w')
+    validNetwork = False
     # Initialize arrays
     links = {}
     flows = {}
@@ -23,9 +24,13 @@ if __name__ == "__main__":
     # Initialize event queue
     constants.system_EQ = EventQueue()
     # Initialize analytics
-    constants.system_analytics = Analytics()
+    constants.system_analytics = Analytics(outFile)
     # Set up network
-    inp_network(inFile,links,flows,hosts,routers)
+    validNetwork = inp_network(inFile,links,flows,hosts,routers)
+    if not validNetwork:
+        print("The network was not valid")
+        exit(1)
+
     # Enqueue all the flows
     for flow_key, flow_obj in flows.items():
         flow_event = Event(Event.flow_start, flow_obj.start, [flow_obj])
@@ -36,3 +41,5 @@ if __name__ == "__main__":
         EventHandler(curr_event)
     # If done with while loop, have finished all events
     # Output analytics in a text file
+    constants.system_analytics.writeOutput()
+    outFile.close()
