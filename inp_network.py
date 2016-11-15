@@ -16,6 +16,7 @@ print flws
 
 def inp_network(file, L={}, F={}, H={}, R={}):
     debug = True 
+    test_case = 0
     # Open relevant file
     f = open(file, 'r')
     # Initialize section count (each section has a specific format)
@@ -39,6 +40,9 @@ def inp_network(file, L={}, F={}, H={}, R={}):
         # Update link and host/router parameters
         # Return these instances in arrays: flows, links, hosts, routers
         if sec_count == 0:
+            # Every line will be formatted like:
+            #   params = linkID   source   destination   linkRate   linkDelay   linkBuffer
+
             # Set up first link direction (a)
             if debug: print("creating a link %s from %s to %s" %(params[0]+'a', params[1],params[2]))
             temp_link = Link(params[0]+'a',float(params[3]),float(params[4]),params[1],params[2],float(params[5]))
@@ -60,26 +64,44 @@ def inp_network(file, L={}, F={}, H={}, R={}):
                     print('Error: host {} has two out links'.format(params[1]))
                     return False
                 else:
-                    H[params[1]] = Host(params[1], params[0]+'a')
+                    H[params[1]] = Host(params[1], L[params[0]+'a'])
             # Put routers in array
             # Order by router number
             elif params[1][0] == 'R':
                 pass
+                '''if test_case == 1:
+                    if params[1]=='R1' or params[1]=='R2' or params[1]=='R4':
+                        if params[1]'''
+
             if params[2][0] == 'H':
                 if params[2] in H:
                     print('Error: host {} has two out links'.format(params[2]))
                 else:
-                    H[params[2]] = Host(params[2], params[0] + 'b')
+                    H[params[2]] = Host(params[2], L[params[0] + 'b'])
             elif params[2][0] == 'R':
                 pass
 
         # Flow parameters
         # Assume input file puts flows in order
         if sec_count == 1:
+            # Every line will be formatted like:
+            #   params = flowID   source   dest   dataAmt   flowStart
+
             if debug: print("TYPE: %s %s: %s" % (type(params[3]), type(params[4]), params[4]))
             if params[0] in F:
                 print('Error: flow {} defined twice'.format(params[0]))
                 return False
             F[params[0]] = Flow(params[0],H[params[1]],H[params[2]],float(params[3]), float(params[4]))
     f.close()
+    for lnk in L:
+        src = L[lnk].A
+        destn = L[lnk].B
+        if src[0] == 'H':
+            L[lnk].A = H[src]
+        elif src[0] == 'R':
+            L[lnk].A = R[src]
+        if destn[0] == 'H':
+            L[lnk].B = H[destn]
+        elif destn[0] == 'R':
+            L[lnk].B = R[destn]
     return True
