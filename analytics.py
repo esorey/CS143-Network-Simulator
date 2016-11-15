@@ -95,8 +95,10 @@ class Analytics:
         
     '''link rate should read the time that this delay was calculated for the 
     link and update the relevant link delay'''
-    def log_link_rate(linkID, currTime, rate):
-    	if linkID in self.link_flow_rate:
+    def log_link_rate(linkID, pktsize, duration, currTime):
+    	rate = pktsize/duration
+
+        if linkID in self.link_flow_rate:
     		self.link_flow_rate[linkID].append((currTime, rate))
     	else:
     		self.link_flow_rate[linkID] = [(currTime, rate)]
