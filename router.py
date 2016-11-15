@@ -1,6 +1,6 @@
 from link import Link
-from flow import flow
-class router:
+from flow import Flow
+class Router:
     """Router: end points of the network"""
     def __init__(self, id):
         super(Host, self).__init__()

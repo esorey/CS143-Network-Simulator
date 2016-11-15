@@ -1,6 +1,7 @@
 from link import Link
 from flow import Flow
 from host import Host
+from router import Router
 import network_map as nwm
 '''
 # Test code
