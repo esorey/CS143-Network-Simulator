@@ -19,7 +19,7 @@ print flws
 # LFHR
 
 def inp_network(file):
-    test_case = 1
+    test_case = 0
     # Open relevant file
     f = open(file, 'r')
     # Initialize section count (each section has a specific format)

@@ -40,4 +40,5 @@ if __name__ == "__main__":
     # If done with while loop, have finished all events
     # Output analytics in a text file
     constants.system_analytics.writeOutput()
+    constants.system_analytics.plotOutput()
     outFile.close()

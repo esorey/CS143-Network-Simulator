@@ -51,9 +51,9 @@ class Analytics:
     ''' Arrange dictionary by linkID followed by currTime'''
     def log_buff_occupancy(self, linkID, currTime, buffOccupancy):
         if linkID in self.link_buff_occupancy:
-            self.link_buff_occupancy[linkID].append((currTime, buffOccupancy))
+            self.link_buff_occupancy[linkID].append((currTime, buffOccupancy/constants.MB_TO_BYTES))
         else:
-            self.link_buff_occupancy[linkID] = [(currTime, buffOccupancy)]
+            self.link_buff_occupancy[linkID] = [(currTime, buffOccupancy/constants.MB_TO_BYTES)]
 
     ''' link flow rate calculation stores number of packets properly
     sent through flow in the span between current time to previous time'''
@@ -132,11 +132,11 @@ class Analytics:
         self.outFile.write("\n\n\n\n Total Number of Packets: %d" % self.pckts)
 
     def plotOutput(self):
-        plt.figure(1)
-
+        fig, axes = plt.subplots(nrows=4, ncols=1)
+        fig.tight_layout()
         colors = ['k', 'r', 'b', 'g', 'm', 'y']
         color_ctr = 0
-        plt.subplot(611)        # link rate plot
+        plt.subplot(411)        # link rate plot
         for linkID in self.link_flow_rate:
             time = [elt[0] for elt in self.link_flow_rate[linkID]]
             l_flow_rate_MBPS = [elt[1] for elt in self.link_flow_rate[linkID]]
@@ -144,7 +144,7 @@ class Analytics:
             color_ctr += 1
 
 
-        plt.subplot(612)        # buffer occupancy plot
+        plt.subplot(412)        # buffer occupancy plot
         color_ctr = 0
         for linkID in self.link_buff_occupancy:
             time = [elt[0] for elt in self.link_buff_occupancy[linkID]]
@@ -152,24 +152,21 @@ class Analytics:
             plt.plot(time, l_buff_occ_pkt, color=colors[color_ctr])
             color_ctr += 1
 
-        plt.subplot(613)
+        plt.subplot(413)
         color_ctr = 0
-        lost_packet_link_dict = {linkID: collections.Counter(self.link_packet_lost[linkID] for linkID in self.link_packet_lost)}
-        for linkID in lost_packet_link_dict:
-            time = lost_packet_link_dict[linkID].keys()
-            l_pkt_lost = lost_packet_link_dict.values()
+        for linkID in self.link_packet_lost:
+            freq_dict = collections.Counter(self.link_packet_lost[linkID])
+            time = list(freq_dict.keys())
+            l_pkt_lost = freq_dict.values()
             plt.plot(time, l_pkt_lost, color=colors[color_ctr])
             color_ctr += 1
 
-        plt.subplot(614)
+        plt.subplot(414)
         color_ctr = 0
         for flowID in self.flow_rate:
             time = [elt[0] for elt in self.flow_rate[flowID]]
             f_flow_rate = [elt[1] for elt in self.flow_rate[flowID]]
             plt.plot(time, f_flow_rate, color=colors[color_ctr])
             color_ctr += 1
-
-        plt.subplot(615)
-        clor_ctr = 0
 
         plt.show()
