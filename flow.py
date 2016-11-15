@@ -39,16 +39,16 @@ class Flow:
 		function sends packets from dropped packets and new packets (gives 
 		dropped packets priority). If there are not enough packets, the
 		function sends whatever packets it can. '''
-	def flowSendPackts(self): 
+	def flowSendPackets(self): 
 		packets_to_send = []
 		# Send ALL packets from dropped packets
 		if len(self.droppedPackets) >= self.windowSize:
-			packets_to_send = self.generatePackets(self, self.droppedPackets[:(self.windowSize)])
+			packets_to_send = self.generateDataPackets(self.droppedPackets[:(self.windowSize)])
 
 		# send SOME (could be 0) packets from dropped packets and SOME from new packets
 		else:
 			# Generate and get ready to send packets from dropped packets
-			getPcktsToSend = self.generatePackets(self, self.droppedPackets)
+			getPcktsToSend = self.generateDataPackets(self, self.droppedPackets)
 			packets_to_send.extend(getPcktsToSend)
 
 			# Generate and get ready to send new packets

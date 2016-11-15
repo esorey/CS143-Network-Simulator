@@ -72,13 +72,13 @@ class Analytics:
     at the host and add it to the corresponding packet in the flow'''
     def log_flow_receive_rate(flowID, currTime, receive_order):
         if flowID in self.flow_receive_rate:
-        	# If the number of the received packet is greater than window size,
-        	# 	there is an issue
-        	if receive_order <= self.flow_send_rate[0][0]:
-        		# Log the flow rate
-        		self.log_flow_rate(flowID, constants.DATA_PKT_SIZE, currTime, self.flow_send_rate[0][1])
-        	# Keep track of all the times we get packets just in case
-        	self.flow_receive_rate[flowID][receive_order].append(currTime)
+                # If the number of the received packet is greater than window size,
+                #       there is an issue
+                if receive_order <= self.flow_send_rate[0][0]:
+                        # Log the flow rate
+                        self.log_flow_rate(flowID, constants.DATA_PKT_SIZE, currTime, self.flow_send_rate[0][1])
+                # Keep track of all the times we get packets just in case
+                self.flow_receive_rate[flowID][receive_order].append(currTime)
 
     # time start is queued in immediately
     # time end is when the ack with the right packetID is sent
@@ -95,14 +95,16 @@ class Analytics:
         
     '''link rate should read the time that this delay was calculated for the 
     link and update the relevant link delay'''
-    def log_link_rate(linkID, currTime, rate):
-    	if linkID in self.link_flow_rate:
-    		self.link_flow_rate[linkID].append((currTime, rate))
-    	else:
-    		self.link_flow_rate[linkID] = [(currTime, rate)]
+    def log_link_rate(linkID, pktsize, duration, currTime):
+        rate = pktsize/duration
+
+        if linkID in self.link_flow_rate:
+                self.link_flow_rate[linkID].append((currTime, rate))
+        else:
+                self.link_flow_rate[linkID] = [(currTime, rate)]
 
     def log_window_size(flowID, currTime, windowSize):
-    	if flowID in self.flow_window_size:
-    		self.flow_window_size[flowID].append((currTime, windowSize))
-    	else:
-    		self.flow_window_size[flowID] = [(currTime, delay)]
+        if flowID in self.flow_window_size:
+                self.flow_window_size[flowID].append((currTime, windowSize))
+        else:
+                self.flow_window_size[flowID] = [(currTime, delay)]

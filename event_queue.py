@@ -14,7 +14,7 @@ class EventQueue:
         del self.eventList[0]           # Remove this event from queue
 
         # Update time variable
-        self.currentTime = ret_event.getTime()
+        self.currentTime = ret_event.time
         return ret_event                # And return this event
 
     def enqueue(self, event):
@@ -24,7 +24,7 @@ class EventQueue:
             events in order of the time the event should be executed.
         '''
         # Determine index to insert event based on time property
-        ind_to_insert = self.getIndextoInsert(self, event.getTime())
+        ind_to_insert = self.getIndextoInsert(event.time)
 
         self.eventList.insert(ind_to_insert, event)  # Insert/enqueue event
 
@@ -53,11 +53,11 @@ class EventQueue:
             return 0                   #   at index 0
 
         # If the value is smaller than the first element in the array
-        if event_time < self.eventList[0].getTime():
+        if event_time < self.eventList[0].time:
             return 0
 
         # If the value is greater than or equal to the last element in the array
-        if event_time >= self.eventList[-1].getTime():
+        if event_time >= self.eventList[-1].time:
             return self.getSize()
 
         left = 0
@@ -71,14 +71,14 @@ class EventQueue:
                 return right            # Insert element at right index
 
             # Otherwise narrow the interval
-            elif event_time >= event_m.getTime():
+            elif event_time >= event_m.time:
                 left = m
-            elif event_time < event_m.getTime():
+            elif event_time < event_m.time:
                 right = m
 
             # If the event_time is the same as event_m time, insert event
             #   next to middle element
-            elif event_time == event_m.getTime():
+            elif event_time == event_m.time:
                 return m+1
 
 
