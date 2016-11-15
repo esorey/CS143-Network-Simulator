@@ -1,3 +1,6 @@
+import constants
+
+debug = True
 class Analytics:
 
     def __init__(self, outFile):
@@ -25,7 +28,6 @@ class Analytics:
         # Still need per flow: send/receive rate, packet round trip delay
         self.flow_rate = {}
         self.flow_send_rate = {}
-        self.flow_receive_rate = {} 
         self.flow_packet_RTD = {}
         self.flow_window_size = {}
 
@@ -62,6 +64,9 @@ class Analytics:
             self.flow_rate[flowID].append((currTime, rate))
         else:
             self.flow_rate[flowID] = [(currTime, rate)]
+        if debug:
+            print(rate)
+
 
     '''flow send rate should read the updating window sizes, which
     decide the send rate of each flow, and update it to the relevant time'''
@@ -74,14 +79,13 @@ class Analytics:
     '''flow receive rate should read the time that the packet was received
     at the host and add it to the corresponding packet in the flow'''
     def log_flow_receive_rate(self, flowID, currTime, receive_order):
-        if flowID in self.flow_receive_rate:
+        if flowID in self.flow_send_rate:
             # If the number of the received packet is greater than window size,
             #   there is an issue
-            if receive_order <= self.flow_send_rate[0][0]:
+            if debug: print(self.flow_send_rate[flowID])
+            if receive_order <= self.flow_send_rate[flowID][-1][0]:
                 # Log the flow rate
-                self.log_flow_rate(flowID, constants.DATA_PKT_SIZE, currTime, self.flow_send_rate[0][1])
-        # Keep track of all the times we get packets just in case
-        self.flow_receive_rate[flowID][receive_order].append(currTime)
+                self.log_flow_rate(flowID, constants.DATA_PKT_SIZE, currTime, self.flow_send_rate[flowID][-1][1])
 
     # time start is queued in immediately
     # time end is when the ack with the right packetID is sent
