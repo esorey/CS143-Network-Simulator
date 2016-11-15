@@ -3,7 +3,8 @@
 
 # Units conversions
 MB_TO_BYTES = 1000000		# Convert megabytes to bytes
-Mbits_TO_BYTES = 8000000
+KB_TO_BYTES = 1000
+BYTES_TO_MBITS = 8000000
 SEC_TO_MS = 1000 			# Convert seconds to milliseconds
 
 DATA_PKT_SIZE = 1024		# Bytes per data packet

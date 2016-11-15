@@ -51,9 +51,9 @@ class Analytics:
     ''' Arrange dictionary by linkID followed by currTime'''
     def log_buff_occupancy(self, linkID, currTime, buffOccupancy):
         if linkID in self.link_buff_occupancy:
-            self.link_buff_occupancy[linkID].append((currTime, buffOccupancy/constants.MB_TO_BYTES))
+            self.link_buff_occupancy[linkID].append((currTime, buffOccupancy/constants.KB_TO_BYTES))
         else:
-            self.link_buff_occupancy[linkID] = [(currTime, buffOccupancy/constants.MB_TO_BYTES)]
+            self.link_buff_occupancy[linkID] = [(currTime, buffOccupancy/constants.KB_TO_BYTES)]
 
     ''' link flow rate calculation stores number of packets properly
     sent through flow in the span between current time to previous time'''
@@ -61,7 +61,7 @@ class Analytics:
     # decides to put first packet in iink buffer to when host receives last
     # packet
     def log_flow_rate(self, flowID, numBytes, currTime, prevTime): 
-        rate = numBytes/((currTime - prevTime) * constants.MB_TO_BYTES)
+        rate = numBytes*constants.BYTES_TO_MBITS/((currTime - prevTime)/constants.SEC_TO_MS)
         if flowID in self.flow_rate:
             self.flow_rate[flowID].append((currTime, rate))
         else:
@@ -106,7 +106,7 @@ class Analytics:
     '''link rate should read the time that this delay was calculated for the 
     link and update the relevant link delay'''
     def log_link_rate(self, linkID, pktsize, duration, currTime):
-        rate = pktsize/(duration/constants.SEC_TO_MS * constants.Mbits_TO_BYTES)
+        rate = pktsize * constants.BYTES_TO_MBITS/(duration/constants.SEC_TO_MS)
 
         if linkID in self.link_flow_rate:
             self.link_flow_rate[linkID].append((currTime, rate))
@@ -138,6 +138,9 @@ class Analytics:
         color_ctr = 0
         plt.subplot(311)        # link rate plot
         for linkID in self.link_flow_rate:
+            print("LINK FLOW RATE LINK ID:")
+            print(linkID + " " + colors[color_ctr])
+            #if list(self.link_flow_rate.keys()).index(linkID) is not 1:
             time = [elt[0] for elt in self.link_flow_rate[linkID]]
             l_flow_rate_MBPS = [elt[1] for elt in self.link_flow_rate[linkID]]
             plt.plot(time, l_flow_rate_MBPS, color=colors[color_ctr])
@@ -151,13 +154,15 @@ class Analytics:
         plt.subplot(312)        # buffer occupancy plot
         color_ctr = 0
         for linkID in self.link_buff_occupancy:
+            print("LINK BUFF OCCUPANCY: ")
+            print(linkID + " " + colors[color_ctr])
             time = [elt[0] for elt in self.link_buff_occupancy[linkID]]
             l_buff_occ_pkt = [elt[1] for elt in self.link_buff_occupancy[linkID]]
             plt.plot(time, l_buff_occ_pkt, color=colors[color_ctr])
             color_ctr += 1
 
         plt.xlabel('time (ms)')
-        plt.ylabel('Buffer Occupancy (MB)')
+        plt.ylabel('Buffer Occupancy (KB)')
 
         '''plt.subplot(413)
         color_ctr = 0

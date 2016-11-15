@@ -12,7 +12,7 @@ class Link:
         self.delay = delay
         self.A = A
         self.B = B
-        self.buffer_capacity = buffer_cap * constants.MB_TO_BYTES # buffer_cap is in MB
+        self.buffer_capacity = buffer_cap * constants.KB_TO_BYTES # buffer_cap is in MB
         self.buffer_space_used = 0
         self.buffer = queue.Queue()
 
@@ -68,7 +68,7 @@ class Link:
 
     def get_packet_travel_time(self, pkt):
         '''Compute the travel time for a packet. Will involve the current time and the transmission time.'''
-        travel_time = self.delay + constants.SEC_TO_MS * (pkt.size / (constants.MB_TO_BYTES * self.rate))
+        travel_time = self.delay + constants.SEC_TO_MS * (pkt.size * constants.BYTES_TO_MBITS / self.rate)
         return travel_time
 
     def packet_entered_link(self, pkt):
