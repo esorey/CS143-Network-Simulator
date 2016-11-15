@@ -1,23 +1,25 @@
 from event import Event
 from flow import Flow 
 from host import Host 
+import network_maps as nwm 
+
 debug = True
 def EventHandler(cur_event):
     if cur_event.event_type == Event.flow_start:
-        cur_flow = cur_event.data[0]
+        cur_flow = nwm.flows[cur_event.data[0]]    # Convert flow ID into flow
         cur_flow.flowSendPackets()
 
     elif cur_event.event_type == Event.pckt_rcv:
-        rcv_host = cur_event.data[0]
+        rcv_host = nwm.hosts[cur_event.data[0]]                # Convert host ID to host
         rcv_packet = cur_event.data[1]
         rcv_host.receivePacket(rcv_packet)
 
     elif cur_event.event_type == Event.link_free:
-        lnk = cur_event.data[0]
+        lnk = nwm.links[cur_event.data[0]]
         lnk.handle_link_free()
 
     elif cur_event.event_type == Event.flow_src_send_packets:
-        src_host = cur_event.data[0]
+        src_host = nwm.hosts[cur_event.data[0]]
         pkts_to_send = cur_event.data[1]
         if debug: 
             print("Event Handler - Sending packets: ")
@@ -27,13 +29,13 @@ def EventHandler(cur_event):
         src_host.sendPackets(pkts_to_send)
 
     elif cur_event.event_type == Event.ack_rcv:
-        cur_flow = cur_event.data[0]
+        cur_flow = nwm.flows[cur_event.data[0]]
         packetID = cur_event.data[1]
 
         cur_flow.getACK(packetID)
 
     elif cur_event.event_type == Event.pckt_send:
-        cur_link = cur_event.data[0]
+        cur_link = nwm.links[cur_event.data[0]]
         cur_pckt = cur_event.data[1]
 
         cur_link.enqueue_packet(cur_pckt)

@@ -66,7 +66,7 @@ def inp_network(file):
                     print('Error: host {} has two out links'.format(params[1]))
                     return False
                 else:
-                    nwm.hosts[params[1]] = Host(params[1], nwm.links[params[0]+'a'])
+                    nwm.hosts[params[1]] = Host(params[1], params[0]+'a')
             # Put routers in array
             # Order by router number
             elif params[1][0] == 'R':
@@ -79,7 +79,7 @@ def inp_network(file):
                 if params[2] in nwm.hosts:
                     print('Error: host {} has two out links'.format(params[2]))
                 else:
-                    nwm.hosts[params[2]] = Host(params[2], nwm.link[params[0] + 'b'])
+                    nwm.hosts[params[2]] = Host(params[2], params[0] + 'b')
             elif params[2][0] == 'R':
                 pass
 
@@ -93,17 +93,6 @@ def inp_network(file):
             if params[0] in nwm.flows:
                 print('Error: flow {} defined twice'.format(params[0]))
                 return False
-            nwm.flows[params[0]] = Flow(params[0],nwm.hosts[params[1]],nwm.hosts[params[2]],float(params[3]), float(params[4]))
+            nwm.flows[params[0]] = Flow(params[0],params[1],params[2],float(params[3]), float(params[4]))
     f.close()
-    for lnk in nwm.links:
-        src = nwm.links[lnk].A
-        destn = nwm.links[lnk].B
-        if src[0] == 'H':
-            nwm.links[lnk].A = nwm.hosts[src]
-        elif src[0] == 'R':
-            nwm.links[lnk].A = nwm.routers[src]
-        if destn[0] == 'H':
-            nwm.links[lnk].B = nwm.hosts[destn]
-        elif destn[0] == 'R':
-            nwm.links[lnk].B = nwm.routers[destn]
     return True

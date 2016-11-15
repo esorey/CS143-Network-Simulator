@@ -36,7 +36,7 @@ class Link:
             self.in_use = True              # Link is in use
             
             # Generate link free and packet receive events at the appropriate times
-            link_free_event = Event(Event.link_free, travel_time, [self])
+            link_free_event = Event(Event.link_free, travel_time, [self.ID])
             pkt_receive_event = Event(Event.pckt_rcv, travel_time, [self.B, pkt])
 
             # Enqueue these events in global Event Queue
