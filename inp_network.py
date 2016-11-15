@@ -80,5 +80,5 @@ def inp_network(file, L={}, F={}, H={}, R={}):
             if params[0] in F:
                 print('Error: flow {} defined twice'.format(params[0]))
                 return False
-            F[params[0]] = Flow(params[0],params[1],params[2],float(params[3]), float(params[4]))
+            F[params[0]] = Flow(params[0],H[params[1]],H[params[2]],float(params[3]), float(params[4]))
     f.close()
