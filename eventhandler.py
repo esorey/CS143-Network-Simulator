@@ -8,13 +8,13 @@ def EventHandler(cur_event):
         cur_flow.flowSendPackets()
 
     elif cur_event.event_type == Event.pckt_rcv:
-    	rcv_host = cur_event.data[0]
-    	rcv_packet = cur_event.data[1]
-    	rcv_host.receivePacket(rcv_packet)
+        rcv_host = cur_event.data[0]
+        rcv_packet = cur_event.data[1]
+        rcv_host.receivePacket(rcv_packet)
 
     elif cur_event.event_type == Event.link_free:
-    	lnk = cur_event.data[0]
-    	lnk.handle_link_free()
+        lnk = cur_event.data[0]
+        lnk.handle_link_free()
 
     elif cur_event.event_type == Event.flow_src_send_packets:
         src_host = cur_event.data[0]

@@ -43,21 +43,21 @@ def inp_network(file, L={}, F={}, H={}, R={}):
             if debug: print("creating a link %s from %s to %s" %(params[0]+'a', params[1],params[2]))
             temp_link = Link(params[0]+'a',float(params[3]),float(params[4]),params[1],params[2],float(params[5]))
             if (params[0]+'a') in L:
-                print 'Error: link {} defined twice'.format(params[0])
+                print('Error: link {} defined twice'.format(params[0]))
                 return False
             L[params[0]+'a'] = temp_link
             # Set up other link direction (b)
             if debug: print("creating a link %s from %s to %s" %(params[0]+'b', params[2], params[1]))
             temp_link = Link(params[0]+'b',float(params[3]),float(params[4]),params[2],params[1],float(params[5]))
             if (params[0]+'b') in L:
-                print 'Error: link {} defined twice'.format(params[0])
+                print('Error: link {} defined twice'.format(params[0]))
                 return False
             L[params[0]+'b'] = temp_link
             # Put hosts in array
             # Order by host number and then link number
             if params[1][0] == 'H':
                 if params[1] in H:
-                    print 'Error: host {} has two out links'.format(params[1])
+                    print('Error: host {} has two out links'.format(params[1]))
                     return False
                 else:
                     H[params[1]] = Host(params[1], params[0]+'a')
@@ -67,7 +67,7 @@ def inp_network(file, L={}, F={}, H={}, R={}):
                 pass
             if params[2][0] == 'H':
                 if params[2] in H:
-                    print 'Error: host {} has two out links'.format(params[2])
+                    print('Error: host {} has two out links'.format(params[2]))
                 else:
                     H[params[2]] = Host(params[2], params[0] + 'b')
             elif params[2][0] == 'R':
@@ -78,7 +78,7 @@ def inp_network(file, L={}, F={}, H={}, R={}):
         if sec_count == 1:
             if debug: print("TYPE: %s %s: %s" % (type(params[3]), type(params[4]), params[4]))
             if params[0] in F:
-                print 'Error: flow {} defined twice'.format(params[0])
+                print('Error: flow {} defined twice'.format(params[0]))
                 return False
             F[params[0]] = Flow(params[0],params[1],params[2],float(params[3]), float(params[4]))
     f.close()
