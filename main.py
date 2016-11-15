@@ -27,12 +27,12 @@ if __name__ == "__main__":
     # Set up network
     inp_network(inFile,links,flows,hosts,routers)
     # Enqueue all the flows
-    for flow_obj in flows:
+    for flow_key, flow_obj in flows.items():
         flow_event = Event(Event.flow_start, flow_obj.start, [flow_obj])
-        constants.system_eq.enqueue(flow_event)
+        constants.system_EQ.enqueue(flow_event)
     # Continue to dequeue events until it is empty
-    while(not constants.system_eq.isempty()):
-        curr_event = constants.system_eq.dequeue()
+    while(not constants.system_EQ.isempty()):
+        curr_event = constants.system_EQ.dequeue()
         EventHandler(curr_event)
     # If done with while loop, have finished all events
     # Output analytics in a text file

@@ -67,9 +67,9 @@ class Flow:
 			self.currPCK = end_pckt_index
 
 		# Enqueue event that will tell hosts to send packets
-		event_to_send = Event(Event.flow_src_send_packets, system_EQ.currentTime, [self.source, packets_to_send])
+		event_to_send = Event(Event.flow_src_send_packets, constants.system_EQ.currentTime, [self.source, packets_to_send])
 		constants.system_EQ.enqueue(event_to_send)
-		constants.system_analytics.log_flow_send_rate(self.ID, self.windowSize, currTime)
+		constants.system_analytics.log_flow_send_rate(self.ID, self.windowSize, constants.system_EQ.currentTime)
 
 	''' When a host receives an acknowledgement packet it will call this 
 		function for the flow to update what packets have been received. The 

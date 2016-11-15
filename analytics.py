@@ -72,11 +72,11 @@ class Analytics:
     at the host and add it to the corresponding packet in the flow'''
     def log_flow_receive_rate(flowID, currTime, receive_order):
         if flowID in self.flow_receive_rate:
-        # If the number of the received packet is greater than window size,
-        #   there is an issue
-        if receive_order <= self.flow_send_rate[0][0]:
-            # Log the flow rate
-            self.log_flow_rate(flowID, constants.DATA_PKT_SIZE, currTime, self.flow_send_rate[0][1])
+            # If the number of the received packet is greater than window size,
+            #   there is an issue
+            if receive_order <= self.flow_send_rate[0][0]:
+                # Log the flow rate
+                self.log_flow_rate(flowID, constants.DATA_PKT_SIZE, currTime, self.flow_send_rate[0][1])
         # Keep track of all the times we get packets just in case
         self.flow_receive_rate[flowID][receive_order].append(currTime)
 
