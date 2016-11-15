@@ -1,9 +1,11 @@
 from event import Event
+import queue
+
 debug = True
 class EventQueue:
     def __init__(self):
         self.currentTime = 0       # Current time
-        self.eventList = []         # List of events (sorted by time property)
+        self.eventQueue = queue.PriorityQueue()        # List of events (sorted by time property)
 
     def dequeue(self):
         '''
@@ -14,27 +16,26 @@ class EventQueue:
         if debug: 
             print("Event is getting dequeued")
             print("\tevent: %s" %self.eventList[0].event_type)
-        ret_event = self.eventList[0]   # Get event to dequeue
-        del self.eventList[0]           # Remove this event from queue
+        
+        ret_elem = self.eventQueue.get_nowait()
 
         # Update time variable
-        self.currentTime = ret_event.time
-        return ret_event                # And return this event
+        self.currentTime = ret_elem[0]
+        return ret_elem.[1]             # And return this event
 
-    def enqueue(self, event):
+    def enqueue(self, enq_event):
         '''
             Enqueues the passed event to the event_queue.
             The function enqueues the event by inserting it into the list of
             events in order of the time the event should be executed.
         '''
         # Determine index to insert event based on time property
-        ind_to_insert = self.getIndextoInsert(event.time)
+        self.eventQueue.put_nowait((enq_event.time, enq_event))
         if debug: 
             print("Currently Enqueueing...")
             print("\tInserting at index: %s" % ind_to_insert)
             print("\tInserting time: %s " % event.time)
             print("\tInserting event type: %s" % event.event_type)
-        self.eventList.insert(ind_to_insert, event)  # Insert/enqueue event
 
         return True
 
@@ -42,14 +43,15 @@ class EventQueue:
         '''
             Returns true if event_queue is empty, false if it is not empty
         '''
-        return self.eventList == []
+        return self.eventQueue.empty()
 
     def getSize(self):
         '''
             Returns the length of the event event_queue
         '''
-        return len(self.eventList)
+        return self.eventQueue.qsize()
 
+    # this function should be unnecessary if above works D:
     def getIndextoInsert(self, event_time):
         '''
             This function determines the index at which to insert an event
