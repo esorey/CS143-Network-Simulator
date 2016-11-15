@@ -45,6 +45,8 @@ class Flow:
 			print("Currently in Flow send Packets: ")
 			print("dropped Packets: %s, WindowSize: %s" % (self.droppedPackets, self.windowSize))
 
+                if self.currACK == self.num_packets - 1 and self.droppedPackets == []: # We're done with this flow...YAY!
+                    return
 		# Send ALL packets from dropped packets
 		if len(self.droppedPackets) >= self.windowSize:
 			packets_to_send = self.generateDataPackets(self.droppedPackets[:(self.windowSize)])
@@ -95,6 +97,12 @@ class Flow:
 			self.droppedPackets.remove(packetID)
 		else:
 			self.currACK += 1 	# We received correct packet, increment currACK
+
+
+
+                elif self.currACK - len(self.droppedPackets) + 1 % self.windowSize == 0: # We're finished with this window; send a new one
+                    self.flowSendPackets()
+
 		
 
 	''' Generates data packets with the given IDs and returns a list of the 
