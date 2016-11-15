@@ -26,6 +26,8 @@ class Flow:
         #   done. 
         self.currPCK = 0
 
+        self.pkt_entry_times = {}
+
 
     def congestionControlAlg(pcktReceived, pcktSent): 
         # run congestion control alg
@@ -88,6 +90,9 @@ class Flow:
         function for the flow to update what packets have been received. The 
         flow deals with packet loss.'''
     def getACK(self, packetID):
+
+        constants.system_analytics.log_packet_RTD(packetID, self.pkt_entry_times[packetID], constants.system_EQ.currentTime)
+
         if packetID  > self.currACK+1:  # if we dropped a packet
             # Add the packets we dropped to the droppedPackets list
             self.droppedPackets.append(range(self.currACK+1, packetID))
@@ -111,6 +116,8 @@ class Flow:
         for PID in listPacketIDs:
             pckt = DataPacket(PID, self.source, self.dest, self.ID)
             packets_list.append(pckt)
+            if pckt.packet_id not in self.pkt_entry_times:
+                self.pkt_entry_times[pckt.packet_id] = constants.system_EQ.currentTime
 
         return packets_list
 
