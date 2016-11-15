@@ -74,12 +74,12 @@ def inp_network(file):
                 
                 if test_case == 1:
                     if params[1]=='R1' or params[1]=='R2' or params[1]=='R4':
-                        if params[1] in R:
+                        if params[1] in nwm.routers:
                             if params[0] == 'L1' or params[0] == 'L3' or params[0] == 'L5':
-                                R[params[1]].routingTable['H2'] = params[0]+'a'
+                                nwm.routers[params[1]].routingTable['H2'] = params[0]+'a'
                         else:
-                            R[params[1]] = Router(params[1])
-                            R[params[1]].routingTable['H2'] = params[0]+'a'
+                            nwm.routers[params[1]] = Router(params[1])
+                            nwm.routers[params[1]].routingTable['H2'] = params[0]+'a'
                 else:
                     pass
 
@@ -91,12 +91,12 @@ def inp_network(file):
             elif params[2][0] == 'R':
                 if test_case == 1:
                     if params[2]=='R1' or params[2]=='R2' or params[2]=='R4':
-                        if params[2] in R:
+                        if params[2] in nwm.routers:
                             if params[0] == 'L1' or params[0] == 'L3' or params[0] == 'L0':
-                                R[params[1]].routingTable['H1'] = params[0]+'b'
+                                nwm.routers[params[1]].routingTable['H1'] = params[0]+'b'
                         else:
-                            R[params[1]] = Router(params[1])
-                            R[params[1]].routingTable['H1'] = params[0]+'b'
+                            nwm.routers[params[1]] = Router(params[1])
+                            nwm.routers[params[1]].routingTable['H1'] = params[0]+'b'
                 else:
                     pass
 
