@@ -2,7 +2,7 @@ from event import Event
 from packet import DataPacket
 from event_queue import EventQueue
 import constants
-
+debug = True
 class Flow:
 	"""Flow Class"""
 	def __init__(self, ID, source, destination, data_amt, start):
@@ -67,8 +67,15 @@ class Flow:
 			self.currPCK = end_pckt_index
 
 		# Enqueue event that will tell hosts to send packets
+		if debug: print("Event is getting enqueued...")
 		event_to_send = Event(Event.flow_src_send_packets, constants.system_EQ.currentTime, [self.source, packets_to_send])
 		constants.system_EQ.enqueue(event_to_send)
+		if debug: 
+			print("event type: %s" % event_to_send.event_type)
+			print("event time: %s" % event_to_send.time)
+			print("event data: %s" % event_to_send.data)
+			print("Len of eventlist: %s" % len(constants.system_EQ.eventList))
+
 		constants.system_analytics.log_flow_send_rate(self.ID, self.windowSize, constants.system_EQ.currentTime)
 
 	''' When a host receives an acknowledgement packet it will call this 

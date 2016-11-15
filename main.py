@@ -34,6 +34,7 @@ if __name__ == "__main__":
     # Enqueue all the flows
     for flow_key, flow_obj in flows.items():
         flow_event = Event(Event.flow_start, flow_obj.start, [flow_obj])
+        outFile.write(str(flow_event.event_type) + "\n")
         constants.system_EQ.enqueue(flow_event)
     # Continue to dequeue events until it is empty
     while(not constants.system_EQ.isempty()):

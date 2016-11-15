@@ -1,4 +1,5 @@
 from event import Event
+debug = True
 class EventQueue:
     def __init__(self):
         self.currentTime = 0       # Current time
@@ -10,6 +11,9 @@ class EventQueue:
             The function gets the first event in the eventList, removes it
             from the list, and returns it
         '''
+        if debug: 
+            print("Event is getting dequeued")
+            print("event: %s" %self.eventList[0].event_type)
         ret_event = self.eventList[0]   # Get event to dequeue
         del self.eventList[0]           # Remove this event from queue
 
@@ -25,7 +29,10 @@ class EventQueue:
         '''
         # Determine index to insert event based on time property
         ind_to_insert = self.getIndextoInsert(event.time)
-
+        if debug: 
+            print("Currently Enqueueing...")
+            print("Inserting at index: %s" % ind_to_insert)
+            print("Inserting time: %s " % event.time)
         self.eventList.insert(ind_to_insert, event)  # Insert/enqueue event
 
         return True
