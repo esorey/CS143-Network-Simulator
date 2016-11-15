@@ -18,7 +18,6 @@ print flws
 # LFHR
 
 def inp_network(file):
-    debug = False 
     test_case = 0
     # Open relevant file
     f = open(file, 'r')
@@ -38,7 +37,7 @@ def inp_network(file):
         # Remove extra spaces
         while '' in params:
             params.remove('')
-        if debug: print(params[0] + " " + params[1])
+        if constants.debug: print(params[0] + " " + params[1])
         # Set list values based on the section we're in
         # Update link and host/router parameters
         # Return these instances in arrays: flows, links, hosts, routers
@@ -47,14 +46,14 @@ def inp_network(file):
             #   params = linkID   source   destination   linkRate   linkDelay   linkBuffer
 
             # Set up first link direction (a)
-            if debug: print("creating a link %s from %s to %s" %(params[0]+'a', params[1],params[2]))
+            if constants.debug: print("creating a link %s from %s to %s" %(params[0]+'a', params[1],params[2]))
             temp_link = Link(params[0]+'a',float(params[3]),float(params[4]),params[1],params[2],float(params[5]))
             if (params[0]+'a') in nwm.links:
                 print('Error: link {} defined twice'.format(params[0]))
                 return False
             nwm.links[params[0]+'a'] = temp_link
             # Set up other link direction (b)
-            if debug: print("creating a link %s from %s to %s" %(params[0]+'b', params[2], params[1]))
+            if constants.debug: print("creating a link %s from %s to %s" %(params[0]+'b', params[2], params[1]))
             temp_link = Link(params[0]+'b',float(params[3]),float(params[4]),params[2],params[1],float(params[5]))
             if (params[0]+'b') in nwm.links:
                 print('Error: link {} defined twice'.format(params[0]))
@@ -106,7 +105,7 @@ def inp_network(file):
             # Every line will be formatted like:
             #   params = flowID   source   dest   dataAmt   flowStart
 
-            if debug: print("TYPE: %s %s: %s" % (type(params[3]), type(params[4]), params[4]))
+            if constants.debug: print("TYPE: %s %s: %s" % (type(params[3]), type(params[4]), params[4]))
             if params[0] in nwm.flows:
                 print('Error: flow {} defined twice'.format(params[0]))
                 return False

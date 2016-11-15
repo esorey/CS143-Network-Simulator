@@ -1,7 +1,6 @@
 import constants
 import matplotlib.pyplot as plt
 
-debug = False
 class Analytics:
 
     def __init__(self, outFile):
@@ -65,7 +64,7 @@ class Analytics:
             self.flow_rate[flowID].append((currTime, rate))
         else:
             self.flow_rate[flowID] = [(currTime, rate)]
-        if debug:
+        if constants.debug:
             print(rate)
 
 
@@ -83,7 +82,7 @@ class Analytics:
         if flowID in self.flow_send_rate:
             # If the number of the received packet is greater than window size,
             #   there is an issue
-            if debug: print(self.flow_send_rate[flowID])
+            if constants.debug: print(self.flow_send_rate[flowID])
             if receive_order <= self.flow_send_rate[flowID][-1][0]:
                 # Log the flow rate
                 self.log_flow_rate(flowID, constants.DATA_PKT_SIZE, currTime, self.flow_send_rate[flowID][-1][1])

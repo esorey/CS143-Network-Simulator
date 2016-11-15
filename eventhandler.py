@@ -4,7 +4,6 @@ from host import Host
 from router import Router
 import network_map as nwm 
 
-debug = False
 def EventHandler(cur_event):
     if cur_event.event_type == Event.flow_start:
         print(nwm.flows)
@@ -29,7 +28,7 @@ def EventHandler(cur_event):
     elif cur_event.event_type == Event.flow_src_send_packets:
         src_host = nwm.hosts[cur_event.data[0]]
         pkts_to_send = cur_event.data[1]
-        if debug: 
+        if constants.debug: 
             print("Event Handler - Sending packets: ")
             print("Source Host: %s" % src_host)
             print("Packets to Send: %s" % pkts_to_send)
@@ -37,7 +36,7 @@ def EventHandler(cur_event):
         src_host.sendPackets(pkts_to_send)
 
     elif cur_event.event_type == Event.ack_rcv:
-        if debug: print("ACK data: %s" % cur_event.data)
+        if constants.debug: print("ACK data: %s" % cur_event.data)
         cur_flow = nwm.flows[cur_event.data[1]]
         packetID = cur_event.data[0]
 
