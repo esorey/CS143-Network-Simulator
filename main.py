@@ -1,5 +1,5 @@
 import sys
-import event_queue
+from event_queue import EventQueue
 import constants
 from eventhandler import EventHandler
 from flow import Flow
@@ -16,8 +16,8 @@ if __name__ == "__main__":
 	# Initialize arrays
 	links = []
 	flows = []
-	hosts = []
-	routers = []
+	hosts = {}
+	routers = {}
 
 	# Initialize event queue
 	constants.system_eq = EventQueue();
@@ -28,10 +28,8 @@ if __name__ == "__main__":
 		flow_event = Event(Event.flow_start, flow_obj.start, [flow_obj])
 		constants.system_eq.enqueue(flow_event)
 	# Continue to dequeue events until it is empty
-	while(!constant.system_eq.isempty()):
+	while(not constants.system_eq.isempty()):
 		curr_event = constants.system_eq.dequeue()
 		EventHandler(curr_event)
 	# If done with while loop, have finished all events
 	# Output analytics in a text file
-	
-

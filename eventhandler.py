@@ -5,7 +5,7 @@ from host import Host
 def EventHandler(cur_event):
     if cur_event.event_type == Event.flow_start:
         cur_flow = cur_event.data[0]
-    	cur_flow.flowSendPackets()
+        cur_flow.flowSendPackets()
 
     elif cur_event.event_type == Event.pckt_rcv:
     	rcv_host = cur_event.data[0]
