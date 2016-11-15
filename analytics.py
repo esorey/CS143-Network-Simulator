@@ -1,5 +1,6 @@
 import constants
 import matplotlib.pyplot as plt
+import collections
 
 debug = False
 class Analytics:
@@ -60,7 +61,7 @@ class Analytics:
     # decides to put first packet in iink buffer to when host receives last
     # packet
     def log_flow_rate(self, flowID, numBytes, currTime, prevTime): 
-        rate = numBytes/(currTime - prevTime)
+        rate = numBytes/((currTime - prevTime) * constants.MB_TO_BYTES)
         if flowID in self.flow_rate:
             self.flow_rate[flowID].append((currTime, rate))
         else:
@@ -92,7 +93,7 @@ class Analytics:
     # time end is when the ack with the right packetID is sent
     # get the time for that ack in event queue
     def log_packet_RTD(self, packetID, timeStart, timeEnd):
-        self.flow_packet_RTD[packetID] = timeEnd - timeStart
+        self.flow_packet_RTD[packetID] = (timeEnd, timeEnd - timeStart)
 
 
     def log_host_send_rate():
@@ -130,3 +131,43 @@ class Analytics:
 
     def plotOutput(self):
         plt.figure(1)
+
+        colors = ['k', 'r', 'b', 'g', 'm', 'y']
+        color_ctr = 0
+        plt.subplot(611)        # link rate plot
+        for linkID in self.link_flow_rate:
+            time = [elt[0] for elt in self.link_flow_rate[linkID]]
+            l_flow_rate_MBPS = [elt[1] for elt in self.link_flow_rate[linkID]]
+            plt.plot(time, l_flow_rate_MBPS, color=colors[color_ctr])
+            color_ctr += 1
+
+
+        plt.subplot(612)        # buffer occupancy plot
+        color_ctr = 0
+        for linkID in self.link_buff_occupancy:
+            time = [elt[0] for elt in self.link_buff_occupancy[linkID]]
+            l_buff_occ_pkt = [elt[1] for elt in self.link_buff_occupancy[linkID]]
+            plt.plot(time, l_buff_occ_pkt, color=colors[color_ctr])
+            color_ctr += 1
+
+        plt.subplot(613)
+        color_ctr = 0
+        lost_packet_link_dict = {linkID: collections.Counter(self.link_packet_lost[linkID] for linkID in self.link_packet_lost)}
+        for linkID in lost_packet_link_dict:
+            time = lost_packet_link_dict[linkID].keys()
+            l_pkt_lost = lost_packet_link_dict.values()
+            plt.plot(time, l_pkt_lost, color=colors[color_ctr])
+            color_ctr += 1
+
+        plt.subplot(614)
+        color_ctr = 0
+        for flowID in self.flow_rate:
+            time = [elt[0] for elt in self.flow_rate[flowID]]
+            f_flow_rate = [elt[1] for elt in self.flow_rate[flowID]]
+            plt.plot(time, f_flow_rate, color=colors[color_ctr])
+            color_ctr += 1
+
+        plt.subplot(615)
+        clor_ctr = 0
+
+        plt.show()
