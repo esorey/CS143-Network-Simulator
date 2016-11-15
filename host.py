@@ -28,7 +28,7 @@ class Host:
             # make and enqueue an event for the event queue 
             # for acknowledging a received acknowledgment packet
             ackEvent = Event(Event.ack_rcv, constants.system_EQ.currentTime, 
-                [pckt.packet_id, pckt.owner_flow])
+                    [pckt.packet_id, pckt.owner_flow])
             constants.system_EQ.enqueue(ackEvent)
 
         if type(pckt) is DataPacket: # Data packet
@@ -39,9 +39,9 @@ class Host:
             constants.system_EQ.enqueue(sendAckPckt)
             # Add to analytics
             if flow.ID in self.pckt_counters:
-                self.pckt_counters[flow.ID] += 1
+                    self.pckt_counters[flow.ID] += 1
             else:
-                self.pckt_counters[flow.ID] = 1
+                    self.pckt_counters[flow.ID] = 1
             constants.system_analytics.log_flow_receive_rate(flow.ID, constants.system_EQ.currentTime, self.pckt_counters[flow.ID])
 
 
