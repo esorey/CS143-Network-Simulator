@@ -4,6 +4,7 @@ from event_queue import EventQueue
 from event import Event
 from analytics import Analytics
 
+debug = True
 class Host:
     """A Host: end points of the network"""
     def __init__(self, id, out_link):
@@ -18,6 +19,9 @@ class Host:
     '''Add the passed packets to the link queue of the 
     outlink it is connected to'''
     def sendPackets(self, packetlist):
+        if debug: 
+            print("Sending Packets: ")
+            print("\t" + str(packetlist))
         for pckt in packetlist:
             sendPckt = Event(Event.pckt_send, system_EQ.currentTime, [self.out_link, pckt])
             constants.system_EQ.enqueue(sendPckt)
