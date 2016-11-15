@@ -3,7 +3,6 @@ from packet import DataPacket
 from event_queue import EventQueue
 import constants
 import math
-debug = False
 class Flow:
 	"""Flow Class"""
 	def __init__(self, ID, source, destination, data_amt, start):
@@ -42,7 +41,7 @@ class Flow:
 		function sends whatever packets it can. '''
 	def flowSendPackets(self): 
 		packets_to_send = []
-		if debug: 
+		if constants.debug: 
 			print("Currently in Flow send Packets: ")
 			print("dropped Packets: %s, WindowSize: %s" % (self.droppedPackets, self.windowSize))
 
@@ -66,7 +65,7 @@ class Flow:
 				end_pckt_index = self.num_packets + 1 	# Indicate we have sent all packets
 			else:	# Otherwise
 				end_pckt_index = self.currPCK + temp
-			if debug: print("Generating data packets in range: %s to %s" %(self.currPCK, end_pckt_index))
+			if constants.debug: print("Generating data packets in range: %s to %s" %(self.currPCK, end_pckt_index))
 			getPcktsToSend = self.generateDataPackets(range(self.currPCK, end_pckt_index))
 			packets_to_send.extend(getPcktsToSend)
 
@@ -74,10 +73,10 @@ class Flow:
 			self.currPCK = end_pckt_index
 
 		# Enqueue event that will tell hosts to send packets
-		if debug: print("Event is getting enqueued...")
+		if constants.debug: print("Event is getting enqueued...")
 		event_to_send = Event(Event.flow_src_send_packets, constants.system_EQ.currentTime, [self.source, packets_to_send])
 		constants.system_EQ.enqueue(event_to_send)
-		if debug: 
+		if constants.debug: 
 			print("\tevent type: %s" % event_to_send.event_type)
 			print("\tevent time: %s" % event_to_send.time)
 			print("\tevent data: %s" % event_to_send.data)
@@ -110,7 +109,7 @@ class Flow:
 		packets. '''
 	def generateDataPackets(self, listPacketIDs):
 		packets_list = []
-		if debug: print("Generating Data Packets...")
+		if constants.debug: print("Generating Data Packets...")
 		for PID in listPacketIDs:
 			pckt = DataPacket(PID, self.source, self.dest, self.ID)
 			packets_list.append(pckt)
