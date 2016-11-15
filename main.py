@@ -5,6 +5,7 @@ from eventhandler import EventHandler
 from flow import Flow
 from inp_network import inp_network
 from event import Event
+from analytics import Analytics
 
 if __name__ == "__main__":
 	# Need absolute path
@@ -20,7 +21,9 @@ if __name__ == "__main__":
 	routers = {}
 
 	# Initialize event queue
-	constants.system_eq = EventQueue();
+	constants.system_EQ = EventQueue()
+        # Initialize analytics
+        constants.system_analytics = Analytics()
 	# Set up network
 	inp_network(inFile,links,flows,hosts,routers)
 	# Enqueue all the flows

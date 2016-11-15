@@ -14,12 +14,14 @@ print lnks
 print flws
 '''
 
-def inp_network(file, L=[], F=[], H={}, R={}):
+def inp_network(file, L={}, F={}, H={}, R={}):
     debug = True 
     # Open relevant file
     f = open(file, 'r')
     # Initialize section count (each section has a specific format)
     sec_count = 0
+    # Temporary host dictionary to keep track of the links attached to a host
+    temp_H = {}
     # Read each line in the file
     for line in f:
         # keep track of which section we're in
@@ -40,25 +42,34 @@ def inp_network(file, L=[], F=[], H={}, R={}):
             # Set up first link direction (a)
             if debug: print("creating a link %s from %s to %s" %(params[0]+'a', params[1],params[2]))
             temp_link = Link(params[0]+'a',float(params[3]),float(params[4]),params[1],params[2],float(params[5]))
-            L.append(temp_link)
+            if (params[0]+'a') in L:
+                print 'Error: link {} defined twice'.format(params[0])
+                return False
+            L[params[0]+'a'] = temp_link
             # Set up other link direction (b)
             if debug: print("creating a link %s from %s to %s" %(params[0]+'b', params[2], params[1]))
             temp_link = Link(params[0]+'b',float(params[3]),float(params[4]),params[2],params[1],float(params[5]))
-            L.append(temp_link)
+            if (params[0]+'b') in L:
+                print 'Error: link {} defined twice'.format(params[0])
+                return False
+            L[params[0]+'b'] = temp_link
             # Put hosts in array
             # Order by host number and then link number
             if params[1][0] == 'H':
-                if debug:
-                    print(H)
-                    # TODO: why 2*(int(params[1][1])-1)? 
-                    print(2*(int(params[1][1])-1))
-                H[2*(int(params[1][1])-1)]= Host(params[1], params[0]+'a')
+                if params[1] in H:
+                    print 'Error: host {} has two out links'.format(params[1])
+                    return False
+                else:
+                    H[params[1]] = Host(params[1], params[0]+'a')
             # Put routers in array
             # Order by router number
             elif params[1][0] == 'R':
                 pass
             if params[2][0] == 'H':
-                H[2*(int(params[2][1]-1)+1)] = Host(params[2],params[0]+'b')
+                if params[2] in H:
+                    print 'Error: host {} has two out links'.format(params[2])
+                else:
+                    H[params[2]] = Host(params[2], params[0] + 'b')
             elif params[2][0] == 'R':
                 pass
 
@@ -66,8 +77,8 @@ def inp_network(file, L=[], F=[], H={}, R={}):
         # Assume input file puts flows in order
         if sec_count == 1:
             if debug: print("TYPE: %s %s: %s" % (type(params[3]), type(params[4]), params[4]))
-            F.append(Flow(params[0],params[1],params[2],float(params[3]), float(params[4])))
+            if params[0] in F:
+                print 'Error: flow {} defined twice'.format(params[0])
+                return False
+            F[params[0]] = Flow(params[0],params[1],params[2],float(params[3]), float(params[4]))
     f.close()
-
-if __name__ == '__main__':
-    inp_network("inp2.txt")
