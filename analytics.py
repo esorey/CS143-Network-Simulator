@@ -136,7 +136,7 @@ class Analytics:
         fig.tight_layout()
         colors = ['k', 'r', 'b', 'g', 'm', 'y']
         color_ctr = 0
-        plt.subplot(411)        # link rate plot
+        plt.subplot(311)        # link rate plot
         for linkID in self.link_flow_rate:
             time = [elt[0] for elt in self.link_flow_rate[linkID]]
             l_flow_rate_MBPS = [elt[1] for elt in self.link_flow_rate[linkID]]
@@ -144,7 +144,7 @@ class Analytics:
             color_ctr += 1
 
 
-        plt.subplot(412)        # buffer occupancy plot
+        plt.subplot(312)        # buffer occupancy plot
         color_ctr = 0
         for linkID in self.link_buff_occupancy:
             time = [elt[0] for elt in self.link_buff_occupancy[linkID]]
@@ -152,21 +152,30 @@ class Analytics:
             plt.plot(time, l_buff_occ_pkt, color=colors[color_ctr])
             color_ctr += 1
 
-        plt.subplot(413)
+        '''plt.subplot(413)
         color_ctr = 0
         for linkID in self.link_packet_lost:
             freq_dict = collections.Counter(self.link_packet_lost[linkID])
             time = list(freq_dict.keys())
             l_pkt_lost = freq_dict.values()
             plt.plot(time, l_pkt_lost, color=colors[color_ctr])
-            color_ctr += 1
+            color_ctr += 1'''
 
-        plt.subplot(414)
+        plt.subplot(313)
+        color_ctr = 0
+        time_RTD_list = list(self.flow_packet_RTD.values())
+        time = [tup[0] for tup in time_RTD_list]
+        pkt_RTD = [tup[1] for tup in time_RTD_list]
+        plt.plot(time, pkt_RTD, color='k')
+
+        '''plt.subplot(414)
         color_ctr = 0
         for flowID in self.flow_rate:
             time = [elt[0] for elt in self.flow_rate[flowID]]
             f_flow_rate = [elt[1] for elt in self.flow_rate[flowID]]
             plt.plot(time, f_flow_rate, color=colors[color_ctr])
-            color_ctr += 1
+            color_ctr += 1'''
+
+        # ALSO FIX UNITS
 
         plt.show()
