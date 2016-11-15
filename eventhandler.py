@@ -1,11 +1,13 @@
 from event import Event
 from flow import Flow 
 from host import Host 
-import network_maps as nwm 
+import network_map as nwm 
 
 debug = True
 def EventHandler(cur_event):
     if cur_event.event_type == Event.flow_start:
+        print(nwm.flows)
+        print(cur_event.data[0])
         cur_flow = nwm.flows[cur_event.data[0]]    # Convert flow ID into flow
         cur_flow.flowSendPackets()
 
@@ -29,8 +31,9 @@ def EventHandler(cur_event):
         src_host.sendPackets(pkts_to_send)
 
     elif cur_event.event_type == Event.ack_rcv:
-        cur_flow = nwm.flows[cur_event.data[0]]
-        packetID = cur_event.data[1]
+        if debug: print("ACK data: %s" % cur_event.data)
+        cur_flow = nwm.flows[cur_event.data[1]]
+        packetID = cur_event.data[0]
 
         cur_flow.getACK(packetID)
 

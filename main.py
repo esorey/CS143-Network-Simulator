@@ -1,7 +1,7 @@
 import sys
 from event_queue import EventQueue
 import constants
-import network_maps as nwm
+import network_map as nwm
 from eventhandler import EventHandler
 from flow import Flow
 from inp_network import inp_network
@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     # Enqueue all the flows
     for flow_key, flow_obj in nwm.flows.items():
-        flow_event = Event(Event.flow_start, flow_obj.start, [flow_obj])
+        flow_event = Event(Event.flow_start, flow_obj.start, [flow_key])
         outFile.write(str(flow_event.event_type) + "\n")
         constants.system_EQ.enqueue(flow_event)
     # Continue to dequeue events until it is empty

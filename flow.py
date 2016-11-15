@@ -43,7 +43,7 @@ class Flow:
 		packets_to_send = []
 		if debug: 
 			print("Currently in Flow send Packets: ")
-			print("dropped Packets: %s, WindoSize: %s" % (self.droppedPackets, self.windowSize))
+			print("dropped Packets: %s, WindowSize: %s" % (self.droppedPackets, self.windowSize))
 
 		# Send ALL packets from dropped packets
 		if len(self.droppedPackets) >= self.windowSize:
@@ -86,15 +86,15 @@ class Flow:
 		function for the flow to update what packets have been received. The 
 		flow deals with packet loss.'''
 	def getACK(self, packetID):
-		if packetID  > currACK+1:  # if we dropped a packet
+		if packetID  > self.currACK+1:  # if we dropped a packet
 			# Add the packets we dropped to the droppedPackets list
-			self.droppedPackets.append(range(currACK+1, packetID))
-			currACK += 1
-		elif packetID < currACK: 	# If we receive an ack for packet that was dropped
+			self.droppedPackets.append(range(self.currACK+1, packetID))
+			self.currACK += 1
+		elif packetID < self.currACK: 	# If we receive an ack for packet that was dropped
 			# Remove this packet from list of dropped packets
 			self.droppedPackets.remove(packetID)
 		else:
-			currACK += 1 	# We received correct packet, increment currACK
+			self.currACK += 1 	# We received correct packet, increment currACK
 		
 
 	''' Generates data packets with the given IDs and returns a list of the 

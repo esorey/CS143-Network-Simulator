@@ -1,7 +1,7 @@
 from link import Link
 from flow import Flow
 from host import Host
-import network_maps as nwm
+import network_map as nwm
 '''
 # Test code
 fil = 'C:\\Users\\Sophia\\Documents\\GitHub\\CS143-Network-Simulator\\inp2.txt'
