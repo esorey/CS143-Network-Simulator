@@ -1,7 +1,7 @@
 from event import Event
 from flow import Flow 
 from host import Host 
-
+debug = True
 def EventHandler(cur_event):
     if cur_event.event_type == Event.flow_start:
         cur_flow = cur_event.data[0]
@@ -19,6 +19,10 @@ def EventHandler(cur_event):
     elif cur_event.event_type == Event.flow_src_send_packets:
         src_host = cur_event.data[0]
         pkts_to_send = cur_event.data[1]
+        if debug: 
+            print("Event Handler - Sending packets: ")
+            print("Source Host: %s" % src_host)
+            print("Packets to Send: %s" % pkts_to_send)
 
         src_host.sendPackets(pkts_to_send)
 

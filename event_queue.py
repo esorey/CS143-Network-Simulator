@@ -13,7 +13,7 @@ class EventQueue:
         '''
         if debug: 
             print("Event is getting dequeued")
-            print("event: %s" %self.eventList[0].event_type)
+            print("\tevent: %s" %self.eventList[0].event_type)
         ret_event = self.eventList[0]   # Get event to dequeue
         del self.eventList[0]           # Remove this event from queue
 
@@ -31,8 +31,9 @@ class EventQueue:
         ind_to_insert = self.getIndextoInsert(event.time)
         if debug: 
             print("Currently Enqueueing...")
-            print("Inserting at index: %s" % ind_to_insert)
-            print("Inserting time: %s " % event.time)
+            print("\tInserting at index: %s" % ind_to_insert)
+            print("\tInserting time: %s " % event.time)
+            print("\tInserting event type: %s" % event.event_type)
         self.eventList.insert(ind_to_insert, event)  # Insert/enqueue event
 
         return True

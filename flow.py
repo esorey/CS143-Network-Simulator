@@ -71,10 +71,11 @@ class Flow:
 		event_to_send = Event(Event.flow_src_send_packets, constants.system_EQ.currentTime, [self.source, packets_to_send])
 		constants.system_EQ.enqueue(event_to_send)
 		if debug: 
-			print("event type: %s" % event_to_send.event_type)
-			print("event time: %s" % event_to_send.time)
-			print("event data: %s" % event_to_send.data)
-			print("Len of eventlist: %s" % len(constants.system_EQ.eventList))
+			print("Currently in Flow send Packets: ")
+			print("\tevent type: %s" % event_to_send.event_type)
+			print("\tevent time: %s" % event_to_send.time)
+			print("\tevent data: %s" % event_to_send.data)
+			print("\tLen of eventlist: %s" % len(constants.system_EQ.eventList))
 
 		constants.system_analytics.log_flow_send_rate(self.ID, self.windowSize, constants.system_EQ.currentTime)
 
