@@ -68,8 +68,6 @@ class Link:
     def get_packet_travel_time(self, pkt):
         '''Compute the travel time for a packet. Will involve the current time and the transmission time.'''
         travel_time = self.delay + constants.SEC_TO_MS * (pkt.size / (constants.MB_TO_BYTES * self.rate))
-        link_rate = float(constants.DATA_PKT_SIZE / travel_time)
-        constants.system_analytics.log_link_rate(self.ID, constants.system_EQ.currentTime, link_rate)
         return travel_time
 
     def packet_entered_link(self, pkt):
@@ -86,6 +84,6 @@ class Link:
             entry_time = self.pkt_entry_times[pkt.packet_ID][0]
             del self.pkt_entry_times[pkt.packet_ID][0]
 
-        log_link_rate(self.ID, pkt.size, exit_time-entry_time, exit_time)
+        system_analytics.log_link_rate(self.ID, pkt.size, exit_time-entry_time, exit_time)
 
         
