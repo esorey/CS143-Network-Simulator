@@ -5,7 +5,7 @@ class Router:
     def __init__(self, id):
         super(Host, self).__init__()
         self.id = id
-        self.routingTable = []
+        self.routingTable = {}
 
     ''' Pseudo code below change later'''
     def initialize(self, graph, source):
@@ -47,4 +47,6 @@ class Router:
         '''
 
     def receivePackets(self, pckt):
-        pass
+        next_link = self.routingTable[pckt.destination_id]
+        send_pckt_event = Event(Event.pckt_send, constants.system_EQ.currentTime, [next_link, pckt])
+        constants.system_EQ.enqueue(send_pckt_event)

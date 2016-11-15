@@ -1,6 +1,7 @@
 from event import Event
 from flow import Flow 
-from host import Host 
+from host import Host
+from router import Router
 import network_map as nwm 
 
 debug = True
@@ -12,9 +13,14 @@ def EventHandler(cur_event):
         cur_flow.flowSendPackets()
 
     elif cur_event.event_type == Event.pckt_rcv:
-        rcv_host = nwm.hosts[cur_event.data[0]]                # Convert host ID to host
-        rcv_packet = cur_event.data[1]
-        rcv_host.receivePacket(rcv_packet)
+        if cur_event.data[0][0] == 'H':
+            rcv_host = nwm.hosts[cur_event.data[0]]                # Convert host ID to host
+            rcv_packet = cur_event.data[1]
+            rcv_host.receivePacket(rcv_packet)
+        elif cur_event.data[0][0] == 'R':
+            rcv_router = nwm.routers[cur_event.data[0]]
+            rcv_packet = cur_event.data[1]
+            rcv_router.receivePackets(rcv_packet)
 
     elif cur_event.event_type == Event.link_free:
         lnk = nwm.links[cur_event.data[0]]
