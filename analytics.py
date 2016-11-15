@@ -106,7 +106,7 @@ class Analytics:
     '''link rate should read the time that this delay was calculated for the 
     link and update the relevant link delay'''
     def log_link_rate(self, linkID, pktsize, duration, currTime):
-        rate = (pktsize/constants.MB_TO_BYTES)/duration
+        rate = pktsize/(duration/constants.SEC_TO_MS * constants.Mbits_TO_BYTES)
 
         if linkID in self.link_flow_rate:
             self.link_flow_rate[linkID].append((currTime, rate))
@@ -142,6 +142,10 @@ class Analytics:
             l_flow_rate_MBPS = [elt[1] for elt in self.link_flow_rate[linkID]]
             plt.plot(time, l_flow_rate_MBPS, color=colors[color_ctr])
             color_ctr += 1
+            break
+
+        plt.xlabel('time (ms)')
+        plt.ylabel('Link Rate (Mbps)')
 
 
         plt.subplot(312)        # buffer occupancy plot
@@ -151,6 +155,9 @@ class Analytics:
             l_buff_occ_pkt = [elt[1] for elt in self.link_buff_occupancy[linkID]]
             plt.plot(time, l_buff_occ_pkt, color=colors[color_ctr])
             color_ctr += 1
+
+        plt.xlabel('time (ms)')
+        plt.ylabel('Buffer Occupancy (MB)')
 
         '''plt.subplot(413)
         color_ctr = 0
@@ -167,6 +174,9 @@ class Analytics:
         time = [tup[0] for tup in time_RTD_list]
         pkt_RTD = [tup[1] for tup in time_RTD_list]
         plt.plot(time, pkt_RTD, color='k')
+
+        plt.xlabel('time (ms)')
+        plt.ylabel('Packet Delay (ms)')
 
         '''plt.subplot(414)
         color_ctr = 0

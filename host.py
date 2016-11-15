@@ -47,5 +47,3 @@ class Host:
             else:
                     self.pckt_counters[pckt.owner_flow] = 1
             constants.system_analytics.log_flow_receive_rate(pckt.owner_flow, constants.system_EQ.currentTime, self.pckt_counters[pckt.owner_flow])
-
-
