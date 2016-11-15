@@ -3,6 +3,7 @@ from flow import Flow
 from host import Host
 from router import Router
 import network_map as nwm 
+import constants
 
 def EventHandler(cur_event):
     if cur_event.event_type == Event.flow_start:

@@ -38,6 +38,7 @@ class Analytics:
         # not sure how to implement/compute these
         # file that we are writing to
         self.outFile = outFile
+        self.pckts = 0
 
     '''This logs that this link dropped a packet at the current time.'''
     def log_dropped_packet(self, linkID, currTime):
@@ -79,6 +80,7 @@ class Analytics:
     '''flow receive rate should read the time that the packet was received
     at the host and add it to the corresponding packet in the flow'''
     def log_flow_receive_rate(self, flowID, currTime, receive_order):
+        self.pckts += 1
         if flowID in self.flow_send_rate:
             # If the number of the received packet is greater than window size,
             #   there is an issue
@@ -126,6 +128,7 @@ class Analytics:
         self.outFile.write(str(self.link_packet_lost))
         self.outFile.write("link flow rate: ")
         self.outFile.write(str(self.link_flow_rate))
+        self.outFile.write("\n\n\n\n Total Number of Packets: %d" % self.pckts)
 
     def plotOutput(self):
         plt.figure(1)

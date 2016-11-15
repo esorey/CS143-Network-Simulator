@@ -14,4 +14,5 @@ global system_EQ 			# the global event queue struct
 global system_analytics		# the global analytics class
 
 
-global debug = False
+global debug 
+debug = False

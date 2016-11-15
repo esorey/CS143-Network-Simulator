@@ -1,4 +1,5 @@
 from event import Event
+import constants
 class EventQueue:
     def __init__(self):
         self.currentTime = 0       # Current time

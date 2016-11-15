@@ -3,6 +3,7 @@ from flow import Flow
 from host import Host
 from router import Router
 import network_map as nwm
+import constants
 '''
 # Test code
 fil = 'C:\\Users\\Sophia\\Documents\\GitHub\\CS143-Network-Simulator\\inp2.txt'
@@ -18,7 +19,7 @@ print flws
 # LFHR
 
 def inp_network(file):
-    test_case = 0
+    test_case = 1
     # Open relevant file
     f = open(file, 'r')
     # Initialize section count (each section has a specific format)
@@ -70,14 +71,11 @@ def inp_network(file):
             # Put routers in array
             # Order by router number
             elif params[1][0] == 'R':
-                
                 if test_case == 1:
                     if params[1]=='R1' or params[1]=='R2' or params[1]=='R4':
-                        if params[1] in nwm.routers:
-                            if params[0] == 'L1' or params[0] == 'L3' or params[0] == 'L5':
-                                nwm.routers[params[1]].routingTable['H2'] = params[0]+'a'
-                        else:
+                        if params[1] not in nwm.routers:
                             nwm.routers[params[1]] = Router(params[1])
+                        if params[0] == 'L1' or params[0] == 'L3' or params[0] == 'L5':
                             nwm.routers[params[1]].routingTable['H2'] = params[0]+'a'
                 else:
                     pass
@@ -90,12 +88,10 @@ def inp_network(file):
             elif params[2][0] == 'R':
                 if test_case == 1:
                     if params[2]=='R1' or params[2]=='R2' or params[2]=='R4':
-                        if params[2] in nwm.routers:
-                            if params[0] == 'L1' or params[0] == 'L3' or params[0] == 'L0':
-                                nwm.routers[params[1]].routingTable['H1'] = params[0]+'b'
-                        else:
-                            nwm.routers[params[1]] = Router(params[1])
-                            nwm.routers[params[1]].routingTable['H1'] = params[0]+'b'
+                        if params[2] not in nwm.routers:
+                            nwm.routers[params[2]] = Router(params[2])
+                        if params[0] == 'L1' or params[0] == 'L3' or params[0] == 'L0':
+                            nwm.routers[params[2]].routingTable['H1'] = params[0]+'b'
                 else:
                     pass
 
