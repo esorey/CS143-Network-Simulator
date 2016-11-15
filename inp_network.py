@@ -1,6 +1,7 @@
 from link import Link
 from flow import Flow
 from host import Host
+import network_maps as nwm
 '''
 # Test code
 fil = 'C:\\Users\\Sophia\\Documents\\GitHub\\CS143-Network-Simulator\\inp2.txt'
@@ -13,8 +14,9 @@ inp_network(fil,links,flows,hosts,routers)
 print lnks
 print flws
 '''
+# LFHR
 
-def inp_network(file, L={}, F={}, H={}, R={}):
+def inp_network(file):
     debug = True 
     test_case = 0
     # Open relevant file
@@ -46,25 +48,25 @@ def inp_network(file, L={}, F={}, H={}, R={}):
             # Set up first link direction (a)
             if debug: print("creating a link %s from %s to %s" %(params[0]+'a', params[1],params[2]))
             temp_link = Link(params[0]+'a',float(params[3]),float(params[4]),params[1],params[2],float(params[5]))
-            if (params[0]+'a') in L:
+            if (params[0]+'a') in nwm.links:
                 print('Error: link {} defined twice'.format(params[0]))
                 return False
-            L[params[0]+'a'] = temp_link
+            nwm.links[params[0]+'a'] = temp_link
             # Set up other link direction (b)
             if debug: print("creating a link %s from %s to %s" %(params[0]+'b', params[2], params[1]))
             temp_link = Link(params[0]+'b',float(params[3]),float(params[4]),params[2],params[1],float(params[5]))
-            if (params[0]+'b') in L:
+            if (params[0]+'b') in nwm.links:
                 print('Error: link {} defined twice'.format(params[0]))
                 return False
-            L[params[0]+'b'] = temp_link
+            nwm.links[params[0]+'b'] = temp_link
             # Put hosts in array
             # Order by host number and then link number
             if params[1][0] == 'H':
-                if params[1] in H:
+                if params[1] in nwm.hosts:
                     print('Error: host {} has two out links'.format(params[1]))
                     return False
                 else:
-                    H[params[1]] = Host(params[1], L[params[0]+'a'])
+                    nwm.hosts[params[1]] = Host(params[1], nwm.links[params[0]+'a'])
             # Put routers in array
             # Order by router number
             elif params[1][0] == 'R':
@@ -74,10 +76,10 @@ def inp_network(file, L={}, F={}, H={}, R={}):
                         if params[1]'''
 
             if params[2][0] == 'H':
-                if params[2] in H:
+                if params[2] in nwm.hosts:
                     print('Error: host {} has two out links'.format(params[2]))
                 else:
-                    H[params[2]] = Host(params[2], L[params[0] + 'b'])
+                    nwm.hosts[params[2]] = Host(params[2], nwm.link[params[0] + 'b'])
             elif params[2][0] == 'R':
                 pass
 
@@ -88,20 +90,20 @@ def inp_network(file, L={}, F={}, H={}, R={}):
             #   params = flowID   source   dest   dataAmt   flowStart
 
             if debug: print("TYPE: %s %s: %s" % (type(params[3]), type(params[4]), params[4]))
-            if params[0] in F:
+            if params[0] in nwm.flows:
                 print('Error: flow {} defined twice'.format(params[0]))
                 return False
-            F[params[0]] = Flow(params[0],H[params[1]],H[params[2]],float(params[3]), float(params[4]))
+            nwm.flows[params[0]] = Flow(params[0],nwm.hosts[params[1]],nwm.hosts[params[2]],float(params[3]), float(params[4]))
     f.close()
-    for lnk in L:
-        src = L[lnk].A
-        destn = L[lnk].B
+    for lnk in nwm.links:
+        src = nwm.links[lnk].A
+        destn = nwm.links[lnk].B
         if src[0] == 'H':
-            L[lnk].A = H[src]
+            nwm.links[lnk].A = nwm.hosts[src]
         elif src[0] == 'R':
-            L[lnk].A = R[src]
+            nwm.links[lnk].A = nwm.routers[src]
         if destn[0] == 'H':
-            L[lnk].B = H[destn]
+            nwm.links[lnk].B = nwm.hosts[destn]
         elif destn[0] == 'R':
-            L[lnk].B = R[destn]
+            nwm.links[lnk].B = nwm.routers[destn]
     return True

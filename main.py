@@ -1,6 +1,7 @@
 import sys
 from event_queue import EventQueue
 import constants
+import network_maps as nwm
 from eventhandler import EventHandler
 from flow import Flow
 from inp_network import inp_network
@@ -16,23 +17,19 @@ if __name__ == "__main__":
     outFile = open(sys.argv[2], 'w')
     validNetwork = False
     # Initialize arrays
-    links = {}
-    flows = {}
-    hosts = {}
-    routers = {}
 
     # Initialize event queue
     constants.system_EQ = EventQueue()
     # Initialize analytics
     constants.system_analytics = Analytics(outFile)
     # Set up network
-    validNetwork = inp_network(inFile,links,flows,hosts,routers)
+    validNetwork = inp_network(inFile)
     if not validNetwork:
         print("The network was not valid")
         exit(1)
 
     # Enqueue all the flows
-    for flow_key, flow_obj in flows.items():
+    for flow_key, flow_obj in nwm.flows.items():
         flow_event = Event(Event.flow_start, flow_obj.start, [flow_obj])
         outFile.write(str(flow_event.event_type) + "\n")
         constants.system_EQ.enqueue(flow_event)
