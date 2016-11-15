@@ -82,3 +82,4 @@ def inp_network(file, L={}, F={}, H={}, R={}):
                 return False
             F[params[0]] = Flow(params[0],H[params[1]],H[params[2]],float(params[3]), float(params[4]))
     f.close()
+    return True
