@@ -142,7 +142,7 @@ class Analytics:
             l_flow_rate_MBPS = [elt[1] for elt in self.link_flow_rate[linkID]]
             plt.plot(time, l_flow_rate_MBPS, color=colors[color_ctr])
             color_ctr += 1
-            break
+            
 
         plt.xlabel('time (ms)')
         plt.ylabel('Link Rate (Mbps)')
