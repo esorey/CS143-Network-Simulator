@@ -1,6 +1,7 @@
 import constants
 import queue
 import analytics
+from event import Event
 class Link:
     '''A uni-directional link. Data can only flow from A to B.'''
 
@@ -50,8 +51,8 @@ class Link:
         if self.buffer.empty() and self.in_use == False:
             self.buffer.put_nowait(pkt)        # Enqueue the packet
             self.buffer_space_used += pkt.size
-            self.handle_link_free()             # Handle the fact that the link is free by putting link in use
             self.packet_entered_link(pkt)       # Record the time the packet entered the link
+            self.handle_link_free()             # Handle the fact that the link is free by putting link in use
 
         # If buffer is full, log that we dropped a packet
         elif self.buffer_space_used + pkt.size > self.buffer_capacity:                
@@ -78,12 +79,12 @@ class Link:
 
     def packet_left_link(self, pkt, exit_time):
         if len(self.pkt_entry_times[pkt.packet_id]) == 1:
-            entry_time = self.pkt_entry_times[pkt.packet_id]
+            entry_time = self.pkt_entry_times[pkt.packet_id][0]
             del self.pkt_entry_times[pkt.packet_id]
         else:
             entry_time = self.pkt_entry_times[pkt.packet_id][0]
             del self.pkt_entry_times[pkt.packet_id][0]
 
-        system_analytics.log_link_rate(self.ID, pkt.size, exit_time-entry_time, exit_time)
+        constants.system_analytics.log_link_rate(self.ID, pkt.size, exit_time-entry_time, exit_time)
 
         

@@ -3,6 +3,7 @@ from packet import Packet
 from event_queue import EventQueue
 from event import Event
 from analytics import Analytics
+from packet import AckPacket, DataPacket
 
 debug = True
 class Host:
@@ -37,15 +38,15 @@ class Host:
 
         if type(pckt) is DataPacket: # Data packet
             # create an acknowledgment packet
-            ackpckt = AckPacket(pckt.packet_id, pckt.origin_id, pckt.destination_id, flow.ID)
+            ackpckt = AckPacket(pckt.packet_id, pckt.origin_id, pckt.destination_id, pckt.owner_flow)
             # push the new acknowledgment
             sendAckPckt = Event(Event.pckt_send, constants.system_EQ.currentTime, [self.out_link, ackpckt])
             constants.system_EQ.enqueue(sendAckPckt)
             # Add to analytics
-            if flow.ID in self.pckt_counters:
-                    self.pckt_counters[flow.ID] += 1
+            if pckt.owner_flow in self.pckt_counters:
+                    self.pckt_counters[pckt.owner_flow] += 1
             else:
-                    self.pckt_counters[flow.ID] = 1
-            constants.system_analytics.log_flow_receive_rate(flow.ID, constants.system_EQ.currentTime, self.pckt_counters[flow.ID])
+                    self.pckt_counters[pckt.owner_flow] = 1
+            constants.system_analytics.log_flow_receive_rate(pckt.owner_flow, constants.system_EQ.currentTime, self.pckt_counters[pckt.owner_flow])
 
 
