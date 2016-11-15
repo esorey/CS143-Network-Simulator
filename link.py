@@ -22,11 +22,11 @@ class Link:
         '''Respond to an event that frees the link. If there is something on the buffer, dequeue it and put a link free event
            on the EQ, along with a packet received event for the destination of this link. If the buffer is empty, mark the link
            as free.'''
-        if self.buffer.Empty():
+        if self.buffer.empty():
             self.in_use = False
 
         else:
-            pkt = self.buffer.get_no_wait() # Dequeue a packet
+            pkt = self.buffer.get_nowait() # Dequeue a packet
             self.buffer_space_used -= pkt.size
             travel_time = constants.system_EQ.currentTime + self.get_packet_travel_time(pkt)
             
@@ -48,7 +48,7 @@ class Link:
         
         # If the buffer is empty and the link is free, immediately send the packet over the link
         if self.buffer.empty() and self.in_use == False:
-            self.buffer.put_no_wait(pkt)        # Enqueue the packet
+            self.buffer.put_nowait(pkt)        # Enqueue the packet
             self.buffer_space_used += pkt.size
             self.handle_link_free()             # Handle the fact that the link is free by putting link in use
             self.packet_entered_link(pkt)       # Record the time the packet entered the link
@@ -71,18 +71,18 @@ class Link:
         return travel_time
 
     def packet_entered_link(self, pkt):
-        if pkt.packet_ID not in self.pkt_entry_times:
-            self.pkt_entry_times[pkt.packet_ID] = [constants.system_EQ.currentTime]
+        if pkt.packet_id not in self.pkt_entry_times:
+            self.pkt_entry_times[pkt.packet_id] = [constants.system_EQ.currentTime]
         else:
-            self.pkt_entry_times[pkt.packet_ID].append(constants.system_EQ.currentTime)
+            self.pkt_entry_times[pkt.packet_id].append(constants.system_EQ.currentTime)
 
     def packet_left_link(self, pkt, exit_time):
-        if len(self.pkt_entry_times[pkt.packet_ID]) == 1:
-            entry_time = self.pkt_entry_times[pkt.packet_ID]
-            del self.pkt_entry_times[pkt.packet_ID]
+        if len(self.pkt_entry_times[pkt.packet_id]) == 1:
+            entry_time = self.pkt_entry_times[pkt.packet_id]
+            del self.pkt_entry_times[pkt.packet_id]
         else:
-            entry_time = self.pkt_entry_times[pkt.packet_ID][0]
-            del self.pkt_entry_times[pkt.packet_ID][0]
+            entry_time = self.pkt_entry_times[pkt.packet_id][0]
+            del self.pkt_entry_times[pkt.packet_id][0]
 
         system_analytics.log_link_rate(self.ID, pkt.size, exit_time-entry_time, exit_time)
 

@@ -23,7 +23,7 @@ class Host:
             print("Sending Packets: ")
             print("\t" + str(packetlist))
         for pckt in packetlist:
-            sendPckt = Event(Event.pckt_send, system_EQ.currentTime, [self.out_link, pckt])
+            sendPckt = Event(Event.pckt_send, constants.system_EQ.currentTime, [self.out_link, pckt])
             constants.system_EQ.enqueue(sendPckt)
 
     '''Receive the packets from the inlink queue'''
