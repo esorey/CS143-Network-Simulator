@@ -1,11 +1,11 @@
 from link import Link
-from flow import Flow
-class Router:
+from flow import flow
+class router:
     """Router: end points of the network"""
     def __init__(self, id):
         super(Host, self).__init__()
         self.id = id
-        self.routingTable = {}
+        self.routingTable = []
 
     ''' Pseudo code below change later'''
     def initialize(self, graph, source):
