@@ -100,7 +100,7 @@ class Flow:
 
 
 
-                elif self.currACK - len(self.droppedPackets) + 1 % self.windowSize == 0: # We're finished with this window; send a new one
+                if self.currACK - len(self.droppedPackets) + 1 % self.windowSize == 0: # We're finished with this window; send a new one
                     self.flowSendPackets()
 
 		
