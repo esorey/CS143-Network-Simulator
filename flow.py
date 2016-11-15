@@ -3,7 +3,7 @@ from packet import DataPacket
 from event_queue import EventQueue
 import constants
 import math
-debug = True
+debug = False
 class Flow:
 	"""Flow Class"""
 	def __init__(self, ID, source, destination, data_amt, start):

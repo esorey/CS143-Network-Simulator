@@ -18,7 +18,7 @@ print flws
 # LFHR
 
 def inp_network(file):
-    debug = True 
+    debug = False 
     test_case = 0
     # Open relevant file
     f = open(file, 'r')

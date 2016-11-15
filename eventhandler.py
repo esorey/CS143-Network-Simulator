@@ -4,7 +4,7 @@ from host import Host
 from router import Router
 import network_map as nwm 
 
-debug = True
+debug = False
 def EventHandler(cur_event):
     if cur_event.event_type == Event.flow_start:
         print(nwm.flows)

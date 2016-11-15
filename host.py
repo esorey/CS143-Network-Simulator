@@ -5,7 +5,7 @@ from event import Event
 from analytics import Analytics
 from packet import AckPacket, DataPacket
 
-debug = True
+debug = False
 class Host:
     """A Host: end points of the network"""
     def __init__(self, id, out_link):

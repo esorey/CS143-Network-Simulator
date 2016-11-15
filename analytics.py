@@ -1,7 +1,7 @@
 import constants
 import matplotlib.pyplot as plt
 
-debug = True
+debug = False
 class Analytics:
 
     def __init__(self, outFile):

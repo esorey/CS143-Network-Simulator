@@ -1,5 +1,5 @@
 from event import Event
-debug = True
+debug = False
 class EventQueue:
     def __init__(self):
         self.currentTime = 0       # Current time
