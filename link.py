@@ -2,6 +2,7 @@ import constants
 import queue
 import analytics
 from event import Event
+import network_map as nwm
 class Link:
     '''A uni-directional link. Data can only flow from A to B.'''
 
@@ -52,7 +53,8 @@ class Link:
             self.buffer.put_nowait(pkt)        # Enqueue the packet
             self.buffer_space_used += pkt.size
             self.packet_entered_link(pkt)       # Record the time the packet entered the link
-            constants.system_analytics.log_buff_occupancy(self.ID, constants.system_EQ.currentTime, 0)
+            # Log buffer occupancy for the whole link
+            constants.system_analytics.log_buff_occupancy(self.ID, constants.system_EQ.currentTime, self.get_buffer_occupancy())
             self.handle_link_free()             # Handle the fact that the link is free by putting link in use
 
         # If buffer is full, log that we dropped a packet
@@ -63,8 +65,8 @@ class Link:
             self.buffer.put_nowait(pkt)         # Enqueue the packet into link buffer
             self.buffer_space_used += pkt.size
             self.packet_entered_link(pkt)       # Record the time the packet entered the link
-            # Log the buffer space used for this link.
-            constants.system_analytics.log_buff_occupancy(self.ID, constants.system_EQ.currentTime, self.buffer_space_used)
+            # Log buffer occupancy for the whole link
+            constants.system_analytics.log_buff_occupancy(self.ID, constants.system_EQ.currentTime, self.get_buffer_occupancy())
             
 
     def get_packet_travel_time(self, pkt):
@@ -89,3 +91,26 @@ class Link:
         constants.system_analytics.log_link_rate(self.ID, pkt.size, exit_time-entry_time, exit_time)
 
         
+    def get_buffer_occupancy(self):
+        '''
+        Get the number of bytes in the bidirectional link that this link is a part of. This checks
+        the number of bytes in the buffer of the link that runs opposite to this one.
+        '''
+        other_link_obj = self.get_opposite_link_obj()
+        return self.buffer_space_used + other_link_obj.buffer_space_used
+
+
+    def get_opposite_link_obj(self):
+        '''
+        Get the link object that runs opposite to this one.
+        '''
+        # Flip the link id
+        if self.ID[-1] == 'a':
+            other_link_id = self.ID[:-1] + 'b'
+        elif self.ID[-1] == 'b':
+            other_link_id  = self.ID[:-1] + 'a'
+        else:
+            raise ValueError('Malformed link id: %s' % self.ID)
+
+        return nwm.get_link_from_id(other_link_id)
+
