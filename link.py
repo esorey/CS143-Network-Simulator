@@ -54,19 +54,19 @@ class Link:
             self.buffer_space_used += pkt.size
             self.packet_entered_link(pkt)       # Record the time the packet entered the link
             # Log buffer occupancy for the whole link
-            constants.system_analytics.log_buff_occupancy(self.ID, constants.system_EQ.currentTime, self.get_buffer_occupancy())
+            constants.system_analytics.log_buff_occupancy(self.ID[0:-1], constants.system_EQ.currentTime, self.get_buffer_occupancy())
             self.handle_link_free()             # Handle the fact that the link is free by putting link in use
 
         # If buffer is full, log that we dropped a packet
         elif self.buffer_space_used + pkt.size > self.buffer_capacity:                
-            constants.system_analytics.log_dropped_packet(self.ID, constants.system_EQ.currentTime)
+            constants.system_analytics.log_dropped_packet(self.ID[0:-1], constants.system_EQ.currentTime)
 
         else:       # Otherwise either link is in use or buffer has some elements, so add pkt to buffer
             self.buffer.put_nowait(pkt)         # Enqueue the packet into link buffer
             self.buffer_space_used += pkt.size
             self.packet_entered_link(pkt)       # Record the time the packet entered the link
             # Log buffer occupancy for the whole link
-            constants.system_analytics.log_buff_occupancy(self.ID, constants.system_EQ.currentTime, self.get_buffer_occupancy())
+            constants.system_analytics.log_buff_occupancy(self.ID[0:-1], constants.system_EQ.currentTime, self.get_buffer_occupancy())
             
 
     def get_packet_travel_time(self, pkt):
@@ -88,7 +88,7 @@ class Link:
             entry_time = self.pkt_entry_times[pkt.packet_id][0]
             del self.pkt_entry_times[pkt.packet_id][0]
 
-        constants.system_analytics.log_link_rate(self.ID, pkt.size, exit_time-entry_time, exit_time)
+        constants.system_analytics.log_link_rate(self.ID[0:-1], pkt.size, exit_time-entry_time, exit_time)
 
         
     def get_buffer_occupancy(self):
