@@ -81,11 +81,11 @@ class Link:
             self.pkt_entry_times[pkt.packet_id].append(constants.system_EQ.currentTime)
 
     def packet_left_link(self, pkt, exit_time):
+        entry_time = self.pkt_entry_times[pkt.packet_id][0]
+        
         if len(self.pkt_entry_times[pkt.packet_id]) == 1:
-            entry_time = self.pkt_entry_times[pkt.packet_id][0]
             del self.pkt_entry_times[pkt.packet_id]
         else:
-            entry_time = self.pkt_entry_times[pkt.packet_id][0]
             del self.pkt_entry_times[pkt.packet_id][0]
 
         constants.system_analytics.log_link_rate(self.ID[0:-1], pkt.size, exit_time-entry_time, exit_time)
