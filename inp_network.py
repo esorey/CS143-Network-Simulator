@@ -73,6 +73,7 @@ def inp_network(file):
             # Put routers in array
             # Order by router number
             elif params[1][0] == 'R':
+                '''
                 if test_case == 1:
                     if params[1]=='R1' or params[1]=='R2' or params[1]=='R4':
                         if params[1] not in nwm.routers:
@@ -81,6 +82,12 @@ def inp_network(file):
                             nwm.routers[params[1]].routingTable['H2'] = params[0]+'a'
                 else:
                     pass
+                '''
+                if params[1] in nwm.routers:
+                    nwm.routers[params[1]].links.append(params[0]+'a')
+                else:
+                    nwm.routers[params[1]] = Router(params[1])
+                    nwm.routers[params[1]].links.append(params[0]+'a')
 
             if params[2][0] == 'H':
                 if params[2] in nwm.hosts:
@@ -88,6 +95,7 @@ def inp_network(file):
                 else:
                     nwm.hosts[params[2]] = Host(params[2], params[0] + 'b')
             elif params[2][0] == 'R':
+                '''
                 if test_case == 1:
                     if params[2]=='R1' or params[2]=='R2' or params[2]=='R4':
                         if params[2] not in nwm.routers:
@@ -96,6 +104,12 @@ def inp_network(file):
                             nwm.routers[params[2]].routingTable['H1'] = params[0]+'b'
                 else:
                     pass
+                '''
+                if params[2] in nwm.routers:
+                    nwm.routers[params[2]].links.append(params[0]+'b')
+                else:
+                    nwm.routers[params[2]] = Router(params[2])
+                    nwm.routers[params[2]].links.append(params[0]+'b')
 
         # Flow parameters
         # Assume input file puts flows in order

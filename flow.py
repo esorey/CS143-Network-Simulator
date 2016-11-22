@@ -28,6 +28,8 @@ class Flow:
 
         self.pkt_entry_times = {}
 
+        self.minRTT = 0
+
 
     def congestionControlAlg(pcktReceived, pcktSent): 
         # run congestion control alg
@@ -92,6 +94,11 @@ class Flow:
     def getACK(self, packetID):
 
         constants.system_analytics.log_packet_RTD(packetID, self.pkt_entry_times[packetID], constants.system_EQ.currentTime)
+        RTT = constants.system_EQ.currentTime - self.pkt_entry_times[packetID]
+        if self.minRTT = 0:
+        	minRTT = RTT
+        elif RTT < minRTT:
+        	minRTT = RTT
         del self.pkt_entry_times[packetID]
         
         if packetID  > self.currACK+1:  # if we dropped a packet
