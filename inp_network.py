@@ -3,6 +3,7 @@ from flow import Flow
 from host import Host
 from router import Router
 import network_map as nwm
+import constants
 '''
 # Test code
 fil = 'C:\\Users\\Sophia\\Documents\\GitHub\\CS143-Network-Simulator\\inp2.txt'
@@ -18,8 +19,7 @@ print flws
 # LFHR
 
 def inp_network(file):
-    debug = True 
-    test_case = 0
+    test_case = 1
     # Open relevant file
     f = open(file, 'r')
     # Initialize section count (each section has a specific format)
@@ -38,24 +38,26 @@ def inp_network(file):
         # Remove extra spaces
         while '' in params:
             params.remove('')
-        if debug: print(params[0] + " " + params[1])
+        if constants.debug: print(params[0] + " " + params[1])
         # Set list values based on the section we're in
         # Update link and host/router parameters
         # Return these instances in arrays: flows, links, hosts, routers
         if sec_count == 0:
             # Every line will be formatted like:
-            #   params = linkID   source   destination   linkRate   linkDelay   linkBuffer
+            #   params = linkID   source   destination   linkRate   linkDelay   linkBufferCap
 
             # Set up first link direction (a)
-            if debug: print("creating a link %s from %s to %s" %(params[0]+'a', params[1],params[2]))
-            temp_link = Link(params[0]+'a',float(params[3]),float(params[4]),params[1],params[2],float(params[5]))
+            if constants.debug: print("creating a link %s from %s to %s" %(params[0]+'a', params[1],params[2]))
+            # Have to halve the occupancy
+            temp_link = Link(params[0]+'a',float(params[3]),float(params[4]),params[1],params[2],float(params[5]) / 2)
             if (params[0]+'a') in nwm.links:
                 print('Error: link {} defined twice'.format(params[0]))
                 return False
             nwm.links[params[0]+'a'] = temp_link
             # Set up other link direction (b)
-            if debug: print("creating a link %s from %s to %s" %(params[0]+'b', params[2], params[1]))
-            temp_link = Link(params[0]+'b',float(params[3]),float(params[4]),params[2],params[1],float(params[5]))
+            if constants.debug: print("creating a link %s from %s to %s" %(params[0]+'b', params[2], params[1]))
+            # Have to halve the occupancy
+            temp_link = Link(params[0]+'b',float(params[3]),float(params[4]),params[2],params[1],float(params[5]) / 2)
             if (params[0]+'b') in nwm.links:
                 print('Error: link {} defined twice'.format(params[0]))
                 return False
@@ -71,14 +73,11 @@ def inp_network(file):
             # Put routers in array
             # Order by router number
             elif params[1][0] == 'R':
-                
                 if test_case == 1:
                     if params[1]=='R1' or params[1]=='R2' or params[1]=='R4':
-                        if params[1] in nwm.routers:
-                            if params[0] == 'L1' or params[0] == 'L3' or params[0] == 'L5':
-                                nwm.routers[params[1]].routingTable['H2'] = params[0]+'a'
-                        else:
+                        if params[1] not in nwm.routers:
                             nwm.routers[params[1]] = Router(params[1])
+                        if params[0] == 'L1' or params[0] == 'L3' or params[0] == 'L5':
                             nwm.routers[params[1]].routingTable['H2'] = params[0]+'a'
                 else:
                     pass
@@ -91,12 +90,10 @@ def inp_network(file):
             elif params[2][0] == 'R':
                 if test_case == 1:
                     if params[2]=='R1' or params[2]=='R2' or params[2]=='R4':
-                        if params[2] in nwm.routers:
-                            if params[0] == 'L1' or params[0] == 'L3' or params[0] == 'L0':
-                                nwm.routers[params[1]].routingTable['H1'] = params[0]+'b'
-                        else:
-                            nwm.routers[params[1]] = Router(params[1])
-                            nwm.routers[params[1]].routingTable['H1'] = params[0]+'b'
+                        if params[2] not in nwm.routers:
+                            nwm.routers[params[2]] = Router(params[2])
+                        if params[0] == 'L1' or params[0] == 'L3' or params[0] == 'L0':
+                            nwm.routers[params[2]].routingTable['H1'] = params[0]+'b'
                 else:
                     pass
 
@@ -106,7 +103,7 @@ def inp_network(file):
             # Every line will be formatted like:
             #   params = flowID   source   dest   dataAmt   flowStart
 
-            if debug: print("TYPE: %s %s: %s" % (type(params[3]), type(params[4]), params[4]))
+            if constants.debug: print("TYPE: %s %s: %s" % (type(params[3]), type(params[4]), params[4]))
             if params[0] in nwm.flows:
                 print('Error: flow {} defined twice'.format(params[0]))
                 return False

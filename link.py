@@ -2,6 +2,7 @@ import constants
 import queue
 import analytics
 from event import Event
+import network_map as nwm
 class Link:
     '''A uni-directional link. Data can only flow from A to B.'''
 
@@ -12,7 +13,7 @@ class Link:
         self.delay = delay
         self.A = A
         self.B = B
-        self.buffer_capacity = buffer_cap * constants.MB_TO_BYTES # buffer_cap is in MB
+        self.buffer_capacity = buffer_cap * constants.KB_TO_BYTES # buffer_cap is in MB
         self.buffer_space_used = 0
         self.buffer = queue.Queue()
 
@@ -52,23 +53,25 @@ class Link:
             self.buffer.put_nowait(pkt)        # Enqueue the packet
             self.buffer_space_used += pkt.size
             self.packet_entered_link(pkt)       # Record the time the packet entered the link
+            # Log buffer occupancy for the whole link
+            constants.system_analytics.log_buff_occupancy(self.ID[0:-1], constants.system_EQ.currentTime, self.get_buffer_occupancy())
             self.handle_link_free()             # Handle the fact that the link is free by putting link in use
 
         # If buffer is full, log that we dropped a packet
         elif self.buffer_space_used + pkt.size > self.buffer_capacity:                
-            constants.system_analytics.log_dropped_packet(self.ID, constants.system_EQ.currentTime)
+            constants.system_analytics.log_dropped_packet(self.ID[0:-1], constants.system_EQ.currentTime)
 
         else:       # Otherwise either link is in use or buffer has some elements, so add pkt to buffer
             self.buffer.put_nowait(pkt)         # Enqueue the packet into link buffer
             self.buffer_space_used += pkt.size
             self.packet_entered_link(pkt)       # Record the time the packet entered the link
-            # Log the buffer space used for this link.
-            constants.system_analytics.log_buff_occupancy(self.ID, constants.system_EQ.currentTime, self.buffer_space_used)
+            # Log buffer occupancy for the whole link
+            constants.system_analytics.log_buff_occupancy(self.ID[0:-1], constants.system_EQ.currentTime, self.get_buffer_occupancy())
             
 
     def get_packet_travel_time(self, pkt):
         '''Compute the travel time for a packet. Will involve the current time and the transmission time.'''
-        travel_time = self.delay + constants.SEC_TO_MS * (pkt.size / (constants.MB_TO_BYTES * self.rate))
+        travel_time = self.delay + constants.SEC_TO_MS * (pkt.size * constants.BYTES_TO_MBITS / self.rate)
         return travel_time
 
     def packet_entered_link(self, pkt):
@@ -78,13 +81,36 @@ class Link:
             self.pkt_entry_times[pkt.packet_id].append(constants.system_EQ.currentTime)
 
     def packet_left_link(self, pkt, exit_time):
+        entry_time = self.pkt_entry_times[pkt.packet_id][0]
+        
         if len(self.pkt_entry_times[pkt.packet_id]) == 1:
-            entry_time = self.pkt_entry_times[pkt.packet_id][0]
             del self.pkt_entry_times[pkt.packet_id]
         else:
-            entry_time = self.pkt_entry_times[pkt.packet_id][0]
             del self.pkt_entry_times[pkt.packet_id][0]
 
-        constants.system_analytics.log_link_rate(self.ID, pkt.size, exit_time-entry_time, exit_time)
+        constants.system_analytics.log_link_rate(self.ID[0:-1], pkt.size, exit_time-entry_time, exit_time)
 
         
+    def get_buffer_occupancy(self):
+        '''
+        Get the number of bytes in the bidirectional link that this link is a part of. This checks
+        the number of bytes in the buffer of the link that runs opposite to this one.
+        '''
+        other_link_obj = self.get_opposite_link_obj()
+        return self.buffer_space_used + other_link_obj.buffer_space_used
+
+
+    def get_opposite_link_obj(self):
+        '''
+        Get the link object that runs opposite to this one.
+        '''
+        # Flip the link id
+        if self.ID[-1] == 'a':
+            other_link_id = self.ID[:-1] + 'b'
+        elif self.ID[-1] == 'b':
+            other_link_id  = self.ID[:-1] + 'a'
+        else:
+            raise ValueError('Malformed link id: %s' % self.ID)
+
+        return nwm.get_link_from_id(other_link_id)
+
