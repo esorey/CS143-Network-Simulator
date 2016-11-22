@@ -8,6 +8,7 @@ class Router:
     def __init__(self, id):
         self.id = id
         self.routingTable = {}
+        self.links = []
 
     ''' Pseudo code below change later'''
     def initialize(self, graph, source):

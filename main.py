@@ -27,7 +27,8 @@ if __name__ == "__main__":
     if not validNetwork:
         print("The network was not valid")
         exit(1)
-
+    # Should run Bellman Ford first
+    
     # Enqueue all the flows
     for flow_key, flow_obj in nwm.flows.items():
         flow_event = Event(Event.flow_start, flow_obj.start, [flow_key])
