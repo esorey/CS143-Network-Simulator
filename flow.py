@@ -3,6 +3,8 @@ from packet import DataPacket
 from event_queue import EventQueue
 import constants
 import math
+import queue
+
 class Flow:
     """Flow Class"""
     def __init__(self, ID, source, destination, data_amt, start):
@@ -13,7 +15,7 @@ class Flow:
         self.data_amt = data_amt    # Size of data in MB
         self.start = start          # Time at which flow begins
         
-        self.windowSize = 25        # set in congestion control algorithm 
+        self.windowSize = 25        # set in congestion control algorithm, initialize to 1 for RENO and FAST
         self.currACK = -1            # the last acknowledged packet ID
         self.droppedPackets = []    # dropped packets (IDs)
 
@@ -29,6 +31,17 @@ class Flow:
         self.pkt_entry_times = {}
 
         self.minRTT = 0
+
+        # TCP Reno and Fast TCP stuff
+        self.unackPackets = []  
+        self.packetsToSend = queue.Queue()
+        self.expectedAckID = 0
+        self.dupAckCtr = 0
+
+        # TCP Reno Stuff Only 
+        # Slow start threshold (max buffer size converted to data packets)
+        self.sst = 64 * constants.KB_TO_BYTES / constants.DATA_PKT_SIZE
+
 
 
     def congestionControlAlg(pcktReceived, pcktSent): 
@@ -118,8 +131,6 @@ class Flow:
         if (self.currACK - len(self.droppedPackets) + 1) % self.windowSize == 0: # We're finished with this window; send a new one
             self.flowSendPackets()
 
-        
-
     ''' Generates data packets with the given IDs and returns a list of the 
         packets. '''
     def generateDataPackets(self, listPacketIDs):
@@ -132,6 +143,105 @@ class Flow:
                 self.pkt_entry_times[pckt.packet_id] = constants.system_EQ.currentTime
 
         return packets_list
+
+''' Functions for TCP Congestion Control ''' 
+
+    def flowStart(self):
+        # Initialize packetsToSend queue to contain all the packets 
+        for pkt_ID in range(self.num_packets):
+            self.packetsToSend.put_nowait(pkt_ID)
+
+        # Send initial packets (windowSize will likely be 1)
+        self.flowSendNPackets(self.windowSize)
+
+    # Sends N packets from teh packetsToSendQueue
+    def flowSendNPackets(self, N):
+        pkt_list = []       # list of packets to send
+
+        for i in range(N):
+            if self.packetsToSend.empty():
+                break
+
+            pktID = self.packetsToSend.get_nowait()     # Get Packet to send
+            pkt = DataPacket(pktID, self.source, self.dest, self.ID)    # Create data packet
+            pkt_list.append(pkt)                        # Add to list of packets to send to host
+            self.unackPackets.append(pktID)             # Add to list of packets in pipeline
+
+            # TODO: enqueue a timeout event for each packet with packetID and flowID
+            #   For FastTCP timeout length is the average RTT Time, we can use the same time for TCP Reno
+            #   for convenience
+
+
+        if constants.cngstn_ctrl == constants.FAST_TCP:
+            # TODO: enqueue an update FAST TCP W after certain time
+            #   If we're doing FAST TCP we need to update the window size at every time interval, 
+            #   enqueue the first update W event here
+
+        # Send a "flow source send packets" event to send pkt_list
+        event_to_send = Event(Event.flow_src_send_packets, constants.system_EQ.currentTime, [self.source, pkt_list])
+        constants.system_EQ.enqueue(event_to_send)
+
+        # Log that packets were sent
+        constants.system_analytics.log_flow_send_rate(self.ID, self.windowSize, constants.system_EQ.currentTime)
+
+# TODO: Analytics add in log window sizes for every time window size is updated
+
+    # This will be called by event handler in the case of a packet timeout
+    def handlePacketTimeout(self, packetID):
+        if packetID in self.unackPackets:               # If packet is unacknowledged
+            self.unackPackets.remove(packetID)          # Remove packet from unacknowledged packets
+            self.packetsToSend.put_nowait(packetID)     # Send packet again
+
+            self.windowSize = 1                         # Update window size
+
+            if constants.cngstn_ctrl == constants.TCP_RENO:     # Update slow start threshold if necessary
+                self.sst = max(float(self.windowSize)/2, 1)
+
+    def fastTCP_updateW(self):
+        # TODO
+        # Update self.windowSize based on Fast TCP 
+        # Enqueue an event to update Fast TCP W after certain time
+
+    def TCPReno_updateW(self):
+        if self.windowSize <= self.sst:     # Slow start phase
+            self.windowSize += 1            # Increase window size with each ack
+        else:                               # Congestion avoidance phase
+            self.windowSize = self.windowSize + 1.0/self.windowSize
+
+    def congestionGetAck(self, packetID):
+        if packetID == self.expectedAckID:          # Received correct packet
+            if constants.cngstn_ctrl == constants.TCP_RENO:
+                self.TCPReno_updateW()              # For TCP Reno, update W
+
+            self.unackPackets.remove(packetID)          # Remove packet from unacknowledged packets list
+            self.expectedAckID = self.unackPackets[0]   # update expected packet 
+            self.dupAckCtr = 0                      # No duplicate acks
+
+        else:                                       # Received the wrong packet
+            # NOTE: this works primarily for TCP Reno, not entirely sure how duplicate ACKS are processed
+            #   in Fast TCP, but maybe we can keep it the same?
+            self.dupAckCtr += 1                     # Consider this a duplicate ack
+            
+            if constants.cngstn_ctrl == constants.TCP_RENO:
+                self.TCPReno_updateW()              # Update W for TCP Reno
+
+            if self.dupAckCtr == 3:                 # If we've received 3 duplicate ACKS
+                self.unackPackets.remove(packetID)  # Remove this packet from unacknowledged packets
+                self.packetsToSend.put_nowait(packetID)     # Move it to packets to send
+                self.dupAckCtr = 0                  # Reset counter for duplicate ACKS
+
+                self.windowSize = max(float(self.windowSize)/2, 1)      # Update window size (works for both TCP Reno and Fast TCP)
+
+                if constants.cngstn_ctrl == constants.TCP_RENO:         
+                    self.sst = self.windowSize      # If TCP Reno, then update slow start threshold
+            else:
+                self.unackPackets.remove(packetID)  # If we haven't received 3 duplicate acks yet, consider the packet that we  
+                                                    #   actually received ack for as acknowledged
+
+        lengthPktsToSend = self.windowSize - len(self.unackPackets)     # Find number of packets to send
+        self.flowSendNPackets(lengthPktsToSend)     # Send this many packets
+
+
 
 
 
