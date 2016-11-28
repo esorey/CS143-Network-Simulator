@@ -91,9 +91,9 @@ class Flow:
     ''' When a host receives an acknowledgement packet it will call this 
         function for the flow to update what packets have been received. The 
         flow deals with packet loss.'''
-    def getACK(self, packetID):
+    def getACK(self, packetID, ackTime):
 
-        constants.system_analytics.log_packet_RTD(packetID, self.pkt_entry_times[packetID], constants.system_EQ.currentTime)
+        constants.system_analytics.log_packet_RTD(self.ID, self.pkt_entry_times[packetID], ackTime)
         RTT = constants.system_EQ.currentTime - self.pkt_entry_times[packetID]
         if self.minRTT == 0:
         	minRTT = RTT

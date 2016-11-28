@@ -93,8 +93,11 @@ class Analytics:
     # time start is queued in immediately
     # time end is when the ack with the right packetID is sent
     # get the time for that ack in event queue
-    def log_packet_RTD(self, packetID, timeStart, timeEnd):
-        self.flow_packet_RTD[packetID] = (timeEnd, timeEnd - timeStart)
+    def log_packet_RTD(self, flowID, timeStart, timeEnd):
+        if flowID in self.flow_packet_RTD:
+            self.flow_packet_RTD[flowID].append((timeEnd, timeEnd - timeStart))
+        else:
+            self.flow_packet_RTD[flowID] = [(timeEnd, timeEnd - timeStart)]
 
 
     def log_host_send_rate():
@@ -180,14 +183,33 @@ class Analytics:
             plt.plot(time, l_pkt_lost, color=colors[color_ctr])
             color_ctr += 1'''
 
-        plt.subplot(313)
         color_ctr = 0
+        plt.subplot(313)
+        '''
+        #old
         time_RTD_list = list(self.flow_packet_RTD.values())
         time = [tup[0] for tup in time_RTD_list]
         pkt_RTD = [tup[1] for tup in time_RTD_list]
         plt.plot(time, pkt_RTD, color='k')
         plt.xlabel('time (ms)')
         plt.ylabel('Packet Delay (ms)')
+        '''
+        #new
+        sorted_flowIDs = sorted(self.flow_packet_RTD.keys())
+        for flowID in sorted_flowIDs:
+            print("PACKET DELAY FLOW ID:")
+            print(flowID + " " + colors[color_ctr])
+            #if list(self.link_flow_rate.keys()).index(linkID) is not 1:
+            # Get time out of [time, delay] pairs
+            time = [elt[0] for elt in self.flow_packet_RTD[flowID]]
+            # Get delay out of [time, delay] pairs
+            pkt_delay_S = [elt[1] for elt in self.flow_packet_RTD[flowID]]
+            plt.plot(time, pkt_delay_S, color=colors[color_ctr], label=flowID)
+            color_ctr += 1
+
+        plt.legend(bbox_to_anchor=(1,1))
+        plt.xlabel('time (ms)')
+        plt.ylabel('Link Rate (Mbps)')
 
         '''plt.subplot(414)
         color_ctr = 0

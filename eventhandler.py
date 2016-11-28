@@ -40,8 +40,9 @@ def EventHandler(cur_event):
         if constants.debug: print("ACK data: %s" % cur_event.data)
         cur_flow = nwm.flows[cur_event.data[1]]
         packetID = cur_event.data[0]
+        ack_time = cur_event.data[2]
 
-        cur_flow.getACK(packetID)
+        cur_flow.getACK(packetID, ack_time)
 
     elif cur_event.event_type == Event.pckt_send:
         cur_link = nwm.links[cur_event.data[0]]
