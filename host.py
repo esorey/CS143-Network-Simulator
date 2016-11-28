@@ -32,12 +32,12 @@ class Host:
             # make and enqueue an event for the event queue 
             # for acknowledging a received acknowledgment packet
             ackEvent = Event(Event.ack_rcv, constants.system_EQ.currentTime, 
-                    [pckt.packet_id, pckt.owner_flow])
+                    [pckt.packet_id, pckt.owner_flow, pckt.ack_sent_time])
             constants.system_EQ.enqueue(ackEvent)
 
         if type(pckt) is DataPacket: # Data packet
             # create an acknowledgment packet
-            ackpckt = AckPacket(pckt.packet_id, pckt.origin_id, pckt.destination_id, pckt.owner_flow)
+            ackpckt = AckPacket(pckt.packet_id, pckt.origin_id, pckt.destination_id, pckt.owner_flow, constants.system_EQ.currentTime)
             # push the new acknowledgment
             sendAckPckt = Event(Event.pckt_send, constants.system_EQ.currentTime, [self.out_link, ackpckt])
             constants.system_EQ.enqueue(sendAckPckt)

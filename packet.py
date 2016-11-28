@@ -19,6 +19,7 @@ class DataPacket(Packet):
         self.owner_flow = pkt_flow
 
 class AckPacket(Packet):
-    def __init__(self, packet_id, origin_id, destination_id, pkt_flow):
+    def __init__(self, packet_id, origin_id, destination_id, pkt_flow, ack_time):
         super().__init__(packet_id, origin_id, destination_id, constants.ACK_PKT_SIZE)
         self.owner_flow = pkt_flow
+        self.ack_sent_time = ack_time
