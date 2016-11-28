@@ -95,7 +95,7 @@ class Flow:
 
         constants.system_analytics.log_packet_RTD(packetID, self.pkt_entry_times[packetID], constants.system_EQ.currentTime)
         RTT = constants.system_EQ.currentTime - self.pkt_entry_times[packetID]
-        if self.minRTT = 0:
+        if self.minRTT == 0:
         	minRTT = RTT
         elif RTT < minRTT:
         	minRTT = RTT
