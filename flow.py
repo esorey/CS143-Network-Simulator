@@ -31,6 +31,10 @@ class Flow:
         self.pkt_entry_times = {}
 
         self.minRTT = 0
+        self.numRTT = 0
+        self.sumRTT = 0
+        self.gamma = 0.5
+        self.alpha = 15
 
         # TCP Reno and Fast TCP stuff
         self.unackPackets = []  
@@ -107,11 +111,14 @@ class Flow:
     def getACK(self, packetID, ackTime):
 
         constants.system_analytics.log_packet_RTD(self.ID, self.pkt_entry_times[packetID], ackTime)
-        RTT = constants.system_EQ.currentTime - self.pkt_entry_times[packetID]
+        RTT = ackTime - self.pkt_entry_times[packetID]
         if self.minRTT == 0:
-        	minRTT = RTT
+        	self.minRTT = RTT
         elif RTT < minRTT:
-        	minRTT = RTT
+        	self.minRTT = RTT
+        # CHECK: is average only over current time period or over whole time
+        self.sumRTT += RTT
+        self.numRTT += 1
         del self.pkt_entry_times[packetID]
 
         if packetID == 0:
@@ -205,6 +212,10 @@ class Flow:
     def fastTCP_updateW(self):
         # TODO
         # Update self.windowSize based on Fast TCP 
+        avgRTT = float(self.sumRTT)/float(self.numRTT)
+        doubW = 2 * self.windowSize
+        eqW = (1-self.gamma) * float(self.windowSize) + self.gamma * float(self.minRTT/avgRTT * self.windowSize + self.alpha)
+        self.windowSize = min(doubW, eqW)
         # Enqueue an event to update Fast TCP W after certain time
 
     def TCPReno_updateW(self):
