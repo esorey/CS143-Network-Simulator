@@ -135,32 +135,37 @@ class Analytics:
         fig, axes = plt.subplots(nrows=4, ncols=1)
         fig.tight_layout()
         colors = ['k', 'r', 'b', 'g', 'm', 'y']
+
         color_ctr = 0
         plt.subplot(311)        # link rate plot
-        for linkID in self.link_flow_rate:
+        sorted_linkIDs = sorted(self.link_flow_rate.keys())
+        for linkID in sorted_linkIDs:
             print("LINK FLOW RATE LINK ID:")
             print(linkID + " " + colors[color_ctr])
             #if list(self.link_flow_rate.keys()).index(linkID) is not 1:
+            # Get time out of [time, rate] pairs
             time = [elt[0] for elt in self.link_flow_rate[linkID]]
+            # Get rate out of [time, rate] pairs
             l_flow_rate_MBPS = [elt[1] for elt in self.link_flow_rate[linkID]]
-            plt.plot(time, l_flow_rate_MBPS, color=colors[color_ctr])
+            plt.plot(time, l_flow_rate_MBPS, color=colors[color_ctr], label=linkID)
             color_ctr += 1
-            
 
+        plt.legend(bbox_to_anchor=(1.05,1))
         plt.xlabel('time (ms)')
         plt.ylabel('Link Rate (Mbps)')
 
-
-        plt.subplot(312)        # buffer occupancy plot
         color_ctr = 0
+        plt.subplot(312)        # buffer occupancy plot
+        sorted_linkIDs = sorted(self.link_buff_occupancy.keys())
         for linkID in self.link_buff_occupancy:
             print("LINK BUFF OCCUPANCY: ")
             print(linkID + " " + colors[color_ctr])
             time = [elt[0] for elt in self.link_buff_occupancy[linkID]]
             l_buff_occ_pkt = [elt[1] for elt in self.link_buff_occupancy[linkID]]
-            plt.plot(time, l_buff_occ_pkt, color=colors[color_ctr])
+            plt.plot(time, l_buff_occ_pkt, color=colors[color_ctr], label=linkID)
             color_ctr += 1
 
+        plt.legend(bbox_to_anchor=(1.05,1))
         plt.xlabel('time (ms)')
         plt.ylabel('Buffer Occupancy (KB)')
 
@@ -179,7 +184,6 @@ class Analytics:
         time = [tup[0] for tup in time_RTD_list]
         pkt_RTD = [tup[1] for tup in time_RTD_list]
         plt.plot(time, pkt_RTD, color='k')
-
         plt.xlabel('time (ms)')
         plt.ylabel('Packet Delay (ms)')
 
