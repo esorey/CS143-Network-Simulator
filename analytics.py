@@ -209,7 +209,7 @@ class Analytics:
 
         plt.legend(bbox_to_anchor=(1,1))
         plt.xlabel('time (ms)')
-        plt.ylabel('Link Rate (Mbps)')
+        plt.ylabel('Packet Delay (ms)')
 
         plt.subplot(414)
         color_ctr = 0
