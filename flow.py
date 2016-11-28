@@ -14,7 +14,7 @@ class Flow:
         self.start = start          # Time at which flow begins
         
         self.windowSize = 25        # set in congestion control algorithm 
-        self.currACK = 0            # the last acknowledged packet ID
+        self.currACK = -1            # the last acknowledged packet ID
         self.droppedPackets = []    # dropped packets (IDs)
 
         # Number of data packets the flow needs to send
@@ -100,6 +100,10 @@ class Flow:
         elif RTT < minRTT:
         	minRTT = RTT
         del self.pkt_entry_times[packetID]
+
+        if packetID == 0:
+        	print("First ack")
+        	print(constants.system_EQ.currentTime)
         
         if packetID  > self.currACK+1:  # if we dropped a packet
             # Add the packets we dropped to the droppedPackets list

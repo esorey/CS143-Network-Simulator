@@ -140,7 +140,7 @@ class Analytics:
         colors = ['k', 'r', 'b', 'g', 'm', 'y']
 
         color_ctr = 0
-        plt.subplot(311)        # link rate plot
+        plt.subplot(411)        # link rate plot
         sorted_linkIDs = sorted(self.link_flow_rate.keys())
         for linkID in sorted_linkIDs:
             print("LINK FLOW RATE LINK ID:")
@@ -158,7 +158,7 @@ class Analytics:
         plt.ylabel('Link Rate (Mbps)')
 
         color_ctr = 0
-        plt.subplot(312)        # buffer occupancy plot
+        plt.subplot(412)        # buffer occupancy plot
         sorted_linkIDs = sorted(self.link_buff_occupancy.keys())
         for linkID in sorted_linkIDs:
             print("LINK BUFF OCCUPANCY: ")
@@ -184,7 +184,7 @@ class Analytics:
             color_ctr += 1'''
 
         color_ctr = 0
-        plt.subplot(313)
+        plt.subplot(413)
         '''
         #old
         time_RTD_list = list(self.flow_packet_RTD.values())
@@ -211,13 +211,13 @@ class Analytics:
         plt.xlabel('time (ms)')
         plt.ylabel('Link Rate (Mbps)')
 
-        '''plt.subplot(414)
+        plt.subplot(414)
         color_ctr = 0
         for flowID in self.flow_rate:
             time = [elt[0] for elt in self.flow_rate[flowID]]
             f_flow_rate = [elt[1] for elt in self.flow_rate[flowID]]
             plt.plot(time, f_flow_rate, color=colors[color_ctr])
-            color_ctr += 1'''
+            color_ctr += 1
 
         # ALSO FIX UNITS
 

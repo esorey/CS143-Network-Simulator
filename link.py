@@ -10,7 +10,7 @@ class Link:
         self.ID = ID
         self.in_use = False
         self.rate = rate
-        self.delay = delay
+        self.delay = 0#delay
         self.A = A
         self.B = B
         self.buffer_capacity = buffer_cap * constants.KB_TO_BYTES # buffer_cap is in MB
@@ -88,7 +88,7 @@ class Link:
         else:
             del self.pkt_entry_times[pkt.packet_id][0]
 
-        constants.system_analytics.log_link_rate(self.ID[0:-1], pkt.size, exit_time-entry_time, exit_time)
+        constants.system_analytics.log_link_rate(self.ID, pkt.size, exit_time-entry_time, exit_time)
 
         
     def get_buffer_occupancy(self):
