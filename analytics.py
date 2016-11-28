@@ -150,14 +150,14 @@ class Analytics:
             plt.plot(time, l_flow_rate_MBPS, color=colors[color_ctr], label=linkID)
             color_ctr += 1
 
-        plt.legend(bbox_to_anchor=(1.05,1))
+        plt.legend(bbox_to_anchor=(1,1))
         plt.xlabel('time (ms)')
         plt.ylabel('Link Rate (Mbps)')
 
         color_ctr = 0
         plt.subplot(312)        # buffer occupancy plot
         sorted_linkIDs = sorted(self.link_buff_occupancy.keys())
-        for linkID in self.link_buff_occupancy:
+        for linkID in sorted_linkIDs:
             print("LINK BUFF OCCUPANCY: ")
             print(linkID + " " + colors[color_ctr])
             time = [elt[0] for elt in self.link_buff_occupancy[linkID]]
@@ -165,12 +165,14 @@ class Analytics:
             plt.plot(time, l_buff_occ_pkt, color=colors[color_ctr], label=linkID)
             color_ctr += 1
 
-        plt.legend(bbox_to_anchor=(1.05,1))
+        plt.legend(bbox_to_anchor=(1,1))
         plt.xlabel('time (ms)')
         plt.ylabel('Buffer Occupancy (KB)')
 
-        '''plt.subplot(413)
+        '''
         color_ctr = 0
+        plt.subplot(413)
+        sorted_linkIDs = sorted(self.link_packet_lost.keys())
         for linkID in self.link_packet_lost:
             freq_dict = collections.Counter(self.link_packet_lost[linkID])
             time = list(freq_dict.keys())
