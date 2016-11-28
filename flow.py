@@ -145,6 +145,11 @@ class Flow:
         return packets_list
 
 ''' Functions for TCP Congestion Control ''' 
+# GENERAL TODO: Analytics add in log window sizes for every time window size is updated
+# GENERAL TODO: Also, I don't think there's a terminating condition, so we should check if the unacknowledged
+#       packets and the packets to send queue is empty, then we should stop sending
+# TODO: Timeout events for packets
+# TODO: and obviously Fast TCP
 
     def flowStart(self):
         # Initialize packetsToSend queue to contain all the packets 
@@ -184,7 +189,7 @@ class Flow:
         # Log that packets were sent
         constants.system_analytics.log_flow_send_rate(self.ID, self.windowSize, constants.system_EQ.currentTime)
 
-# TODO: Analytics add in log window sizes for every time window size is updated
+
 
     # This will be called by event handler in the case of a packet timeout
     def handlePacketTimeout(self, packetID):
