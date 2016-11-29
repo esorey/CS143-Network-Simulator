@@ -8,10 +8,12 @@ class Packet:
         self.size = size
 
 class RoutingTablePacket(Packet):
-    def __init__(self, packet_id, origin_id, size):
+    def __init__(self, packet_id, origin_id, size, link_id, routing_table):
         # No destination because it needs to go to all neighbors of the origin node
         super().__init__(packet_id, origin_id, None, size)
         # TODO: this packet should contain routing table information
+        self.link_id = link_id
+        self.routing_table = routing_table
 
 class DataPacket(Packet):
     def __init__(self, packet_id, origin_id, destination_id, pkt_flow):
