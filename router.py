@@ -9,45 +9,43 @@ class Router:
         self.id = id
         self.routingTable = {}
         self.links = []
-
-    ''' Pseudo code below change later'''
-    def initialize(self, graph, source):
-        dest = {} # destination
-        pred = {} # predecessor
-        for node in graph:
-            dest[node] = float('Inf')
-            pred[node] = None
-        dest[node] = 0 # for the source we can reach
-        return dest, pred
         
     '''Bellman-Ford Algorithm: Update routing tables based
     on congestion information'''
-    def bellmanFord(self, graph, source):
-        # run bellman ford
-        '''
-        def relax(node, neighbour, graph, d, p):
-        # If the distance between the node and the neighbour is lower than the one I have now
-        if d[neighbour] > d[node] + graph[node][neighbour]:
-            # Record this lower distance
-            d[neighbour]  = d[node] + graph[node][neighbour]
-            p[neighbour] = node
+ # The main function that finds shortest distances from src to
+    # all other vertices using Bellman-Ford algorithm.  The function
+    # also detects negative weight cycle
+    def BellmanFord(self, src):
+ 
+        # Step 1: Initialize distances from src to all other vertices
+        # as INFINITE
+        for i in self.links:
+            self.routingTable[i] = float('Inf')
+        routingTable[src] = 0
+ 
+ 
+        # Step 2: Relax all edges |V| - 1 times. A simple shortest 
+        # path from src to any other vertex can have at-most |V| - 1 
+        # edges
+        for i in range(self.V - 1):
+            # Update dist value and parent index of the adjacent vertices of
+            # the picked vertex. Consider only those vertices which are still in
+            # queue
+            for u, v, w in self.graph:
+                if routingTable[u] != float("Inf") and dist[u] + w < dist[v]:
+                    routingTable[v] = routingTable[u] + w
+ 
+        # Step 3: check for negative-weight cycles.  The above step 
+        # guarantees shortest distances if graph doesn't contain 
+        # negative weight cycle.  If we get a shorter path, then there
+        # is a cycle.
+ 
+        for u, v, w in self.graph:
+            if routingTable[u] != float('Inf') and routingTable[u] + w < routingTable[v]:
+                print("!--Graph contains negative weight cycle--!")
+                return
+                     
 
-        def bellman_ford(graph, source):
-            d, p = initialize(graph, source)
-            for i in range(len(graph)-1): #Run this until is converges
-                for u in graph:
-                    for v in graph[u]: #For each neighbour of u
-                        relax(u, v, graph, d, p) #Lets relax it
-
-            # Step 3: check for negative-weight cycles
-            for u in graph:
-                for v in graph[u]:
-                    assert d[v] <= d[u] + graph[u][v]
-
-            return d, p
-
-        '''
-        pass
     def receivePackets(self, pckt):
         next_link = self.routingTable[pckt.destination_id]
         send_pckt_event = Event(Event.pckt_send, constants.system_EQ.currentTime, [next_link, pckt])
