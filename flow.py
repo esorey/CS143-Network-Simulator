@@ -188,6 +188,9 @@ class Flow:
             # TODO: enqueue an update FAST TCP W after certain time
             #   If we're doing FAST TCP we need to update the window size at every time interval, 
             #   enqueue the first update W event here
+            FAST_event = Event(Event.update_FAST, constants.system_EQ.currentTime, [self.ID])
+            constants.system_EQ.enqueue(FAST_event)
+
 
         # Send a "flow source send packets" event to send pkt_list
         event_to_send = Event(Event.flow_src_send_packets, constants.system_EQ.currentTime, [self.source, pkt_list])
@@ -205,6 +208,7 @@ class Flow:
             self.packetsToSend.put_nowait(packetID)     # Send packet again
 
             self.windowSize = 1                         # Update window size
+            constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
 
             if constants.cngstn_ctrl == constants.TCP_RENO:     # Update slow start threshold if necessary
                 self.sst = max(float(self.windowSize)/2, 1)
@@ -212,17 +216,28 @@ class Flow:
     def fastTCP_updateW(self):
         # TODO
         # Update self.windowSize based on Fast TCP 
-        avgRTT = float(self.sumRTT)/float(self.numRTT)
-        doubW = 2 * self.windowSize
-        eqW = (1-self.gamma) * float(self.windowSize) + self.gamma * float(self.minRTT/avgRTT * self.windowSize + self.alpha)
-        self.windowSize = min(doubW, eqW)
+        if self.windowSize <= self.sst:
+        	self.windowSize += 1
+        	constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
+        else:
+        	avgRTT = float(self.sumRTT)/float(self.numRTT)
+        	doubW = 2 * self.windowSize
+        	eqW = (1-self.gamma) * float(self.windowSize) + self.gamma * float(self.minRTT/avgRTT * self.windowSize + self.alpha)
+        	self.windowSize = min(doubW, eqW)
+        	constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
+
         # Enqueue an event to update Fast TCP W after certain time
+        FAST_event = Event(Event.update_FAST, constants.system_EQ.currentTime + 20, [self.ID])
+        constants.system_EQ.enqueue(FAST_event)
+
 
     def TCPReno_updateW(self):
         if self.windowSize <= self.sst:     # Slow start phase
             self.windowSize += 1            # Increase window size with each ack
+            constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
         else:                               # Congestion avoidance phase
             self.windowSize = self.windowSize + 1.0/self.windowSize
+            constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
 
     def congestionGetAck(self, packetID):
         if packetID == self.expectedAckID:          # Received correct packet
@@ -247,6 +262,7 @@ class Flow:
                 self.dupAckCtr = 0                  # Reset counter for duplicate ACKS
 
                 self.windowSize = max(float(self.windowSize)/2, 1)      # Update window size (works for both TCP Reno and Fast TCP)
+                constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
 
                 if constants.cngstn_ctrl == constants.TCP_RENO:         
                     self.sst = self.windowSize      # If TCP Reno, then update slow start threshold

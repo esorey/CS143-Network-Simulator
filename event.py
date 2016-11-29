@@ -5,6 +5,8 @@ class Event:
 	flow_src_send_packets = 4
 	ack_rcv = 5
 	pckt_send = 6
+	update_FAST = 7
+	update_RENO = 8
 
 	def __init__(self, ev_type, time, data):
 		'''
