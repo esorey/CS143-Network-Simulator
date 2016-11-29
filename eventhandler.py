@@ -50,6 +50,10 @@ def EventHandler(cur_event):
 
         cur_link.enqueue_packet(cur_pckt)
 
+    elif cur_event.event_type == Event.update_FAST:
+        cur_flow = nwm.flows[cur_event.data[0]]
+        cur_flow.fastTCP_updateW()
+
     ''' Dealing with events:
         pckt_rcv:
             needs: host/router, packet, time
