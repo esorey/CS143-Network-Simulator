@@ -14,7 +14,7 @@ class Link:
         self.A = A
         self.B = B
         self.buffer_capacity = buffer_cap * constants.KB_TO_BYTES # buffer_cap is in MB
-        self.buffer_space_used = 0
+        self.buffer_space_used = float(0)
         self.buffer = queue.Queue()
 
         self.pkt_entry_times = {}    # Key: packet ID, value: [entryTime]

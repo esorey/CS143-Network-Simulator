@@ -51,9 +51,9 @@ class Analytics:
     ''' Arrange dictionary by linkID followed by currTime'''
     def log_buff_occupancy(self, linkID, currTime, buffOccupancy):
         if linkID in self.link_buff_occupancy:
-            self.link_buff_occupancy[linkID].append((currTime, buffOccupancy/constants.KB_TO_BYTES))
+            self.link_buff_occupancy[linkID].append((currTime, buffOccupancy/constants.DATA_PKT_SIZE))
         else:
-            self.link_buff_occupancy[linkID] = [(currTime, buffOccupancy/constants.KB_TO_BYTES)]
+            self.link_buff_occupancy[linkID] = [(currTime, buffOccupancy/constants.DATA_PKT_SIZE)]
 
     ''' link flow rate calculation stores number of packets properly
     sent through flow in the span between current time to previous time'''
