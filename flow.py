@@ -146,8 +146,8 @@ class Flow:
 # TODO: Some small TODOs listed below
 
     def flowStartTCP(self):
+        self.windowSize = 1         # Initial window size for congestion control algorithms
         # Initialize packetsToSend queue to contain all the packets
-
         for pkt_ID in range(self.num_packets):
             self.packetsToSend.put_nowait(pkt_ID)
 

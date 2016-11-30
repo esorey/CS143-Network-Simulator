@@ -10,7 +10,11 @@ def EventHandler(cur_event):
         print(nwm.flows)
         print(cur_event.data[0])
         cur_flow = nwm.flows[cur_event.data[0]]    # Convert flow ID into flow
-        cur_flow.flowSendPackets()
+
+        if constants.cngstn_ctrl == constants.NO_CNGSTN_CTRL:
+            cur_flow.flowSendPackets()
+        else:
+            cur_flow.flowStartTCP()
 
     elif cur_event.event_type == Event.pckt_rcv:
         if cur_event.data[0][0] == 'H':
