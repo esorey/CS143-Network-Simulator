@@ -8,6 +8,7 @@ class Event:
     update_FAST = 7
     pckt_timeout = 8
     bellman_ford = 9
+    flow_done = 10
     def __init__(self, ev_type, time, data):
         '''
             event_type - enumerated type that indicates what sort of event 

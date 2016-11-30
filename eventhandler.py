@@ -64,6 +64,16 @@ def EventHandler(cur_event):
     elif cur_event.event_type == Event.bellman_ford: 
         BellmanFord.runBellmanFord()
 
+    elif cur_event.event_type == Event.flow_done:
+        done_cnt = 0
+        for flow in nwm.flows.keys():
+            if nwm.flows[flow].done == True:
+                done_cnt += 1
+        if done_cnt == len(nwm.flows):
+            constants.all_flows_done = True
+            print("Time all flows done")
+            print(cur_event.data[0])
+
     ''' Dealing with events:
         pckt_rcv:
             needs: host/router, packet, time

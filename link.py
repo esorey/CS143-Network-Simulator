@@ -3,6 +3,8 @@ import queue
 import analytics
 from event import Event
 import network_map as nwm
+from packet import Packet 
+from packet import DataPacket
 class Link:
     '''A uni-directional link. Data can only flow from A to B.'''
 
@@ -30,7 +32,7 @@ class Link:
         else:
             pkt = self.buffer.get_nowait() # Dequeue a packet
             self.buffer_space_used -= pkt.size
-            travel_time = constants.system_EQ.currentTime + self.get_packet_travel_time(pkt)
+            travel_time = float(constants.system_EQ.currentTime + self.get_packet_travel_time(pkt))
             
             self.packet_left_link(pkt, travel_time)     # Log that a packet left
 
@@ -72,6 +74,8 @@ class Link:
     def get_packet_travel_time(self, pkt):
         '''Compute the travel time for a packet. Will involve the current time and the transmission time.'''
         travel_time = self.delay + constants.SEC_TO_MS * (pkt.size * constants.BYTES_TO_MBITS / self.rate)
+        print("Travel Time:")
+        print(travel_time)
         return travel_time
 
     def packet_entered_link(self, pkt):
@@ -87,8 +91,8 @@ class Link:
             del self.pkt_entry_times[pkt.packet_id]
         else:
             del self.pkt_entry_times[pkt.packet_id][0]
-
-        constants.system_analytics.log_link_rate(self.ID, pkt.size, exit_time-entry_time, exit_time)
+        if type(pkt) is DataPacket:
+        	constants.system_analytics.log_link_rate(self.ID, pkt.size, float(exit_time-entry_time), exit_time)
 
         
     def get_buffer_occupancy(self):
@@ -97,6 +101,8 @@ class Link:
         the number of bytes in the buffer of the link that runs opposite to this one.
         '''
         other_link_obj = self.get_opposite_link_obj()
+        print(self.ID)
+        print((self.buffer_space_used + other_link_obj.buffer_space_used)/float(1024))
         return self.buffer_space_used + other_link_obj.buffer_space_used
 
 
