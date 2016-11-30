@@ -28,3 +28,6 @@ global cngstn_ctrl          # 0 - no congestion control
 
 global debug 
 debug = False
+
+global bellman_ford
+bellman_ford = True

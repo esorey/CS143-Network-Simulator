@@ -74,7 +74,8 @@ def inp_network(file):
             # Order by router number
             elif params[1][0] == 'R':
                 
-                if test_case == 1:
+                '''
+                if test_case == 1 and constants.bellman_ford == False:
                     if params[1]=='R1' or params[1]=='R2' or params[1]=='R4':
                         if params[1] not in nwm.routers:
                             nwm.routers[params[1]] = Router(params[1])
@@ -88,7 +89,6 @@ def inp_network(file):
                 else:
                     nwm.routers[params[1]] = Router(params[1])
                     nwm.routers[params[1]].links.append(params[0]+'a')
-                '''
 
             if params[2][0] == 'H':
                 if params[2] in nwm.hosts:
@@ -97,7 +97,8 @@ def inp_network(file):
                     nwm.hosts[params[2]] = Host(params[2], params[0] + 'b')
             elif params[2][0] == 'R':
                 
-                if test_case == 1:
+                '''
+                if test_case == 1 and constants.bellman_ford == False:
                     if params[2]=='R1' or params[2]=='R2' or params[2]=='R4':
                         if params[2] not in nwm.routers:
                             nwm.routers[params[2]] = Router(params[2])
@@ -112,7 +113,6 @@ def inp_network(file):
                 else:
                     nwm.routers[params[2]] = Router(params[2])
                     nwm.routers[params[2]].links.append(params[0]+'b')
-                '''
 
         # Flow parameters
         # Assume input file puts flows in order
@@ -126,4 +126,10 @@ def inp_network(file):
                 return False
             nwm.flows[params[0]] = Flow(params[0],params[1],params[2],float(params[3]), float(params[4]))
     f.close()
+
+
+    # Set up the router's routing tables
+    for router_id in nwm.routers:
+        router = nwm.get_router_from_id(router_id)
+        router.init_routing_table()
     return True

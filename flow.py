@@ -142,8 +142,8 @@ class Flow:
 
         return packets_list
 
-''' Functions for TCP Congestion Control ''' 
-# TODO: Some small TODOs listed below
+    ''' Functions for TCP Congestion Control ''' 
+    # TODO: Some small TODOs listed below
 
     def flowStartTCP(self):
         self.windowSize = 1         # Initial window size for congestion control algorithms
@@ -273,7 +273,7 @@ class Flow:
 
         if self.minRTT == 0:        # Save minimum RTT time
             self.minRTT = RTT
-        elif RTT < minRTT:
+        elif RTT < self.minRTT:
             self.minRTT = RTT
         # CHECK: is average only over current time period or over whole time
         self.sumRTT += RTT
