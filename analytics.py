@@ -137,7 +137,8 @@ class Analytics:
     def plotOutput(self):
         fig, axes = plt.subplots(nrows=4, ncols=1)
         fig.tight_layout()
-        colors = ['k', 'r', 'b', 'g', 'm', 'y']
+        colors = ['k', 'r', 'b', 'g', 'm', 'y', 'c', '0.5', '0.75', '#B62828',
+        '#0F644D', '#87C41C']
 
         color_ctr = 0
         plt.subplot(411)        # link rate plot

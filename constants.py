@@ -14,18 +14,19 @@ SEC_TO_MS = float(1000)             # Convert seconds to milliseconds
 
 DATA_PKT_SIZE = float(1024)     # Bytes per data packet
 ACK_PKT_SIZE = float(64)            # Bytes per acknowledgement packet
+RTABLE_PKT_SIZE = float(64)	# Bytes per routing table packet
 
 LINK_BUFFER_UNIDIR_CAPACITY = float(50) # The capacity for a link buffer in one direction. Pick a better number plz.
 
 CONSECUTIVE_PKT_DELAY = 0.5     # Send new packets every 0.5 ms when sending consecutive packets
 TIMEOUT_TIME = 10               # Default packet timeout time, otherwise use avg RTT 
 
+global Bellman_not_done
 global system_EQ            # the global event queue struct
 global system_analytics     # the global analytics class
 global cngstn_ctrl          # 0 - no congestion control
                             # 1 - TCP Reno
                             # 2 - Fast TCP
-
 global debug 
 debug = False
 
