@@ -142,10 +142,9 @@ class Flow:
 
         return packets_list
 
-    ''' Functions for TCP Congestion Control ''' 
-    # TODO: Some small TODOs listed below
-
     def flowStartTCP(self):
+        ''' Functions for TCP Congestion Control ''' 
+        # TODO: Some small TODOs listed below
         self.windowSize = 1         # Initial window size for congestion control algorithms
         # Initialize packetsToSend queue to contain all the packets
         for pkt_ID in range(self.num_packets):
@@ -207,9 +206,10 @@ class Flow:
     def fastTCP_updateW(self):
         # TODO: remove slow start threshold and confirm if average RTT or last RTT
         #       also fix potential divide by 0
-        # Update self.windowSize based on Fast TCP
-        if self.numRTT == 0:
-        	self.windowSize = 1
+        # Update self.windowSize based on Fast TCP 
+        if self.windowSize <= self.sst:
+        	self.windowSize += 1
+        	constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
         else:
         	avgRTT = float(self.sumRTT)/float(self.numRTT)
         	doubW = 2 * self.windowSize

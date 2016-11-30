@@ -8,6 +8,7 @@ from inp_network import inp_network
 from event import Event
 from analytics import Analytics
 import BellmanFord
+
 if __name__ == "__main__":
     # Need absolute path
     # Input file (system parameters)
@@ -45,6 +46,10 @@ if __name__ == "__main__":
         outFile.write(str(flow_event.event_type) + "\n")
         constants.system_EQ.enqueue(flow_event)
 
+    bellman_event = Event(Event.bellman_ford, constants.BELLMAN_PERIOD, None)
+    constants.system_EQ.enqueue(bellman_event)
+    bellman_event = Event(Event.bellman_ford, constants.BELLMAN_PERIOD*2, None)
+    constants.system_EQ.enqueue(bellman_event)
     # Continue to dequeue events until it is empty
     while(not constants.system_EQ.isempty()):
         curr_event = constants.system_EQ.dequeue()
