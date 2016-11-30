@@ -2,6 +2,8 @@ from link import Link
 from flow import Flow
 from event import Event
 from event_queue import EventQueue
+import network_map as nwm
+
 import constants
 class Router:
     """Router: end points of the network"""
@@ -15,25 +17,26 @@ class Router:
  # The main function that finds shortest distances from src to
     # all other vertices using Bellman-Ford algorithm.  The function
     # also detects negative weight cycle
-    def BellmanFord(self, src):
- 
-        # Step 1: Initialize distances from src to all other vertices
+    def BellmanFord(self):
+        src = self.id
+        bufTable = {}
+        # Step 1: Initialize buffer occupancy from src to all other vertices
         # as INFINITE
         for i in self.links:
-            self.routingTable[i] = float('Inf')
-        routingTable[src] = 0
+            self.bufTable[i] = float('Inf')
+        bufTable[src] = 0
  
  
         # Step 2: Relax all edges |V| - 1 times. A simple shortest 
         # path from src to any other vertex can have at-most |V| - 1 
         # edges
-        for i in range(self.V - 1):
+        for i in range(self.routingTable - 1):
             # Update dist value and parent index of the adjacent vertices of
             # the picked vertex. Consider only those vertices which are still in
             # queue
             for u, v, w in self.graph:
-                if routingTable[u] != float("Inf") and dist[u] + w < dist[v]:
-                    routingTable[v] = routingTable[u] + w
+                if bufTable[u] != float("Inf") and dist[u] + w < dist[v]:
+                    bufTable[v] = bufTable[u] + w
  
         # Step 3: check for negative-weight cycles.  The above step 
         # guarantees shortest distances if graph doesn't contain 
@@ -41,7 +44,7 @@ class Router:
         # is a cycle.
  
         for u, v, w in self.graph:
-            if routingTable[u] != float('Inf') and routingTable[u] + w < routingTable[v]:
+            if bufTable[u] != float('Inf') and bufTable[u] + w < bufTable[v]:
                 print("!--Graph contains negative weight cycle--!")
                 return
                      
