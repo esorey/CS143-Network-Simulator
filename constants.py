@@ -18,7 +18,7 @@ ACK_PKT_SIZE = float(64)            # Bytes per acknowledgement packet
 LINK_BUFFER_UNIDIR_CAPACITY = float(50) # The capacity for a link buffer in one direction. Pick a better number plz.
 
 CONSECUTIVE_PKT_DELAY = 0.5     # Send new packets every 0.5 ms when sending consecutive packets
-TIMEOUT_TIME = 10               # Packet times out after 10 ms
+TIMEOUT_TIME = 10               # Default packet timeout time, otherwise use avg RTT 
 
 global system_EQ            # the global event queue struct
 global system_analytics     # the global analytics class
