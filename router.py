@@ -9,8 +9,34 @@ class Router:
     """Router: end points of the network"""
     def __init__(self, id):
         self.id = id
-        self.routingTable = {}
-        self.links = []
+        self.routing_table = init_routing_table()
+        self.links = [] # All links are outgoing from this router
+
+
+    def init_routing_table(self):
+        '''Initialize the routing table.'''
+        # Get dict of hosts
+        routing_table = {}
+        hosts_dict = nwm.hosts
+
+        for host_id in hosts_dict.keys():
+            host_obj = nwm.get_host_from_id(host_id)
+            host_link_id = host_obj.out_link
+            host_link_obj = nwm.get_link_from_id(host_link_id)
+            link_dest = host_link_obj.B
+            
+            # If the link connects to this router, add the host and weights to the routing table
+            if link_dest is self.id:
+                routing_table[host_id] = [host_link_id, host_link_obj.get_buffer_occupancy()]
+
+
+            # If not, mark the host as link unknown, distance infinity
+            else:
+                routing_table[host_id] = [None, float("Inf")]
+
+        return routing_table
+
+
         
     '''Bellman-Ford Algorithm: Update routing tables based
     on congestion information'''
