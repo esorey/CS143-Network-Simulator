@@ -54,6 +54,11 @@ def EventHandler(cur_event):
         cur_flow = nwm.flows[cur_event.data[0]]
         cur_flow.fastTCP_updateW()
 
+    elif cur_event.event_type == Event.pckt_timeout:
+        cur_pckt = cur_event.data[0]
+        cur_flow = nwm.flows[cur_pckt.owner_flow]
+        cur_flow.handlePacketTimeout(cur_pckt.packet_id)
+
     ''' Dealing with events:
         pckt_rcv:
             needs: host/router, packet, time
@@ -80,4 +85,6 @@ def EventHandler(cur_event):
 
         pckt_send:
             needs: link, packet
-                call link.enqueue_packet(packet)'''
+                call link.enqueue_packet(packet)
+
+        '''
