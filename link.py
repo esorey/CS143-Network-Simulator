@@ -58,7 +58,7 @@ class Link:
             self.handle_link_free()             # Handle the fact that the link is free by putting link in use
 
         # If buffer is full, log that we dropped a packet
-        elif self.buffer_space_used + pkt.size > self.buffer_capacity:                
+        elif self.get_buffer_occupancy() + pkt.size > self.buffer_capacity:                
             constants.system_analytics.log_dropped_packet(self.ID[0:-1], constants.system_EQ.currentTime)
 
         else:       # Otherwise either link is in use or buffer has some elements, so add pkt to buffer
