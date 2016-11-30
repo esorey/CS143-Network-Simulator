@@ -14,7 +14,7 @@ class Link:
         self.A = A
         self.B = B
         self.buffer_capacity = buffer_cap * constants.KB_TO_BYTES # buffer_cap is in MB
-        self.buffer_space_used = 0
+        self.buffer_space_used = float(0)
         self.buffer = queue.Queue()
 
         self.pkt_entry_times = {}    # Key: packet ID, value: [entryTime]
@@ -58,7 +58,7 @@ class Link:
             self.handle_link_free()             # Handle the fact that the link is free by putting link in use
 
         # If buffer is full, log that we dropped a packet
-        elif self.buffer_space_used + pkt.size > self.buffer_capacity:                
+        elif self.get_buffer_occupancy() + pkt.size > self.buffer_capacity:                
             constants.system_analytics.log_dropped_packet(self.ID[0:-1], constants.system_EQ.currentTime)
 
         else:       # Otherwise either link is in use or buffer has some elements, so add pkt to buffer

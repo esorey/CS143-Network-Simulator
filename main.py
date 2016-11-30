@@ -7,6 +7,7 @@ from flow import Flow
 from inp_network import inp_network
 from event import Event
 from analytics import Analytics
+import BellmanFord
 
 if __name__ == "__main__":
     # Need absolute path
@@ -28,12 +29,27 @@ if __name__ == "__main__":
         print("The network was not valid")
         exit(1)
     # Should run Bellman Ford first
-    
+    BellmanFord.runBellmanFord()
+    # Continue to dequeue events until it is empty
+    while(not constants.system_EQ.isempty()):
+        curr_event = constants.system_EQ.dequeue()
+        EventHandler(curr_event)
+
+    for r in nwm.routers.keys():
+        router = nwm.get_router_from_id(r)
+        print("--" + r + "--")
+        print(str(router.routingTable))
+
     # Enqueue all the flows
     for flow_key, flow_obj in nwm.flows.items():
         flow_event = Event(Event.flow_start, flow_obj.start, [flow_key])
         outFile.write(str(flow_event.event_type) + "\n")
         constants.system_EQ.enqueue(flow_event)
+
+    bellman_event = Event(Event.bellman_ford, constants.BELLMAN_PERIOD, None)
+    constants.system_EQ.enqueue(bellman_event)
+    bellman_event = Event(Event.bellman_ford, constants.BELLMAN_PERIOD*2, None)
+    constants.system_EQ.enqueue(bellman_event)
     # Continue to dequeue events until it is empty
     while(not constants.system_EQ.isempty()):
         curr_event = constants.system_EQ.dequeue()

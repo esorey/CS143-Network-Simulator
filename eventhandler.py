@@ -4,12 +4,14 @@ from host import Host
 from router import Router
 import network_map as nwm 
 import constants
+import BellmanFord
 
 def EventHandler(cur_event):
     if cur_event.event_type == Event.flow_start:
         print(nwm.flows)
         print(cur_event.data[0])
         cur_flow = nwm.flows[cur_event.data[0]]    # Convert flow ID into flow
+
         cur_flow.flowSendPackets()
 
     elif cur_event.event_type == Event.pckt_rcv:
@@ -54,6 +56,14 @@ def EventHandler(cur_event):
         cur_flow = nwm.flows[cur_event.data[0]]
         cur_flow.fastTCP_updateW()
 
+    elif cur_event.event_type == Event.pckt_timeout:
+        cur_pckt = cur_event.data[0]
+        cur_flow = nwm.flows[cur_pckt.owner_flow]
+        cur_flow.handlePacketTimeout(cur_pckt.packet_id)
+
+    elif cur_event.event_type == Event.bellman_ford: 
+        BellmanFord.runBellmanFord()
+
     ''' Dealing with events:
         pckt_rcv:
             needs: host/router, packet, time
@@ -80,4 +90,6 @@ def EventHandler(cur_event):
 
         pckt_send:
             needs: link, packet
-                call link.enqueue_packet(packet)'''
+                call link.enqueue_packet(packet)
+
+        '''

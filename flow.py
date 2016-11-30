@@ -110,16 +110,7 @@ class Flow:
         flow deals with packet loss.'''
     def getACK(self, packetID, ackTime):
 
-        constants.system_analytics.log_packet_RTD(self.ID, self.pkt_entry_times[packetID], ackTime)
-        RTT = ackTime - self.pkt_entry_times[packetID]
-        if self.minRTT == 0:
-        	self.minRTT = RTT
-        elif RTT < minRTT:
-        	self.minRTT = RTT
-        # CHECK: is average only over current time period or over whole time
-        self.sumRTT += RTT
-        self.numRTT += 1
-        del self.pkt_entry_times[packetID]
+        self.updateRTTandLogRTD(packetID, ackTime)
 
         if packetID == 0:
         	print("First ack")
@@ -151,15 +142,11 @@ class Flow:
 
         return packets_list
 
-''' Functions for TCP Congestion Control ''' 
-# GENERAL TODO: Analytics add in log window sizes for every time window size is updated
-# GENERAL TODO: Also, I don't think there's a terminating condition, so we should check if the unacknowledged
-#       packets and the packets to send queue is empty, then we should stop sending
-# TODO: Timeout events for packets
-# TODO: and obviously Fast TCP
-
-    def flowStart(self):
-        # Initialize packetsToSend queue to contain all the packets 
+    def flowStartTCP(self):
+        ''' Functions for TCP Congestion Control ''' 
+        # TODO: Some small TODOs listed below
+        self.windowSize = 1         # Initial window size for congestion control algorithms
+        # Initialize packetsToSend queue to contain all the packets
         for pkt_ID in range(self.num_packets):
             self.packetsToSend.put_nowait(pkt_ID)
 
@@ -179,16 +166,19 @@ class Flow:
             pkt_list.append(pkt)                        # Add to list of packets to send to host
             self.unackPackets.append(pktID)             # Add to list of packets in pipeline
 
-            # TODO: enqueue a timeout event for each packet with packetID and flowID
-            #   For FastTCP timeout length is the average RTT Time, we can use the same time for TCP Reno
-            #   for convenience
+            # Calculate the time at which to timeout
+            if self.sumRTT == 0:
+                timeout_time = constants.system_EQ.currentTime + constants.TIMEOUT_TIME
+            else:
+                timeout_time = constants.system_EQ.currentTime + 1.5 * float(self.sumRTT)/self.minRTT
 
+            # Create and enqueue timeout event
+            timeout_ev = Event(Event.pckt_timeout, timeout_time, [pkt])
+            constants.system_EQ.enqueue(timeout_ev)
 
         if constants.cngstn_ctrl == constants.FAST_TCP:
-            # TODO: enqueue an update FAST TCP W after certain time
-            #   If we're doing FAST TCP we need to update the window size at every time interval, 
-            #   enqueue the first update W event here
-            FAST_event = Event(Event.update_FAST, constants.system_EQ.currentTime, [self.ID])
+            # Enqueue an update FAST TCP W after certain time
+            FAST_event = Event(Event.update_FAST, constants.system_EQ.currentTime + 20, [self.ID])
             constants.system_EQ.enqueue(FAST_event)
 
 
@@ -214,7 +204,8 @@ class Flow:
                 self.sst = max(float(self.windowSize)/2, 1)
 
     def fastTCP_updateW(self):
-        # TODO
+        # TODO: remove slow start threshold and confirm if average RTT or last RTT
+        #       also fix potential divide by 0
         # Update self.windowSize based on Fast TCP 
         if self.windowSize <= self.sst:
         	self.windowSize += 1
@@ -239,7 +230,9 @@ class Flow:
             self.windowSize = self.windowSize + 1.0/self.windowSize
             constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
 
-    def congestionGetAck(self, packetID):
+    def congestionGetAck(self, packetID, ackTime):
+        self.updateRTTandLogRTD(packetID, ackTime)     # Log packet delay and 
+        
         if packetID == self.expectedAckID:          # Received correct packet
             if constants.cngstn_ctrl == constants.TCP_RENO:
                 self.TCPReno_updateW()              # For TCP Reno, update W
@@ -261,10 +254,10 @@ class Flow:
                 self.packetsToSend.put_nowait(packetID)     # Move it to packets to send
                 self.dupAckCtr = 0                  # Reset counter for duplicate ACKS
 
-                self.windowSize = max(float(self.windowSize)/2, 1)      # Update window size (works for both TCP Reno and Fast TCP)
-                constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
-
-                if constants.cngstn_ctrl == constants.TCP_RENO:         
+                if constants.cngstn_ctrl == constants.TCP_RENO:
+                    # Update window size to half because we dropped packet
+                    self.windowSize = max(float(self.windowSize)/2, 1)      
+                    constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)       
                     self.sst = self.windowSize      # If TCP Reno, then update slow start threshold
             else:
                 self.unackPackets.remove(packetID)  # If we haven't received 3 duplicate acks yet, consider the packet that we  
@@ -273,6 +266,20 @@ class Flow:
         lengthPktsToSend = self.windowSize - len(self.unackPackets)     # Find number of packets to send
         self.flowSendNPackets(lengthPktsToSend)     # Send this many packets
 
+    def updateRTTandLogRTD(self, packetID, ackTime):
+        constants.system_analytics.log_packet_RTD(self.ID, self.pkt_entry_times[packetID], ackTime)
+        
+        RTT = ackTime - self.pkt_entry_times[packetID]
+
+        if self.minRTT == 0:        # Save minimum RTT time
+            self.minRTT = RTT
+        elif RTT < self.minRTT:
+            self.minRTT = RTT
+        # CHECK: is average only over current time period or over whole time
+        self.sumRTT += RTT
+        self.numRTT += 1
+
+        del self.pkt_entry_times[packetID]
 
 
 
