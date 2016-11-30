@@ -60,8 +60,9 @@ class Analytics:
     # changed to flowID because I think this should be flow? i.e. when a flow
     # decides to put first packet in iink buffer to when host receives last
     # packet
-    def log_flow_rate(self, flowID, numBytes, currTime, prevTime): 
-        rate = numBytes*constants.BYTES_TO_MBITS/((currTime - prevTime)/constants.SEC_TO_MS)
+    #def log_flow_rate(self, flowID, numBytes, currTime, prevTime):
+    def log_flow_rate(self, flowID, numBytes, RTT, currTime): 
+        rate = numBytes*constants.BYTES_TO_MBITS/(RTT/constants.SEC_TO_MS)
         if flowID in self.flow_rate:
             self.flow_rate[flowID].append((currTime, rate))
         else:
@@ -87,8 +88,9 @@ class Analytics:
             #   there is an issue
             if constants.debug: print(self.flow_send_rate[flowID])
             if receive_order <= self.flow_send_rate[flowID][-1][0]:
+                pass
                 # Log the flow rate
-                self.log_flow_rate(flowID, constants.DATA_PKT_SIZE, currTime, self.flow_send_rate[flowID][-1][1])
+                #self.log_flow_rate(flowID, constants.DATA_PKT_SIZE, currTime, self.flow_send_rate[flowID][-1][1])
 
     # time start is queued in immediately
     # time end is when the ack with the right packetID is sent
@@ -111,10 +113,10 @@ class Analytics:
     def log_link_rate(self, linkID, pktsize, duration, currTime):
         rate = pktsize * constants.BYTES_TO_MBITS/(duration/constants.SEC_TO_MS)
 
-        if linkID in self.link_flow_rate:
-            self.link_flow_rate[linkID].append((currTime, rate))
+        if linkID[0:-1] in self.link_flow_rate:
+            self.link_flow_rate[linkID[0:-1]].append((currTime, rate))
         else:
-            self.link_flow_rate[linkID] = [(currTime, rate)]
+            self.link_flow_rate[linkID[0:-1]] = [(currTime, rate)]
 
     def log_window_size(self, flowID, currTime, windowSize):
         if flowID in self.flow_window_size:
@@ -141,7 +143,7 @@ class Analytics:
         '#0F644D', '#87C41C']
 
         color_ctr = 0
-        plt.subplot(411)        # link rate plot
+        plt.subplot(511)        # link rate plot
         sorted_linkIDs = sorted(self.link_flow_rate.keys())
         for linkID in sorted_linkIDs:
             print("LINK FLOW RATE LINK ID:")
@@ -159,7 +161,7 @@ class Analytics:
         plt.ylabel('Link Rate (Mbps)')
 
         color_ctr = 0
-        plt.subplot(412)        # buffer occupancy plot
+        plt.subplot(512)        # buffer occupancy plot
         sorted_linkIDs = sorted(self.link_buff_occupancy.keys())
         for linkID in sorted_linkIDs:
             print("LINK BUFF OCCUPANCY: ")
@@ -173,19 +175,9 @@ class Analytics:
         plt.xlabel('time (ms)')
         plt.ylabel('Buffer Occupancy (KB)')
 
-        '''
-        color_ctr = 0
-        plt.subplot(413)
-        sorted_linkIDs = sorted(self.link_packet_lost.keys())
-        for linkID in self.link_packet_lost:
-            freq_dict = collections.Counter(self.link_packet_lost[linkID])
-            time = list(freq_dict.keys())
-            l_pkt_lost = freq_dict.values()
-            plt.plot(time, l_pkt_lost, color=colors[color_ctr])
-            color_ctr += 1'''
 
         color_ctr = 0
-        plt.subplot(413)
+        plt.subplot(513)
         '''
         #old
         time_RTD_list = list(self.flow_packet_RTD.values())
@@ -212,14 +204,28 @@ class Analytics:
         plt.xlabel('time (ms)')
         plt.ylabel('Packet Delay (ms)')
 
-        plt.subplot(414)
+        plt.subplot(514)
         color_ctr = 0
         for flowID in self.flow_rate:
             time = [elt[0] for elt in self.flow_rate[flowID]]
             f_flow_rate = [elt[1] for elt in self.flow_rate[flowID]]
             plt.plot(time, f_flow_rate, color=colors[color_ctr])
             color_ctr += 1
+        plt.xlabel('time (ms)')
+        plt.ylabel('Flow Rate (Mbps)')
 
+        color_ctr = 0
+        plt.subplot(515)
+        sorted_linkIDs = sorted(self.link_packet_lost.keys())
+        for linkID in self.link_packet_lost:
+            freq_dict = collections.Counter(self.link_packet_lost[linkID])
+            time = list(freq_dict.keys())
+            l_pkt_lost = freq_dict.values()
+            plt.plot(time, l_pkt_lost, color=colors[color_ctr])
+            color_ctr += 1
+        plt.legend(bbox_to_anchor=(1,1))
+        plt.xlabel('time (ms)')
+        plt.ylabel('Packets Dropped')
         # ALSO FIX UNITS
 
         plt.show()

@@ -28,7 +28,8 @@ global system_analytics     # the global analytics class
 global cngstn_ctrl          # 0 - no congestion control
                             # 1 - TCP Reno
                             # 2 - Fast TCP
-global debug 
+global debug
+global all_flows_done
 debug = False
 
 global bellman_ford

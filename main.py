@@ -40,6 +40,8 @@ if __name__ == "__main__":
         print("--" + r + "--")
         print(str(router.routingTable))
 
+    # Initialize global variable indicating when all flows are done
+    constants.all_flows_done = False
     # Enqueue all the flows
     for flow_key, flow_obj in nwm.flows.items():
         flow_event = Event(Event.flow_start, flow_obj.start, [flow_key])
@@ -51,7 +53,7 @@ if __name__ == "__main__":
     bellman_event = Event(Event.bellman_ford, constants.BELLMAN_PERIOD*2, None)
     constants.system_EQ.enqueue(bellman_event)
     # Continue to dequeue events until it is empty
-    while(not constants.system_EQ.isempty()):
+    while((not constants.system_EQ.isempty()) and (not constants.all_flows_done)):
         curr_event = constants.system_EQ.dequeue()
         EventHandler(curr_event)
     # If done with while loop, have finished all events
