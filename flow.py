@@ -19,8 +19,6 @@ class Flow:
         self.currACK = -1            # the last acknowledged packet ID
         self.droppedPackets = []    # dropped packets (IDs)
 
-        self.done = False           # if flow is done
-
         # Number of data packets the flow needs to send
         self.num_packets = math.ceil(data_amt * constants.MB_TO_BYTES / constants.DATA_PKT_SIZE)
 
@@ -32,7 +30,6 @@ class Flow:
 
         self.pkt_entry_times = {}
 
-        # TCP Fast stuff only
         self.minRTT = 0
         self.numRTT = 0
         self.sumRTT = 0
@@ -69,7 +66,8 @@ class Flow:
             print("Currently in Flow send Packets: ")
             print("dropped Packets: %s, WindowSize: %s" % (self.droppedPackets, self.windowSize))
 
-        
+        if self.currACK == self.num_packets - 1 and self.droppedPackets == []: # We're done with this flow...YAY!
+            return
         # Send ALL packets from dropped packets
         if len(self.droppedPackets) >= self.windowSize:
             packets_to_send = self.generateDataPackets(self.droppedPackets[:(self.windowSize)])
@@ -115,25 +113,22 @@ class Flow:
         self.updateRTTandLogRTD(packetID, ackTime)
 
         if packetID == 0:
-            print("First ack")
-            print(constants.system_EQ.currentTime)
+        	print("First ack")
+        	print(constants.system_EQ.currentTime)
         
         if packetID  > self.currACK+1:  # if we dropped a packet
             # Add the packets we dropped to the droppedPackets list
             self.droppedPackets.append(range(self.currACK+1, packetID))
             self.currACK += 1
+            print("%s was lost" % packetID)
         elif packetID < self.currACK:   # If we receive an ack for packet that was dropped
             # Remove this packet from list of dropped packets
             self.droppedPackets.remove(packetID)
+            print("%s was found" % packetID)
         else:
             self.currACK += 1   # We received correct packet, increment currACK
-        if self.currACK == self.num_packets - 1 and self.droppedPackets == []: # We're done with this flow...YAY!
-            self.done = True
-            print("Flow %s is done at time %s" % (self.ID, constants.system_EQ.currentTime))
-            flow_done_event = Event(Event.flow_done, constants.system_EQ.currentTime, [constants.system_EQ.currentTime])
-            constants.system_EQ.enqueue(flow_done_event)
-            return
-        elif (self.currACK - len(self.droppedPackets) + 1) % self.windowSize == 0: # We're finished with this window; send a new one
+
+        if (self.currACK - len(self.droppedPackets) + 1) % self.windowSize == 0: # We're finished with this window; send a new one
             self.flowSendPackets()
 
     ''' Generates data packets with the given IDs and returns a list of the 
@@ -149,9 +144,10 @@ class Flow:
 
         return packets_list
 
+    ''' Functions for TCP Congestion Control ''' 
+    # TODO: Some small TODOs listed below
+
     def flowStartTCP(self):
-        ''' Functions for TCP Congestion Control ''' 
-        # TODO: Some small TODOs listed below
         self.windowSize = 1         # Initial window size for congestion control algorithms
         # Initialize packetsToSend queue to contain all the packets
         for pkt_ID in range(self.num_packets):
@@ -213,16 +209,15 @@ class Flow:
     def fastTCP_updateW(self):
         # TODO: remove slow start threshold and confirm if average RTT or last RTT
         #       also fix potential divide by 0
-        # Update self.windowSize based on Fast TCP 
-        if self.windowSize <= self.sst:
-            self.windowSize += 1
-            constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
+        # Update self.windowSize based on Fast TCP
+        if self.numRTT == 0:
+        	self.windowSize = 1
         else:
-            avgRTT = float(self.sumRTT)/float(self.numRTT)
-            doubW = 2 * self.windowSize
-            eqW = (1-self.gamma) * float(self.windowSize) + self.gamma * float(self.minRTT/avgRTT * self.windowSize + self.alpha)
-            self.windowSize = min(doubW, eqW)
-            constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
+        	avgRTT = float(self.sumRTT)/float(self.numRTT)
+        	doubW = 2 * self.windowSize
+        	eqW = (1-self.gamma) * float(self.windowSize) + self.gamma * float(self.minRTT/avgRTT * self.windowSize + self.alpha)
+        	self.windowSize = min(doubW, eqW)
+        	constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
 
         # Enqueue an event to update Fast TCP W after certain time
         FAST_event = Event(Event.update_FAST, constants.system_EQ.currentTime + 20, [self.ID])
@@ -256,7 +251,7 @@ class Flow:
             if constants.cngstn_ctrl == constants.TCP_RENO:
                 self.TCPReno_updateW()              # Update W for TCP Reno
 
-            if self.dupAckCtr == 3:                 # If we've received 3 duplicate ACKS
+            if self.dupAckCtr == 2:                 # If we've received 3 duplicate ACKS
                 self.unackPackets.remove(packetID)  # Remove this packet from unacknowledged packets
                 self.packetsToSend.put_nowait(packetID)     # Move it to packets to send
                 self.dupAckCtr = 0                  # Reset counter for duplicate ACKS
@@ -276,8 +271,7 @@ class Flow:
     def updateRTTandLogRTD(self, packetID, ackTime):
         constants.system_analytics.log_packet_RTD(self.ID, self.pkt_entry_times[packetID], ackTime)
         
-        RTT = float(ackTime) - self.pkt_entry_times[packetID]
-        constants.system_analytics.log_flow_rate(self.ID, constants.DATA_PKT_SIZE, RTT, ackTime)
+        RTT = ackTime - self.pkt_entry_times[packetID]
 
         if self.minRTT == 0:        # Save minimum RTT time
             self.minRTT = RTT

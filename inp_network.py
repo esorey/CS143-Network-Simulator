@@ -49,7 +49,7 @@ def inp_network(file):
             # Set up first link direction (a)
             if constants.debug: print("creating a link %s from %s to %s" %(params[0]+'a', params[1],params[2]))
             # Have to halve the occupancy
-            temp_link = Link(params[0]+'a',float(params[3]),float(params[4]),params[1],params[2],float(params[5]) / 2)
+            temp_link = Link(params[0]+'a',float(params[3]),float(params[4]),params[1],params[2],float(params[5]))
             if (params[0]+'a') in nwm.links:
                 print('Error: link {} defined twice'.format(params[0]))
                 return False
@@ -57,7 +57,7 @@ def inp_network(file):
             # Set up other link direction (b)
             if constants.debug: print("creating a link %s from %s to %s" %(params[0]+'b', params[2], params[1]))
             # Have to halve the occupancy
-            temp_link = Link(params[0]+'b',float(params[3]),float(params[4]),params[2],params[1],float(params[5]) / 2)
+            temp_link = Link(params[0]+'b',float(params[3]),float(params[4]),params[2],params[1],float(params[5]))
             if (params[0]+'b') in nwm.links:
                 print('Error: link {} defined twice'.format(params[0]))
                 return False
