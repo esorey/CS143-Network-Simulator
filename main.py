@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
 
     constants.cngstn_ctrl = 0
-    
+
     # Initialize event queue
     constants.system_EQ = EventQueue()
     # Initialize analytics
@@ -59,6 +59,7 @@ if __name__ == "__main__":
     while((not constants.system_EQ.isempty()) and (not constants.all_flows_done)):
         curr_event = constants.system_EQ.dequeue()
         EventHandler(curr_event)
+
     # If done with while loop, have finished all events
     # Output analytics in a text file
     constants.system_analytics.writeOutput()

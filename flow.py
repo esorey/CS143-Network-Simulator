@@ -15,12 +15,12 @@ class Flow:
         self.data_amt = data_amt    # Size of data in MB
         self.start = start          # Time at which flow begins
         
-        self.windowSize = 50        # set in congestion control algorithm, initialize to 1 for RENO and FAST
+        self.windowSize = 75        # set in congestion control algorithm, initialize to 1 for RENO and FAST
 
         self.done = False
 
         # Number of data packets the flow needs to send
-        self.num_packets = math.ceil(data_amt * constants.MB_TO_BYTES / constants.DATA_PKT_SIZE)
+        self.num_packets = 100#math.ceil(data_amt * constants.MB_TO_BYTES / constants.DATA_PKT_SIZE)
 
         # Packet that we will send next, if this is equal to num_packets
         #   then we have attempted to send all packets. Packets should now be
@@ -29,9 +29,9 @@ class Flow:
 
         self.pkt_entry_times = {}
 
-        self.minRTT = 0
-        self.numRTT = 0
-        self.sumRTT = 0
+        self.minRTT = 0.0
+        self.numRTT = 0.0
+        self.sumRTT = 0.0
         self.gamma = 0.5
         self.alpha = 15
 
@@ -56,13 +56,16 @@ class Flow:
         print("Unacknowledged packets")
         print(self.unackPackets)
 
+        if self.numRTT != 0:
+            print("Avg RTT %f" % (self.sumRTT/self.numRTT))
+
         self.updateRTTandLogRTD(packetID, ackTime)
 
         if packetID == 0:
             print("First ack")
             print(constants.system_EQ.currentTime)
 
-        if packetID == self.unackPackets[0]:    # Packet wasn't dropped
+        if (len(self.unackPackets) > 0) and (packetID == self.unackPackets[0]):    # Packet wasn't dropped
             self.unackPackets.remove(packetID)  # Mark as acknowledged
 
         elif packetID in self.unackPackets:  # if we dropped some packet
@@ -76,15 +79,16 @@ class Flow:
             for i in range(indofpkt):
                 del self.unackPackets[0]
                 
-
-        if self.unackPackets == 0 and self.packetsToSend.empty(): # We're done with this flow...YAY!
+                
+        if len(self.unackPackets) == 0 and self.packetsToSend.empty(): # We're done with this flow...YAY!
             self.done = True
             print("Flow %s is done at time %s" % (self.ID, constants.system_EQ.currentTime))
             flow_done_event = Event(Event.flow_done, constants.system_EQ.currentTime, [constants.system_EQ.currentTime])
             constants.system_EQ.enqueue(flow_done_event)
             return
 
-        elif (packetID + 1) % self.windowSize == 0: # We're finished with this window; send a new one
+        elif len(self.unackPackets) == 0: # We're finished with this window; send a new one
+            print("Send a new flow")
             self.flowSendNPackets(self.windowSize)
 
 
@@ -118,16 +122,15 @@ class Flow:
                 print("Resending a packet ID %s, only makes sense if packet was lost" % pktID)
             self.pkt_entry_times[pktID] = constants.system_EQ.currentTime
 
-            # Calculate the time at which to timeout if we're using congestion control
-            if constants.cngstn_ctrl != constants.NO_CNGSTN_CTRL:
-                if self.sumRTT == 0:
-                    timeout_time = constants.system_EQ.currentTime + constants.TIMEOUT_TIME
-                else:
-                    timeout_time = constants.system_EQ.currentTime + 1.5 * float(self.sumRTT)/self.minRTT
+            # Calculate the time at which to timeout
+            if self.sumRTT == 0:
+                timeout_time = constants.system_EQ.currentTime + self.windowSize
+            else:
+                timeout_time = constants.system_EQ.currentTime + 1.5 * float(self.sumRTT)/self.numRTT
 
                 # Create and enqueue timeout event
-                timeout_ev = Event(Event.pckt_timeout, timeout_time, [pkt])
-                constants.system_EQ.enqueue(timeout_ev)
+            timeout_ev = Event(Event.pckt_timeout, timeout_time, [pkt])
+            constants.system_EQ.enqueue(timeout_ev)
 
         if constants.cngstn_ctrl == constants.FAST_TCP:
             # Enqueue an update FAST TCP W after certain time
@@ -150,11 +153,16 @@ class Flow:
             self.unackPackets.remove(packetID)          # Remove packet from unacknowledged packets
             self.packetsToSend.put_nowait(packetID)     # Send packet again
 
-            self.windowSize = 1                         # Update window size
-            constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
+            if constants.cngstn_ctrl != constants.NO_CNGSTN_CTRL:
+                self.windowSize = 1                         # Update window size
+                constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
 
-            if constants.cngstn_ctrl == constants.TCP_RENO:     # Update slow start threshold if necessary
-                self.sst = max(float(self.windowSize)/2, 1)
+                if constants.cngstn_ctrl == constants.TCP_RENO:     # Update slow start threshold if necessary
+                    self.sst = max(float(self.windowSize)/2, 1)
+
+            if (len(self.unackPackets) == 0) and (self.packetsToSend.empty() == False):
+                self.flowSendNPackets(self.windowSize)
+
 
     def fastTCP_updateW(self):
         # TODO: remove slow start threshold and confirm if average RTT or last RTT

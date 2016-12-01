@@ -19,9 +19,9 @@ class Host:
     '''Add the passed packets to the link queue of the 
     outlink it is connected to'''
     def sendPackets(self, packetlist):
-        if constants.debug: 
-            print("Sending Packets: ")
-            print("\t" + str(packetlist))
+        #if constants.debug: 
+        print("Sending Packets: ")
+        print("\t" + str(packetlist))
         for pckt in packetlist:
             sendPckt = Event(Event.pckt_send, constants.system_EQ.currentTime, [self.out_link, pckt])
             constants.system_EQ.enqueue(sendPckt)
