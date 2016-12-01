@@ -97,8 +97,8 @@ class Link:
             del self.pkt_entry_times[pkt.packet_id]
         else:
             del self.pkt_entry_times[pkt.packet_id][0]
-        if type(pkt) is DataPacket:
-            constants.system_analytics.log_link_rate(self.ID, pkt.size, float(exit_time-entry_time), exit_time)
+            
+        constants.system_analytics.log_link_rate(self.ID, pkt.size, float(exit_time-entry_time), exit_time)
 
         
     def get_buffer_occupancy(self):

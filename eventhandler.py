@@ -12,7 +12,7 @@ def EventHandler(cur_event):
         print(cur_event.data[0])
         cur_flow = nwm.flows[cur_event.data[0]]    # Convert flow ID into flow
 
-        cur_flow.flowSendPackets()
+        cur_flow.flowStart()
 
     elif cur_event.event_type == Event.pckt_rcv:
         if cur_event.data[0][0] == 'H':
@@ -44,7 +44,10 @@ def EventHandler(cur_event):
         packetID = cur_event.data[0]
         ack_time = cur_event.data[2]
 
-        cur_flow.getACK(packetID, ack_time)
+        if constants.cngstn_ctrl == constants.NO_CNGSTN_CTRL:
+            cur_flow.getACK(packetID, ack_time)
+        else:
+            cur_flow.congestionGetAck(packetID, ack_time)
 
     elif cur_event.event_type == Event.pckt_send:
         cur_link = nwm.links[cur_event.data[0]]
