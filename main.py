@@ -20,7 +20,7 @@ if __name__ == "__main__":
     # Initialize arrays
 
 
-    constants.cngstn_ctrl = 0
+    constants.cngstn_ctrl = 1
 
     # Initialize event queue
     constants.system_EQ = EventQueue()

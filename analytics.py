@@ -126,7 +126,7 @@ class Analytics:
         if flowID in self.flow_window_size:
             self.flow_window_size[flowID].append((currTime, windowSize))
         else:
-            self.flow_window_size[flowID] = [(currTime, delay)]
+            self.flow_window_size[flowID] = [(currTime, windowSize)]
 
     def generatePlots():
         pass
@@ -153,7 +153,7 @@ class Analytics:
             num_plotted_links = 3
 
         color_ctr = 0
-        plt.subplot(511)        # link rate plot
+        plt.subplot(611)        # link rate plot
         sorted_linkIDs = sorted(self.link_flow_rate.keys())
         for linkID in sorted_linkIDs[:num_plotted_links]:
             if constants.debug:
@@ -172,7 +172,7 @@ class Analytics:
         plt.ylabel('Link Rate (Mbps)')
 
         color_ctr = 0
-        plt.subplot(512)        # buffer occupancy plot
+        plt.subplot(612)        # buffer occupancy plot
         sorted_linkIDs = sorted(self.link_buff_occupancy.keys())
         for linkID in sorted_linkIDs[:num_plotted_links]:
             if constants.debug:
@@ -189,7 +189,7 @@ class Analytics:
 
 
         color_ctr = 0
-        plt.subplot(513)
+        plt.subplot(613)
         '''
         #old
         time_RTD_list = list(self.flow_packet_RTD.values())
@@ -217,7 +217,7 @@ class Analytics:
         plt.xlabel('time (ms)')
         plt.ylabel('Packet Delay (ms)')
 
-        plt.subplot(514)
+        plt.subplot(614)
         color_ctr = 0
         print(self.flow_rate)
         for flowID in self.flow_rate:
@@ -231,7 +231,7 @@ class Analytics:
         plt.ylabel('Flow Rate (Mbps)')
 
         color_ctr = 0
-        plt.subplot(515)
+        plt.subplot(615)
         sorted_linkIDs = sorted(self.link_packet_lost.keys())
         for linkID in sorted_linkIDs[:num_plotted_links]:
             link_dict = self.link_packet_lost[linkID]
@@ -244,6 +244,24 @@ class Analytics:
         plt.legend(bbox_to_anchor=(1,1))
         plt.xlabel('time (ms)')
         plt.ylabel('Packets Dropped')
+
+        color_ctr = 0
+        plt.subplot(616)        # link rate plot
+        sorted_flowIDs = sorted(self.flow_window_size.keys())
+        for flowID in sorted_flowIDs:
+            if constants.debug:
+                print("WINDOW SIZE FLOW ID:")
+                print(flowID + " " + colors[color_ctr])
+            #if list(self.link_flow_rate.keys()).index(linkID) is not 1:
+            # Get time out of [time, rate] pairs
+            time = [elt[0] for elt in self.flow_window_size[flowID]]
+            # Get rate out of [time, rate] pairs
+            flow_ws = [elt[1] for elt in self.flow_window_size[flowID]]
+            plt.plot(time, flow_ws, label=flowID, marker='o', linestyle='--', markersize=1, color=colors[color_ctr], markeredgecolor=colors[color_ctr])
+            color_ctr += 1
+        plt.legend(bbox_to_anchor=(1,1))
+        plt.xlabel('time (ms)')
+        plt.ylabel('Window Size (pkts)')
         # ALSO FIX UNITS
 
         plt.show()
