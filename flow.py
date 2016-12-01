@@ -15,7 +15,7 @@ class Flow:
         self.data_amt = data_amt    # Size of data in MB
         self.start = start          # Time at which flow begins
         
-        self.windowSize = 75        # set in congestion control algorithm, initialize to 1 for RENO and FAST
+        self.windowSize = 50        # set in congestion control algorithm, initialize to 1 for RENO and FAST
         self.currACK = -1            # the last acknowledged packet ID
         self.droppedPackets = []    # dropped packets (IDs)
 
@@ -114,8 +114,8 @@ class Flow:
         self.updateRTTandLogRTD(packetID, ackTime)
 
         if packetID == 0:
-        	print("First ack")
-        	print(constants.system_EQ.currentTime)
+            print("First ack")
+            print(constants.system_EQ.currentTime)
         
         if packetID  > self.currACK+1:  # if we dropped a packet
             # Add the packets we dropped to the droppedPackets list
@@ -217,14 +217,14 @@ class Flow:
         #       also fix potential divide by 0
         # Update self.windowSize based on Fast TCP
         if self.numRTT == 0:
-        	self.windowSize = 1
+            self.windowSize = 1
             constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
         else:
-        	avgRTT = float(self.sumRTT)/float(self.numRTT)
-        	doubW = 2 * self.windowSize
-        	eqW = (1-self.gamma) * float(self.windowSize) + self.gamma * float(self.minRTT/avgRTT * self.windowSize + self.alpha)
-        	self.windowSize = min(doubW, eqW)
-        	constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
+            avgRTT = float(self.sumRTT)/float(self.numRTT)
+            doubW = 2 * self.windowSize
+            eqW = (1-self.gamma) * float(self.windowSize) + self.gamma * float(self.minRTT/avgRTT * self.windowSize + self.alpha)
+            self.windowSize = min(doubW, eqW)
+            constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
 
         # Enqueue an event to update Fast TCP W after certain time
         FAST_event = Event(Event.update_FAST, constants.system_EQ.currentTime + 20, [self.ID])
