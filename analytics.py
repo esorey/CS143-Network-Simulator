@@ -126,7 +126,7 @@ class Analytics:
         if flowID in self.flow_window_size:
             self.flow_window_size[flowID].append((currTime, windowSize))
         else:
-            self.flow_window_size[flowID] = [(currTime, delay)]
+            self.flow_window_size[flowID] = [(currTime, windowSize)]
 
     def generatePlots():
         pass
