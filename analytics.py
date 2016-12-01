@@ -158,7 +158,7 @@ class Analytics:
             time = [elt[0] for elt in self.link_flow_rate[linkID]]
             # Get rate out of [time, rate] pairs
             l_flow_rate_MBPS = [elt[1] for elt in self.link_flow_rate[linkID]]
-            plt.plot(time, l_flow_rate_MBPS, color=colors[color_ctr], label=linkID)
+            plt.plot(time, l_flow_rate_MBPS, label=linkID, marker='o', linestyle='--', markersize=1, color=colors[color_ctr], markeredgecolor=colors[color_ctr])
             color_ctr += 1
 
         plt.legend(bbox_to_anchor=(1,1))
@@ -174,7 +174,7 @@ class Analytics:
                 print(linkID + " " + colors[color_ctr])
             time = [elt[0] for elt in self.link_buff_occupancy[linkID]]
             l_buff_occ_pkt = [elt[1] for elt in self.link_buff_occupancy[linkID]]
-            plt.plot(time, l_buff_occ_pkt, color=colors[color_ctr], label=linkID)
+            plt.plot(time, l_buff_occ_pkt, label=linkID, marker='o', linestyle='--', markersize=1, color=colors[color_ctr], markeredgecolor=colors[color_ctr])
             color_ctr += 1
 
         plt.legend(bbox_to_anchor=(1,1))
@@ -204,7 +204,7 @@ class Analytics:
             time = [elt[0] for elt in self.flow_packet_RTD[flowID]]
             # Get delay out of [time, delay] pairs
             pkt_delay_S = [elt[1] for elt in self.flow_packet_RTD[flowID]]
-            plt.plot(time, pkt_delay_S, color=colors[color_ctr], label=flowID)
+            plt.plot(time, pkt_delay_S, label=flowID, marker='o', linestyle='--', markersize=1, color=colors[color_ctr], markeredgecolor=colors[color_ctr])
             color_ctr += 1
 
         plt.legend(bbox_to_anchor=(1,1))
@@ -219,7 +219,7 @@ class Analytics:
             f_flow_rate = [elt[1] for elt in self.flow_rate[flowID]]
             print(time)
             print(f_flow_rate)
-            plt.plot(time, f_flow_rate, color=colors[color_ctr], label = flowID)
+            plt.plot(time, f_flow_rate, label=flowID, marker='o', linestyle='--', markersize=1, color=colors[color_ctr], markeredgecolor=colors[color_ctr])
             color_ctr += 1
         plt.xlabel('time (ms)')
         plt.ylabel('Flow Rate (Mbps)')
@@ -233,7 +233,7 @@ class Analytics:
             l_pkt_lost = []
             for time in sorted_time:
                 l_pkt_lost.append(link_dict[time])
-            plt.plot(sorted_time, l_pkt_lost, color=colors[color_ctr], label = linkID)
+            plt.plot(sorted_time, l_pkt_lost, label=linkID, marker='o', linestyle='--', markersize=1, color=colors[color_ctr], markeredgecolor=colors[color_ctr])
             color_ctr += 1
         plt.legend(bbox_to_anchor=(1,1))
         plt.xlabel('time (ms)')
