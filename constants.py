@@ -21,7 +21,7 @@ LINK_BUFFER_UNIDIR_CAPACITY = float(50) # The capacity for a link buffer in one 
 CONSECUTIVE_PKT_DELAY = 0.5     # Send new packets every 0.5 ms when sending consecutive packets
 TIMEOUT_TIME = 2               # Default packet timeout time, otherwise use avg RTT 
 FAST_PERIOD = 20
-BELLMAN_PERIOD = 200		# Time between each bellman ford event enqueued in ms
+BELLMAN_PERIOD = 5000		# Time between each bellman ford event enqueued in ms
 global Bellman_not_done
 global system_EQ            # the global event queue struct
 global system_analytics     # the global analytics class

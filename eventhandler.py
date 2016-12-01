@@ -65,6 +65,10 @@ def EventHandler(cur_event):
         cur_flow.handlePacketTimeout(cur_pckt.packet_id)
 
     elif cur_event.event_type == Event.bellman_ford: 
+        newTime = cur_event.time + constants.BELLMAN_PERIOD
+        print("TIME BF: " + str(newTime))
+        bellman_event = Event(Event.bellman_ford, newTime, None)
+        constants.system_EQ.enqueue(bellman_event)
         BellmanFord.runBellmanFord()
 
     elif cur_event.event_type == Event.flow_done:

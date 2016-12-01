@@ -118,7 +118,7 @@ class Flow:
                 break
 
             pktID = self.packetsToSend.get_nowait()     # Get Packet to send
-            print("FLOW: Sending Packet with ID %s" % pktID )
+            #print("FLOW: Sending Packet with ID %s" % pktID )
             pkt = DataPacket(pktID, self.source, self.dest, self.ID)    # Create data packet
             pkt_list.append(pkt)                        # Add to list of packets to send to host
 
@@ -215,7 +215,7 @@ class Flow:
         self.updateRTTandLogRTD(packetID, ackTime)     # Log packet delay and 
 
         if packetID == self.expectedAckID:          # Received correct packet
-            print("FLOW Received CORRECT acknowledgement %d" % packetID)
+            #print("FLOW Received CORRECT acknowledgement %d" % packetID)
             if constants.cngstn_ctrl == constants.TCP_RENO:
                 self.TCPReno_updateW()              # For TCP Reno, update W
 
@@ -229,8 +229,8 @@ class Flow:
         elif packetID in self.unackPackets:         # Received the wrong packet
             # NOTE: this works primarily for TCP Reno, not entirely sure how duplicate ACKS are processed
             #   in Fast TCP, but maybe we can keep it the same?
-            print("FLOW Received DUPLICATE acknowledgement %d" % packetID)
-            print("FLOW Duplicate Ack Ctr %d" % self.dupAckCtr)
+            #print("FLOW Received DUPLICATE acknowledgement %d" % packetID)
+            #print("FLOW Duplicate Ack Ctr %d" % self.dupAckCtr)
             self.dupAckCtr += 1                     # Consider this a duplicate ack
             
             if constants.cngstn_ctrl == constants.TCP_RENO:
@@ -252,7 +252,7 @@ class Flow:
 
         #print("FLOW Unacknowledged packets")
         #print(self.unackPackets)
-        print("FLOW Window Size %d and sst is %f" % (self.windowSize, self.sst))
+        #print("FLOW Window Size %d and sst is %f" % (self.windowSize, self.sst))
 
         lengthPktsToSend = self.windowSize - len(self.unackPackets)     # Find number of packets to send
         self.flowSendNPackets(int(lengthPktsToSend))     # Send this many packets
