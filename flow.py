@@ -275,7 +275,7 @@ class Flow:
     def updateRTTandLogRTD(self, packetID, ackTime):
         constants.system_analytics.log_packet_RTD(self.ID, self.pkt_entry_times[packetID], ackTime)
         
-        RTT = ackTime - self.pkt_entry_times[packetID]
+        RTT = constants.system_EQ.currentTime - self.pkt_entry_times[packetID]
         constants.system_analytics.log_flow_rate(self.ID, constants.DATA_PKT_SIZE, RTT, ackTime)
 
         if self.minRTT == 0:        # Save minimum RTT time
