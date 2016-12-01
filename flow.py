@@ -20,7 +20,7 @@ class Flow:
         self.done = False
 
         # Number of data packets the flow needs to send
-        self.num_packets = 10#math.ceil(data_amt * constants.MB_TO_BYTES / constants.DATA_PKT_SIZE)
+        self.num_packets = math.ceil(data_amt * constants.MB_TO_BYTES / constants.DATA_PKT_SIZE)
 
         # Packet that we will send next, if this is equal to num_packets
         #   then we have attempted to send all packets. Packets should now be
@@ -45,6 +45,9 @@ class Flow:
         # Slow start threshold (max buffer size converted to data packets)
         self.sst = 64 * constants.KB_TO_BYTES / constants.DATA_PKT_SIZE
 
+        self.debug_timeout_ctr = 0
+        self.debug_dupack_pkts = 0
+
     ''' Sends a list of packets depending on the windowSize to the host. The
         function sends packets from dropped packets and new packets (gives 
         dropped packets priority). If there are not enough packets, the
@@ -53,8 +56,8 @@ class Flow:
     def getACK(self, packetID, ackTime):
 
         print("Received acknowledgement %s" % packetID)
-        print("Unacknowledged packets")
-        print(self.unackPackets)
+        #print("Unacknowledged packets")
+        #print(self.unackPackets)
 
         if self.numRTT != 0:
             print("Avg RTT %f" % (self.sumRTT/self.numRTT))
@@ -133,10 +136,10 @@ class Flow:
                 if constants.cngstn_ctrl == constants.NO_CNGSTN_CTRL:
                     timeout_time = constants.system_EQ.currentTime + self.windowSize
                 else:
-                    timeout_time = constants.system_EQ.currentTime + self.windowSize * 10
+                    timeout_time = constants.system_EQ.currentTime + 500
 
             else:
-                timeout_time = constants.system_EQ.currentTime + 1.5 * float(self.sumRTT)/self.numRTT
+                timeout_time = constants.system_EQ.currentTime + 5 * float(self.sumRTT)/self.numRTT
 
                 # Create and enqueue timeout event
             timeout_ev = Event(Event.pckt_timeout, timeout_time, [pkt])
@@ -144,7 +147,7 @@ class Flow:
 
         if constants.cngstn_ctrl == constants.FAST_TCP:
             # Enqueue an update FAST TCP W after certain time
-            FAST_event = Event(Event.update_FAST, constants.system_EQ.currentTime + 20, [self.ID])
+            FAST_event = Event(Event.update_FAST, constants.system_EQ.currentTime + constants.FAST_PERIOD, [self.ID])
             constants.system_EQ.enqueue(FAST_event)
 
 
@@ -163,6 +166,11 @@ class Flow:
             print("Got timeout event for packet %d" % packetID)
             self.unackPackets.remove(packetID)          # Remove packet from unacknowledged packets
             self.packetsToSend.put_nowait(packetID)     # Send packet again
+            self.debug_timeout_ctr += 1
+            # If the packet we timed out was the next packet we were expecting (and we are still
+            #   expecting more packets) then update the expected ack ID
+            if packetID == self.expectedAckID and len(self.unackPackets) != 0:
+                self.expectedAckID = self.unackPackets[0]
 
             if constants.cngstn_ctrl != constants.NO_CNGSTN_CTRL:
                 self.windowSize = 1                         # Update window size
@@ -191,7 +199,7 @@ class Flow:
             constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
 
         # Enqueue an event to update Fast TCP W after certain time
-        FAST_event = Event(Event.update_FAST, constants.system_EQ.currentTime + 20, [self.ID])
+        FAST_event = Event(Event.update_FAST, constants.system_EQ.currentTime + constants.FAST_PERIOD, [self.ID])
         constants.system_EQ.enqueue(FAST_event)
 
 
@@ -206,8 +214,6 @@ class Flow:
     def congestionGetAck(self, packetID, ackTime):
         self.updateRTTandLogRTD(packetID, ackTime)     # Log packet delay and 
 
-        
-        
         if packetID == self.expectedAckID:          # Received correct packet
             print("FLOW Received CORRECT acknowledgement %d" % packetID)
             if constants.cngstn_ctrl == constants.TCP_RENO:
@@ -220,8 +226,7 @@ class Flow:
 
             self.dupAckCtr = 0                      # No duplicate acks
 
-        else:                                       # Received the wrong packet
-            # MAYBE want to check if packetID is in self.unackPackets
+        elif packetID in self.unackPackets:         # Received the wrong packet
             # NOTE: this works primarily for TCP Reno, not entirely sure how duplicate ACKS are processed
             #   in Fast TCP, but maybe we can keep it the same?
             print("FLOW Received DUPLICATE acknowledgement %d" % packetID)
@@ -235,7 +240,7 @@ class Flow:
                 self.unackPackets.remove(packetID)  # Remove this packet from unacknowledged packets
                 self.packetsToSend.put_nowait(packetID)     # Move it to packets to send
                 self.dupAckCtr = 0                  # Reset counter for duplicate ACKS
-
+                self.debug_dupack_pkts += 1
                 if constants.cngstn_ctrl == constants.TCP_RENO:
                     # Update window size to half because we dropped packet
                     self.windowSize = max(float(self.windowSize)/2, 1)      
@@ -245,9 +250,9 @@ class Flow:
                 self.unackPackets.remove(packetID)  # If we haven't received 3 duplicate acks yet, consider the packet that we  
                                                     #   actually received ack for as acknowledged
 
-        print("FLOW Unacknowledged packets")
-        print(self.unackPackets)
-        print("FLOW Window Size %d" % self.windowSize)
+        #print("FLOW Unacknowledged packets")
+        #print(self.unackPackets)
+        print("FLOW Window Size %d and sst is %f" % (self.windowSize, self.sst))
 
         lengthPktsToSend = self.windowSize - len(self.unackPackets)     # Find number of packets to send
         self.flowSendNPackets(int(lengthPktsToSend))     # Send this many packets
@@ -255,6 +260,7 @@ class Flow:
         if len(self.unackPackets) == 0 and self.packetsToSend.empty(): # We're done with this flow...YAY!
             self.done = True
             print("Flow %s is done at time %s" % (self.ID, constants.system_EQ.currentTime))
+            print("Timed out packets %d and 3 Dup Ack packets %d" % (self.debug_timeout_ctr, self.debug_dupack_pkts))
             flow_done_event = Event(Event.flow_done, constants.system_EQ.currentTime, [constants.system_EQ.currentTime])
             constants.system_EQ.enqueue(flow_done_event)
             return
