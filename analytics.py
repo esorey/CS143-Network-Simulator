@@ -146,8 +146,9 @@ class Analytics:
         plt.subplot(511)        # link rate plot
         sorted_linkIDs = sorted(self.link_flow_rate.keys())
         for linkID in sorted_linkIDs:
-            print("LINK FLOW RATE LINK ID:")
-            print(linkID + " " + colors[color_ctr])
+            if constants.debug:
+                print("LINK FLOW RATE LINK ID:")
+                print(linkID + " " + colors[color_ctr])
             #if list(self.link_flow_rate.keys()).index(linkID) is not 1:
             # Get time out of [time, rate] pairs
             time = [elt[0] for elt in self.link_flow_rate[linkID]]
@@ -164,8 +165,9 @@ class Analytics:
         plt.subplot(512)        # buffer occupancy plot
         sorted_linkIDs = sorted(self.link_buff_occupancy.keys())
         for linkID in sorted_linkIDs:
-            print("LINK BUFF OCCUPANCY: ")
-            print(linkID + " " + colors[color_ctr])
+            if constants.debug:
+                print("LINK BUFF OCCUPANCY: ")
+                print(linkID + " " + colors[color_ctr])
             time = [elt[0] for elt in self.link_buff_occupancy[linkID]]
             l_buff_occ_pkt = [elt[1] for elt in self.link_buff_occupancy[linkID]]
             plt.plot(time, l_buff_occ_pkt, color=colors[color_ctr], label=linkID)
@@ -190,8 +192,9 @@ class Analytics:
         #new
         sorted_flowIDs = sorted(self.flow_packet_RTD.keys())
         for flowID in sorted_flowIDs:
-            print("PACKET DELAY FLOW ID:")
-            print(flowID + " " + colors[color_ctr])
+            if constants.debug:
+                print("PACKET DELAY FLOW ID:")
+                print(flowID + " " + colors[color_ctr])
             #if list(self.link_flow_rate.keys()).index(linkID) is not 1:
             # Get time out of [time, delay] pairs
             time = [elt[0] for elt in self.flow_packet_RTD[flowID]]
@@ -209,7 +212,7 @@ class Analytics:
         for flowID in self.flow_rate:
             time = [elt[0] for elt in self.flow_rate[flowID]]
             f_flow_rate = [elt[1] for elt in self.flow_rate[flowID]]
-            plt.plot(time, f_flow_rate, color=colors[color_ctr])
+            plt.plot(time, f_flow_rate, color=colors[color_ctr], label=flowID)
             color_ctr += 1
         plt.xlabel('time (ms)')
         plt.ylabel('Flow Rate (Mbps)')
@@ -219,7 +222,8 @@ class Analytics:
         sorted_linkIDs = sorted(self.link_packet_lost.keys())
         for linkID in self.link_packet_lost:
             freq_dict = collections.Counter(self.link_packet_lost[linkID])
-            print(freq_dict)
+            if constants.debug:
+                print(freq_dict)
             time = list(freq_dict.keys())
             l_pkt_lost = list(freq_dict.values())
             plt.plot(time, l_pkt_lost, color=colors[color_ctr], label=linkID)

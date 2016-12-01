@@ -60,7 +60,10 @@ class Link:
             self.handle_link_free()             # Handle the fact that the link is free by putting link in use
 
         # If buffer is full, log that we dropped a packet
-        elif self.get_buffer_occupancy() + pkt.size > self.buffer_capacity:                
+        elif self.get_buffer_occupancy() + pkt.size > self.buffer_capacity:  
+            print(self.ID)
+            print("Packet dropped, buffer occupancy is %s" % self.get_buffer_occupancy())
+            print("buffer capacity is %s" % self.buffer_capacity)              
             constants.system_analytics.log_dropped_packet(self.ID[0:-1], constants.system_EQ.currentTime)
 
         else:       # Otherwise either link is in use or buffer has some elements, so add pkt to buffer
@@ -74,8 +77,9 @@ class Link:
     def get_packet_travel_time(self, pkt):
         '''Compute the travel time for a packet. Will involve the current time and the transmission time.'''
         travel_time = self.delay + constants.SEC_TO_MS * (pkt.size * constants.BYTES_TO_MBITS / self.rate)
-        print("Travel Time:")
-        print(travel_time)
+        if constants.debug:
+            print("Travel Time:")
+            print(travel_time)
         return travel_time
 
     def packet_entered_link(self, pkt):
@@ -92,7 +96,7 @@ class Link:
         else:
             del self.pkt_entry_times[pkt.packet_id][0]
         if type(pkt) is DataPacket:
-        	constants.system_analytics.log_link_rate(self.ID, pkt.size, float(exit_time-entry_time), exit_time)
+            constants.system_analytics.log_link_rate(self.ID, pkt.size, float(exit_time-entry_time), exit_time)
 
         
     def get_buffer_occupancy(self):
@@ -101,8 +105,9 @@ class Link:
         the number of bytes in the buffer of the link that runs opposite to this one.
         '''
         other_link_obj = self.get_opposite_link_obj()
-        print(self.ID)
-        print((self.buffer_space_used + other_link_obj.buffer_space_used)/float(1024))
+        if constants.debug:
+            print(self.ID)
+            print((self.buffer_space_used + other_link_obj.buffer_space_used)/float(1024))
         return self.buffer_space_used + other_link_obj.buffer_space_used
 
 

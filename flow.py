@@ -15,7 +15,7 @@ class Flow:
         self.data_amt = data_amt    # Size of data in MB
         self.start = start          # Time at which flow begins
         
-        self.windowSize = 25        # set in congestion control algorithm, initialize to 1 for RENO and FAST
+        self.windowSize = 50        # set in congestion control algorithm, initialize to 1 for RENO and FAST
         self.currACK = -1            # the last acknowledged packet ID
         self.droppedPackets = []    # dropped packets (IDs)
 
@@ -120,9 +120,11 @@ class Flow:
             # Add the packets we dropped to the droppedPackets list
             self.droppedPackets.append(range(self.currACK+1, packetID))
             self.currACK += 1
+            print("%s was lost" % packetID)
         elif packetID < self.currACK:   # If we receive an ack for packet that was dropped
             # Remove this packet from list of dropped packets
             self.droppedPackets.remove(packetID)
+            print("%s was found" % packetID)
         else:
             self.currACK += 1   # We received correct packet, increment currACK
 
