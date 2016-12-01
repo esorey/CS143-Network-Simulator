@@ -213,12 +213,12 @@ class Analytics:
 
         plt.subplot(614)
         color_ctr = 0
-        print(self.flow_rate)
         for flowID in self.flow_rate:
             time = [elt[0] for elt in self.flow_rate[flowID]]
             f_flow_rate = [elt[1] for elt in self.flow_rate[flowID]]
-            print(time)
-            print(f_flow_rate)
+            if constants.debug:
+                print(time)
+                print(f_flow_rate)
             plt.plot(time, f_flow_rate, label=flowID, marker='o', linestyle='--', markersize=1, color=colors[color_ctr], markeredgecolor=colors[color_ctr])
             color_ctr += 1
         plt.xlabel('time (ms)')
