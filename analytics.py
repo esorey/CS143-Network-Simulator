@@ -219,9 +219,10 @@ class Analytics:
         sorted_linkIDs = sorted(self.link_packet_lost.keys())
         for linkID in self.link_packet_lost:
             freq_dict = collections.Counter(self.link_packet_lost[linkID])
+            print(freq_dict)
             time = list(freq_dict.keys())
-            l_pkt_lost = freq_dict.values()
-            plt.plot(time, l_pkt_lost, color=colors[color_ctr])
+            l_pkt_lost = list(freq_dict.values())
+            plt.plot(time, l_pkt_lost, color=colors[color_ctr], label=linkID)
             color_ctr += 1
         plt.legend(bbox_to_anchor=(1,1))
         plt.xlabel('time (ms)')
