@@ -32,6 +32,7 @@ class Link:
         else:
             pkt = self.buffer.get_nowait() # Dequeue a packet
             self.buffer_space_used -= pkt.size
+            constants.system_analytics.log_buff_occupancy(self.ID[0:-1], constants.system_EQ.currentTime, self.get_buffer_occupancy())
             travel_time = float(constants.system_EQ.currentTime + self.get_packet_travel_time(pkt))
             
             self.packet_left_link(pkt, travel_time)     # Log that a packet left
