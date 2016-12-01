@@ -43,7 +43,30 @@ class Router:
         print("Routing table for " + self.id + " is " + str(routing_table))
         self.routingTable = routing_table
 
+    def modify_routing_table(self):
+        '''modify the routing table.'''
+        # Get dict of hosts
+        routing_table = {}
+        hosts_dict = nwm.hosts
+        print(nwm.hosts)
+        for host_id in hosts_dict.keys():
+            host_obj = nwm.get_host_from_id(host_id)
+            host_link_id = host_obj.out_link
 
+            flipped_link_id = util.flip_link_id(host_link_id)
+
+            host_link_obj = nwm.get_link_from_id(flipped_link_id)
+            link_dest = host_link_obj.A
+            # If the link connects to this router, add the host and weights to the routing table
+            if link_dest == self.id:
+                routing_table[host_id] = [flipped_link_id, host_link_obj.get_buffer_occupancy()]
+
+            # If not, mark the host as link unknown, distance infinity
+            else:
+                routing_table[host_id] = [flipped_link_id, float("Inf"), self.id]
+
+        print("Routing table for " + self.id + " is " + str(routing_table))
+        self.routingTable = routing_table
         
     '''Bellman-Ford Algorithm: Update routing tables based
     on congestion information'''
@@ -97,6 +120,8 @@ class Router:
         self.changePrev = self.changeCurr
         self.changeCurr = False
         if type(pckt) is RoutingTablePacket:
+            print("Routing table for " + self.id + " is " + str(self.routingTable))
+
             # do bellman Ford
             # check the routing table of the packet
             # format is hostID: [link_id, bufferOccupancy]
@@ -105,6 +130,8 @@ class Router:
             # is curr occupancy + value  in the routing table from the other guy
             for hosts in pckt.routing_table.keys():
                 new_cost = pckt.routing_table[hosts][1] + link_cost
+                print("New Cost: " + str(new_cost))
+                print("original cost: " + str(self.routingTable[hosts][1]))
                 if new_cost < self.routingTable[hosts][1]:
                     self.routingTable[hosts][1] = new_cost
                     # want to flip the ID because direction is reversed
