@@ -19,6 +19,8 @@ class Flow:
         self.currACK = -1            # the last acknowledged packet ID
         self.droppedPackets = []    # dropped packets (IDs)
 
+        self.done = False
+
         # Number of data packets the flow needs to send
         self.num_packets = math.ceil(data_amt * constants.MB_TO_BYTES / constants.DATA_PKT_SIZE)
 
@@ -66,8 +68,7 @@ class Flow:
             print("Currently in Flow send Packets: ")
             print("dropped Packets: %s, WindowSize: %s" % (self.droppedPackets, self.windowSize))
 
-        if self.currACK == self.num_packets - 1 and self.droppedPackets == []: # We're done with this flow...YAY!
-            return
+        
         # Send ALL packets from dropped packets
         if len(self.droppedPackets) >= self.windowSize:
             packets_to_send = self.generateDataPackets(self.droppedPackets[:(self.windowSize)])
@@ -127,8 +128,13 @@ class Flow:
             print("%s was found" % packetID)
         else:
             self.currACK += 1   # We received correct packet, increment currACK
-
-        if (self.currACK - len(self.droppedPackets) + 1) % self.windowSize == 0: # We're finished with this window; send a new one
+        if self.currACK == self.num_packets - 1 and self.droppedPackets == []: # We're done with this flow...YAY!
+            self.done = True
+            print("Flow %s is done at time %s" % (self.ID, constants.system_EQ.currentTime))
+            flow_done_event = Event(Event.flow_done, constants.system_EQ.currentTime, [constants.system_EQ.currentTime])
+            constants.system_EQ.enqueue(flow_done_event)
+            return
+        elif (self.currACK - len(self.droppedPackets) + 1) % self.windowSize == 0: # We're finished with this window; send a new one
             self.flowSendPackets()
 
     ''' Generates data packets with the given IDs and returns a list of the 
@@ -212,6 +218,7 @@ class Flow:
         # Update self.windowSize based on Fast TCP
         if self.numRTT == 0:
         	self.windowSize = 1
+            constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
         else:
         	avgRTT = float(self.sumRTT)/float(self.numRTT)
         	doubW = 2 * self.windowSize
@@ -272,6 +279,7 @@ class Flow:
         constants.system_analytics.log_packet_RTD(self.ID, self.pkt_entry_times[packetID], ackTime)
         
         RTT = ackTime - self.pkt_entry_times[packetID]
+        constants.system_analytics.log_flow_rate(self.ID, constants.DATA_PKT_SIZE, RTT, ackTime)
 
         if self.minRTT == 0:        # Save minimum RTT time
             self.minRTT = RTT
