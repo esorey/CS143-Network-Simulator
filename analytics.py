@@ -146,10 +146,16 @@ class Analytics:
         colors = ['k', 'r', 'b', 'g', 'm', 'y', 'c', '0.5', '0.75', '#B62828',
         '#0F644D', '#87C41C']
 
+        # Decide number of links to show based on test case number
+        if constants.testcase in [0, 1]:
+            num_plotted_links = 2
+        else:
+            num_plotted_links = 3
+
         color_ctr = 0
         plt.subplot(611)        # link rate plot
         sorted_linkIDs = sorted(self.link_flow_rate.keys())
-        for linkID in sorted_linkIDs:
+        for linkID in sorted_linkIDs[:num_plotted_links]:
             if constants.debug:
                 print("LINK FLOW RATE LINK ID:")
                 print(linkID + " " + colors[color_ctr])
@@ -168,7 +174,7 @@ class Analytics:
         color_ctr = 0
         plt.subplot(612)        # buffer occupancy plot
         sorted_linkIDs = sorted(self.link_buff_occupancy.keys())
-        for linkID in sorted_linkIDs:
+        for linkID in sorted_linkIDs[:num_plotted_links]:
             if constants.debug:
                 print("LINK BUFF OCCUPANCY: ")
                 print(linkID + " " + colors[color_ctr])
@@ -227,7 +233,7 @@ class Analytics:
         color_ctr = 0
         plt.subplot(615)
         sorted_linkIDs = sorted(self.link_packet_lost.keys())
-        for linkID in sorted_linkIDs:
+        for linkID in sorted_linkIDs[:num_plotted_links]:
             link_dict = self.link_packet_lost[linkID]
             sorted_time = sorted(link_dict)
             l_pkt_lost = []
