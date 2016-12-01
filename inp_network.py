@@ -124,7 +124,7 @@ def inp_network(file):
             if params[0] in nwm.flows:
                 print('Error: flow {} defined twice'.format(params[0]))
                 return False
-            nwm.flows[params[0]] = Flow(params[0],params[1],params[2],float(params[3]), float(params[4]))
+            nwm.flows[params[0]] = Flow(params[0],params[1],params[2],float(params[3]), float(params[4])*constants.SEC_TO_MS)
     f.close()
 
 

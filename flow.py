@@ -174,12 +174,15 @@ class Flow:
             if packetID == self.expectedAckID and len(self.unackPackets) != 0:
                 self.expectedAckID = self.unackPackets[0]
 
-            if constants.cngstn_ctrl != constants.NO_CNGSTN_CTRL:
-                if constants.cngstn_ctrl == constants.TCP_RENO:     # Update slow start threshold if necessary
-                    self.sst = max(float(self.windowSize)/2, 1)
-                
-                #self.windowSize = 1                         # Update window size #CHANGED
-                self.windowSize = max(float(self.windowSize)/2, 1)
+            if constants.cngstn_ctrl != constants.NO_CNGSTN_CTRL:       # CHANGED THIS, CHANGE AGAIN TO 1 RTT
+                if self.prev_timeout_time != constants.system_EQ.currentTime:
+                    if constants.cngstn_ctrl == constants.TCP_RENO:     # Update slow start threshold if necessary
+                        self.sst = max(float(self.windowSize)/2, 1)
+                    
+                    #self.windowSize = 1                         # Update window size #CHANGED
+                    self.windowSize = max(float(self.windowSize)/2, 1)
+
+                self.prev_timeout_time = constants.system_EQ.currentTime
                 constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
 
             if (len(self.unackPackets) == 0) and (self.packetsToSend.empty() == False):
@@ -211,7 +214,7 @@ class Flow:
             self.windowSize += 1            # Increase window size with each ack
             constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
         else:                               # Congestion avoidance phase
-            self.windowSize = self.windowSize + 1.0/self.windowSize
+            self.windowSize = self.windowSize + 1.0/float(math.floor(self.windowSize))
             constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
 
     def congestionGetAck(self, packetID, ackTime):
