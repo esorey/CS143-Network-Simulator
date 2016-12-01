@@ -15,7 +15,7 @@ class Flow:
         self.data_amt = data_amt    # Size of data in MB
         self.start = start          # Time at which flow begins
         
-        self.windowSize = 50        # set in congestion control algorithm, initialize to 1 for RENO and FAST
+        self.windowSize = 75        # set in congestion control algorithm, initialize to 1 for RENO and FAST
         self.currACK = -1            # the last acknowledged packet ID
         self.droppedPackets = []    # dropped packets (IDs)
 

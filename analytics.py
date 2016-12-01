@@ -213,9 +213,12 @@ class Analytics:
 
         plt.subplot(514)
         color_ctr = 0
+        print(self.flow_rate)
         for flowID in self.flow_rate:
             time = [elt[0] for elt in self.flow_rate[flowID]]
             f_flow_rate = [elt[1] for elt in self.flow_rate[flowID]]
+            print(time)
+            print(f_flow_rate)
             plt.plot(time, f_flow_rate, color=colors[color_ctr], label = flowID)
             color_ctr += 1
         plt.xlabel('time (ms)')
@@ -230,8 +233,6 @@ class Analytics:
             l_pkt_lost = []
             for time in sorted_time:
                 l_pkt_lost.append(link_dict[time])
-            print(sorted_time)
-            print(l_pkt_lost)
             plt.plot(sorted_time, l_pkt_lost, color=colors[color_ctr], label = linkID)
             color_ctr += 1
         plt.legend(bbox_to_anchor=(1,1))
