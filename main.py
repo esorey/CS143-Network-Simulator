@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
     bellman_event = Event(Event.bellman_ford, constants.BELLMAN_PERIOD, None)
     constants.system_EQ.enqueue(bellman_event)
-    bellman_event = Event(Event.bellman_ford, constants.BELLMAN_PERIOD*2, None)
+    bellman_event = Event(Event.bellman_ford, 300, None)
     constants.system_EQ.enqueue(bellman_event)
     # Continue to dequeue events until it is empty
     while((not constants.system_EQ.isempty()) and (not constants.all_flows_done)):
