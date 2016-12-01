@@ -48,6 +48,8 @@ class Flow:
         self.debug_timeout_ctr = 0
         self.debug_dupack_pkts = 0
 
+        self.prev_timeout_time = 0
+
     ''' Sends a list of packets depending on the windowSize to the host. The
         function sends packets from dropped packets and new packets (gives 
         dropped packets priority). If there are not enough packets, the
@@ -139,7 +141,7 @@ class Flow:
                     timeout_time = constants.system_EQ.currentTime + 500
 
             else:
-                timeout_time = constants.system_EQ.currentTime + 5 * float(self.sumRTT)/self.numRTT
+                timeout_time = constants.system_EQ.currentTime + 500 #5 * float(self.sumRTT)/self.numRTT
 
                 # Create and enqueue timeout event
             timeout_ev = Event(Event.pckt_timeout, timeout_time, [pkt])
@@ -173,11 +175,12 @@ class Flow:
                 self.expectedAckID = self.unackPackets[0]
 
             if constants.cngstn_ctrl != constants.NO_CNGSTN_CTRL:
-                self.windowSize = 1                         # Update window size
-                constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
-
                 if constants.cngstn_ctrl == constants.TCP_RENO:     # Update slow start threshold if necessary
                     self.sst = max(float(self.windowSize)/2, 1)
+                
+                #self.windowSize = 1                         # Update window size #CHANGED
+                self.windowSize = max(float(self.windowSize)/2, 1)
+                constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
 
             if (len(self.unackPackets) == 0) and (self.packetsToSend.empty() == False):
                 self.flowSendNPackets(self.windowSize)
@@ -236,7 +239,7 @@ class Flow:
             if constants.cngstn_ctrl == constants.TCP_RENO:
                 self.TCPReno_updateW()              # Update W for TCP Reno
 
-            if self.dupAckCtr == 2:                 # If we've received 3 duplicate ACKS, packet was dropped
+            if self.dupAckCtr == 3:                 # If we've received 3 duplicate ACKS, packet was dropped
                 self.unackPackets.remove(packetID)  # Remove this packet from unacknowledged packets
                 self.packetsToSend.put_nowait(packetID)     # Move it to packets to send
                 self.dupAckCtr = 0                  # Reset counter for duplicate ACKS
