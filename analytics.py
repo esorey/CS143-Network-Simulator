@@ -42,11 +42,15 @@ class Analytics:
         self.pckts = 0
 
     '''This logs that this link dropped a packet at the current time.'''
-    def log_dropped_packet(self, linkID, currTime):
+    def log_dropped_packet(self, linkID, currTime, numPkts):
         if linkID in self.link_packet_lost:
-            self.link_packet_lost[linkID].append(currTime)
+            if currTime in self.link_packet_lost[linkID]:
+                self.link_packet_lost[linkID][currTime] += numPkts
+            else:
+                self.link_packet_lost[linkID][currTime] = numPkts
         else:
-            self.link_packet_lost[linkID] = [currTime]
+            self.link_packet_lost[linkID] = {}
+            self.link_packet_lost[linkID][currTime] = numPkts
 
     ''' Arrange dictionary by linkID followed by currTime'''
     def log_buff_occupancy(self, linkID, currTime, buffOccupancy):
@@ -212,7 +216,7 @@ class Analytics:
         for flowID in self.flow_rate:
             time = [elt[0] for elt in self.flow_rate[flowID]]
             f_flow_rate = [elt[1] for elt in self.flow_rate[flowID]]
-            plt.plot(time, f_flow_rate, color=colors[color_ctr], label=flowID)
+            plt.plot(time, f_flow_rate, color=colors[color_ctr], label = flowID)
             color_ctr += 1
         plt.xlabel('time (ms)')
         plt.ylabel('Flow Rate (Mbps)')
@@ -220,13 +224,15 @@ class Analytics:
         color_ctr = 0
         plt.subplot(515)
         sorted_linkIDs = sorted(self.link_packet_lost.keys())
-        for linkID in self.link_packet_lost:
-            freq_dict = collections.Counter(self.link_packet_lost[linkID])
-            if constants.debug:
-                print(freq_dict)
-            time = list(freq_dict.keys())
-            l_pkt_lost = list(freq_dict.values())
-            plt.plot(time, l_pkt_lost, color=colors[color_ctr], label=linkID)
+        for linkID in sorted_linkIDs:
+            link_dict = self.link_packet_lost[linkID]
+            sorted_time = sorted(link_dict)
+            l_pkt_lost = []
+            for time in sorted_time:
+                l_pkt_lost.append(link_dict[time])
+            print(sorted_time)
+            print(l_pkt_lost)
+            plt.plot(sorted_time, l_pkt_lost, color=colors[color_ctr], label = linkID)
             color_ctr += 1
         plt.legend(bbox_to_anchor=(1,1))
         plt.xlabel('time (ms)')
