@@ -16,8 +16,6 @@ class Flow:
         self.start = start          # Time at which flow begins
         
         self.windowSize = 50        # set in congestion control algorithm, initialize to 1 for RENO and FAST
-        self.currACK = -1            # the last acknowledged packet ID
-        self.droppedPackets = []    # dropped packets (IDs)
 
         self.done = False
 
@@ -28,7 +26,6 @@ class Flow:
         #   then we have attempted to send all packets. Packets should now be
         #   sent from dropped array, if there are no packets there, we are
         #   done. 
-        self.currPCK = 0
 
         self.pkt_entry_times = {}
 
@@ -48,113 +45,55 @@ class Flow:
         # Slow start threshold (max buffer size converted to data packets)
         self.sst = 64 * constants.KB_TO_BYTES / constants.DATA_PKT_SIZE
 
-
-
-    def congestionControlAlg(pcktReceived, pcktSent): 
-        # run congestion control alg
-        # TCP Reno
-        # FAST-TCP
-        self.windowSize = 100
-        constants.system_analytics.log_window_size(self.ID, constats.system_EQ.currentTime, self.windowSize)
-        #return self.windowSize
-
     ''' Sends a list of packets depending on the windowSize to the host. The
         function sends packets from dropped packets and new packets (gives 
         dropped packets priority). If there are not enough packets, the
         function sends whatever packets it can. '''
-    def flowSendPackets(self): 
-        packets_to_send = []
-        if constants.debug: 
-            print("Currently in Flow send Packets: ")
-            print("dropped Packets: %s, WindowSize: %s" % (self.droppedPackets, self.windowSize))
 
-        
-        # Send ALL packets from dropped packets
-        if len(self.droppedPackets) >= self.windowSize:
-            packets_to_send = self.generateDataPackets(self.droppedPackets[:(self.windowSize)])
-
-        # send SOME (could be 0) packets from dropped packets and SOME from new packets
-        else:
-            # Generate and get ready to send packets from dropped packets
-            getPcktsToSend = self.generateDataPackets(self.droppedPackets)
-            packets_to_send.extend(getPcktsToSend)
-
-            # Generate and get ready to send new packets
-            temp = self.windowSize - len(self.droppedPackets)
-
-            # If we reach the end of all the packets to send
-            if self.currPCK + temp >= self.num_packets:
-                end_pckt_index = self.num_packets + 1   # Indicate we have sent all packets
-            else:   # Otherwise
-                end_pckt_index = self.currPCK + temp
-            if constants.debug: print("Generating data packets in range: %s to %s" %(self.currPCK, end_pckt_index))
-            getPcktsToSend = self.generateDataPackets(range(self.currPCK, end_pckt_index))
-            packets_to_send.extend(getPcktsToSend)
-
-            # Update the current packet we want to send
-            self.currPCK = end_pckt_index
-
-        # Enqueue event that will tell hosts to send packets
-        if constants.debug: print("Event is getting enqueued...")
-        event_to_send = Event(Event.flow_src_send_packets, constants.system_EQ.currentTime, [self.source, packets_to_send])
-        constants.system_EQ.enqueue(event_to_send)
-        if constants.debug: 
-            print("\tevent type: %s" % event_to_send.event_type)
-            print("\tevent time: %s" % event_to_send.time)
-            print("\tevent data: %s" % event_to_send.data)
-            print("\tLen of eventlist: %s" % len(constants.system_EQ.eventList))
-
-        constants.system_analytics.log_flow_send_rate(self.ID, self.windowSize, constants.system_EQ.currentTime)
-
-    ''' When a host receives an acknowledgement packet it will call this 
-        function for the flow to update what packets have been received. The 
-        flow deals with packet loss.'''
     def getACK(self, packetID, ackTime):
+
+        print("Received acknowledgement %s" % packetID)
+        print("Unacknowledged packets")
+        print(self.unackPackets)
 
         self.updateRTTandLogRTD(packetID, ackTime)
 
         if packetID == 0:
             print("First ack")
             print(constants.system_EQ.currentTime)
-        
-        if packetID  > self.currACK+1:  # if we dropped a packet
-            # Add the packets we dropped to the droppedPackets list
-            self.droppedPackets.append(range(self.currACK+1, packetID))
-            self.currACK += 1
-            print("%s was lost" % packetID)
-        elif packetID < self.currACK:   # If we receive an ack for packet that was dropped
-            # Remove this packet from list of dropped packets
-            self.droppedPackets.remove(packetID)
-            print("%s was found" % packetID)
-        else:
-            self.currACK += 1   # We received correct packet, increment currACK
-        if self.currACK == self.num_packets - 1 and self.droppedPackets == []: # We're done with this flow...YAY!
+
+        if packetID == self.unackPackets[0]:    # Packet wasn't dropped
+            self.unackPackets.remove(packetID)  # Mark as acknowledged
+
+        elif packetID in self.unackPackets:  # if we dropped some packet
+            indofpkt = self.unackPackets.index(packetID)
+
+            for i in range(indofpkt):
+                PID = self.unackPackets[i]
+                self.packetsToSend.put_nowait(PID)
+                print("%s was lost" % PID)
+
+            for i in range(indofpkt):
+                del self.unackPackets[0]
+                
+
+        if self.unackPackets == 0 and self.packetsToSend.empty(): # We're done with this flow...YAY!
             self.done = True
             print("Flow %s is done at time %s" % (self.ID, constants.system_EQ.currentTime))
             flow_done_event = Event(Event.flow_done, constants.system_EQ.currentTime, [constants.system_EQ.currentTime])
             constants.system_EQ.enqueue(flow_done_event)
             return
-        elif (self.currACK - len(self.droppedPackets) + 1) % self.windowSize == 0: # We're finished with this window; send a new one
-            self.flowSendPackets()
 
-    ''' Generates data packets with the given IDs and returns a list of the 
-        packets. '''
-    def generateDataPackets(self, listPacketIDs):
-        packets_list = []
-        if constants.debug: print("Generating Data Packets...")
-        for PID in listPacketIDs:
-            pckt = DataPacket(PID, self.source, self.dest, self.ID)
-            packets_list.append(pckt)
-            if pckt.packet_id not in self.pkt_entry_times:
-                self.pkt_entry_times[pckt.packet_id] = constants.system_EQ.currentTime
+        elif (packetID + 1) % self.windowSize == 0: # We're finished with this window; send a new one
+            self.flowSendNPackets(self.windowSize)
 
-        return packets_list
 
     ''' Functions for TCP Congestion Control ''' 
-    # TODO: Some small TODOs listed below
 
-    def flowStartTCP(self):
-        self.windowSize = 1         # Initial window size for congestion control algorithms
+    def flowStart(self):
+        if constants.cngstn_ctrl != constants.NO_CNGSTN_CTRL:
+            self.windowSize = 1         # Initial window size for congestion control algorithms
+
         # Initialize packetsToSend queue to contain all the packets
         for pkt_ID in range(self.num_packets):
             self.packetsToSend.put_nowait(pkt_ID)
@@ -175,15 +114,20 @@ class Flow:
             pkt_list.append(pkt)                        # Add to list of packets to send to host
             self.unackPackets.append(pktID)             # Add to list of packets in pipeline
 
-            # Calculate the time at which to timeout
-            if self.sumRTT == 0:
-                timeout_time = constants.system_EQ.currentTime + constants.TIMEOUT_TIME
-            else:
-                timeout_time = constants.system_EQ.currentTime + 1.5 * float(self.sumRTT)/self.minRTT
+            if pktID in self.pkt_entry_times:
+                print("Resending a packet ID %s, only makes sense if packet was lost" % pktID)
+            self.pkt_entry_times[pktID] = constants.system_EQ.currentTime
 
-            # Create and enqueue timeout event
-            timeout_ev = Event(Event.pckt_timeout, timeout_time, [pkt])
-            constants.system_EQ.enqueue(timeout_ev)
+            # Calculate the time at which to timeout if we're using congestion control
+            if constants.cngstn_ctrl != constants.NO_CNGSTN_CTRL:
+                if self.sumRTT == 0:
+                    timeout_time = constants.system_EQ.currentTime + constants.TIMEOUT_TIME
+                else:
+                    timeout_time = constants.system_EQ.currentTime + 1.5 * float(self.sumRTT)/self.minRTT
+
+                # Create and enqueue timeout event
+                timeout_ev = Event(Event.pckt_timeout, timeout_time, [pkt])
+                constants.system_EQ.enqueue(timeout_ev)
 
         if constants.cngstn_ctrl == constants.FAST_TCP:
             # Enqueue an update FAST TCP W after certain time
@@ -196,7 +140,7 @@ class Flow:
         constants.system_EQ.enqueue(event_to_send)
 
         # Log that packets were sent
-        constants.system_analytics.log_flow_send_rate(self.ID, self.windowSize, constants.system_EQ.currentTime)
+        constants.system_analytics.log_flow_send_rate(self.ID, len(pkt_list), constants.system_EQ.currentTime)
 
 
 

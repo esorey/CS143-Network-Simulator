@@ -19,6 +19,9 @@ if __name__ == "__main__":
     validNetwork = False
     # Initialize arrays
 
+
+    constants.cngstn_ctrl = 0
+    
     # Initialize event queue
     constants.system_EQ = EventQueue()
     # Initialize analytics

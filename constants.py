@@ -26,8 +26,6 @@ global Bellman_not_done
 global system_EQ            # the global event queue struct
 global system_analytics     # the global analytics class
 global cngstn_ctrl          # 0 - no congestion control
-                            # 1 - TCP Reno
-                            # 2 - Fast TCP
 global debug
 global all_flows_done
 debug = False
