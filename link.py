@@ -74,7 +74,7 @@ class Link:
             self.packet_entered_link(pkt)       # Record the time the packet entered the link
             # Log buffer occupancy for the whole link
             constants.system_analytics.log_buff_occupancy(self.ID[0:-1], constants.system_EQ.currentTime, self.get_buffer_occupancy())
-            
+            constants.system_analytics.log_dropped_packet(self.ID[0:-1], constants.system_EQ.currentTime, 0)
 
     def get_packet_travel_time(self, pkt):
         '''Compute the travel time for a packet. Will involve the current time and the transmission time.'''
