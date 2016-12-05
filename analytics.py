@@ -142,7 +142,7 @@ class Analytics:
 
     def convertToSlidingWindow(self, times, data, numWindows=None):
         if numWindows == None:
-            numWindows = constants.DEFAULT_WINDOW_SIZE
+            numWindows = constants.DEFAULT_NUM_WINDOWS
 
         window_size = max(times)/numWindows
         window_start = 0
@@ -170,7 +170,7 @@ class Analytics:
 
     def getRate(self, times, data, numWindows=None):
         if numWindows == None:
-            numWindows = constants.DEFAULT_WINDOW_SIZE
+            numWindows = constants.DEFAULT_NUM_WINDOWS
 
         window_size = max(times)/numWindows
 
