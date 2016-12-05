@@ -138,10 +138,10 @@ class Flow:
                 if constants.cngstn_ctrl == constants.NO_CNGSTN_CTRL:
                     timeout_time = constants.system_EQ.currentTime + self.windowSize
                 else:
-                    timeout_time = constants.system_EQ.currentTime + 500
+                    timeout_time = constants.system_EQ.currentTime + 1000
 
             else:
-                timeout_time = constants.system_EQ.currentTime + 500 #5 * float(self.sumRTT)/self.numRTT
+                timeout_time = constants.system_EQ.currentTime + 1000 #5 * float(self.sumRTT)/self.numRTT
 
                 # Create and enqueue timeout event
             timeout_ev = Event(Event.pckt_timeout, timeout_time, [pkt])
