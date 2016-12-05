@@ -25,12 +25,12 @@ BELLMAN_PERIOD = 5000		# Time between each bellman ford event enqueued in ms
 global Bellman_not_done
 global system_EQ            # the global event queue struct
 global system_analytics     # the global analytics class
-global cngstn_ctrl          # 0 - no congestion control
 global debug
 global all_flows_done
 global testcase
 debug = False
 testcase = 1
+cngstn_ctrl = 1
 
 global bellman_ford
 bellman_ford = True
