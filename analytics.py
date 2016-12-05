@@ -114,13 +114,13 @@ class Analytics:
         
     '''link rate should read the time that this delay was calculated for the 
     link and update the relevant link delay'''
-    def log_link_rate(self, linkID, pktsize, duration, currTime):
-        rate = pktsize * constants.BYTES_TO_MBITS/(duration/constants.SEC_TO_MS)
+    def log_link_rate(self, linkID, pktsize, currTime):
+        #rate = pktsize * constants.BYTES_TO_MBITS/(duration/constants.SEC_TO_MS)
 
         if linkID[0:-1] in self.link_flow_rate:
-            self.link_flow_rate[linkID[0:-1]].append((currTime, rate))
+            self.link_flow_rate[linkID[0:-1]].append((currTime, pktsize))
         else:
-            self.link_flow_rate[linkID[0:-1]] = [(currTime, rate)]
+            self.link_flow_rate[linkID[0:-1]] = [(currTime, pktsize)]
 
     def log_window_size(self, flowID, currTime, windowSize):
         if flowID in self.flow_window_size:
@@ -139,6 +139,46 @@ class Analytics:
         self.outFile.write("link flow rate: ")
         self.outFile.write(str(self.link_flow_rate))
         self.outFile.write("\n\n\n\n Total Number of Packets: %d" % self.pckts)
+
+    def convertToSlidingWindow(self, times, data, numWindows=None):
+        if numWindows == None:
+            numWindows = constants.DEFAULT_WINDOW_SIZE
+
+        window_size = max(times)/numWindows
+        window_start = 0
+        ret_times = []
+        ret_data = []
+        cur_time_windows = []
+        cur_data_windows = []
+
+        for j in range(len(times)):
+            if times[j] > window_start+window_size:
+                if len(cur_time_windows) == 0:
+                    cur_time_windows.append(window_start + window_size * 1.0/2)
+                    cur_data_windows.append(0)
+                
+                window_start += window_size
+                ret_times.append(cur_time_windows)
+                ret_data.append(cur_data_windows)
+                cur_time_windows = []
+                cur_data_windows = []
+
+            cur_time_windows.append(times[j])
+            cur_data_windows.append(data[j])
+
+        return ret_times, ret_data
+
+    def getRate(self, times, data, numWindows=None):
+        if numWindows == None:
+            numWindows = constants.DEFAULT_WINDOW_SIZE
+
+        window_size = max(times)/numWindows
+
+        w_times, w_data = self.convertToSlidingWindow(times, data, numWindows)
+
+        ret_times = [sum(a)*1.0/len(a) for a in w_times]
+        ret_data = [sum(a)*1.0/window_size for a in w_data]
+        return ret_times, ret_data
 
     def plotOutput(self):
         fig, axes = plt.subplots(nrows=4, ncols=1)
@@ -161,10 +201,13 @@ class Analytics:
                 print(linkID + " " + colors[color_ctr])
             #if list(self.link_flow_rate.keys()).index(linkID) is not 1:
             # Get time out of [time, rate] pairs
-            time = [elt[0] for elt in self.link_flow_rate[linkID]]
-            # Get rate out of [time, rate] pairs
-            l_flow_rate_MBPS = [elt[1] for elt in self.link_flow_rate[linkID]]
-            plt.plot(time, l_flow_rate_MBPS, label=linkID, marker='o', linestyle='--', markersize=1, color=colors[color_ctr], markeredgecolor=colors[color_ctr])
+            link_points = self.link_flow_rate[linkID]
+            link_points.sort(key=lambda x: x[0])
+            time = [elt[0]*constants.MS_TO_SEC for elt in link_points]
+            l_flow_rate_MBPS = [elt[1]*constants.BYTES_TO_MBITS for elt in link_points]
+
+            LFR_t, LFR_d = self.getRate(time, l_flow_rate_MBPS)
+            plt.plot(LFR_t, LFR_d, label=linkID, marker='o', linestyle='--', markersize=1, color=colors[color_ctr], markeredgecolor=colors[color_ctr])
             color_ctr += 1
 
         plt.legend(bbox_to_anchor=(1,1))

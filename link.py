@@ -35,8 +35,8 @@ class Link:
             constants.system_analytics.log_buff_occupancy(self.ID[0:-1], constants.system_EQ.currentTime, self.get_buffer_occupancy())
             travel_time = float(constants.system_EQ.currentTime + self.get_packet_travel_time(pkt))
             
-            self.packet_left_link(pkt, travel_time)     # Log that a packet left
-
+            #self.packet_left_link(pkt, travel_time)     # Log that a packet left
+            constants.system_analytics.log_link_rate(self.ID, pkt.size, constants.system_EQ.currentTime)
             self.in_use = True              # Link is in use
             
             # Generate link free and packet receive events at the appropriate times
@@ -55,7 +55,7 @@ class Link:
         if self.buffer.empty() and self.in_use == False:
             self.buffer.put_nowait(pkt)        # Enqueue the packet
             self.buffer_space_used += pkt.size
-            self.packet_entered_link(pkt)       # Record the time the packet entered the link
+            #self.packet_entered_link(pkt)       # Record the time the packet entered the link
             # Log buffer occupancy for the whole link
             constants.system_analytics.log_buff_occupancy(self.ID[0:-1], constants.system_EQ.currentTime, self.get_buffer_occupancy())
             constants.system_analytics.log_dropped_packet(self.ID[0:-1], constants.system_EQ.currentTime, 0)
@@ -71,7 +71,7 @@ class Link:
         else:       # Otherwise either link is in use or buffer has some elements, so add pkt to buffer
             self.buffer.put_nowait(pkt)         # Enqueue the packet into link buffer
             self.buffer_space_used += pkt.size
-            self.packet_entered_link(pkt)       # Record the time the packet entered the link
+            #self.packet_entered_link(pkt)       # Record the time the packet entered the link
             # Log buffer occupancy for the whole link
             constants.system_analytics.log_buff_occupancy(self.ID[0:-1], constants.system_EQ.currentTime, self.get_buffer_occupancy())
             constants.system_analytics.log_dropped_packet(self.ID[0:-1], constants.system_EQ.currentTime, 0)
