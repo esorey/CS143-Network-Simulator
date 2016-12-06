@@ -26,7 +26,7 @@ FAST_PERIOD = 20                # Time to update window size for Fast TCP
 BELLMAN_PERIOD = 5000           # Time between each bellman ford event enqueued in ms
 
 # Other
-DEFAULT_NUM_WINDOWS = 500       # Default window size for windowed averages
+DEFAULT_NUM_WINDOWS = 1000       # Default window size for windowed averages
 
 # Global Variables
 global system_EQ            # the global event queue struct

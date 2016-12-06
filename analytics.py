@@ -140,7 +140,8 @@ class Analytics:
         self.outFile.write(str(self.link_flow_rate))
         self.outFile.write("\n\n\n\n Total Number of Packets: %d" % self.pckts)
 
-    def convertToSlidingWindow(self, times, data, numWindows=None):
+    def convertToWindow(self, times, data, numWindows=None):
+        # times should be sorted
         if numWindows == None:
             numWindows = constants.DEFAULT_NUM_WINDOWS
 
@@ -168,13 +169,20 @@ class Analytics:
 
         return ret_times, ret_data
 
+    def convertToSlidingWindow(self, times, data, numWindows=None):
+        # Might want to implement this to make the graph look more
+        # like the test cases
+        # To implement we would have to 
+        pass
+
+
     def getRate(self, times, data, numWindows=None):
         if numWindows == None:
             numWindows = constants.DEFAULT_NUM_WINDOWS
 
         window_size = max(times)/numWindows
 
-        w_times, w_data = self.convertToSlidingWindow(times, data, numWindows)
+        w_times, w_data = self.convertToWindow(times, data, numWindows)
 
         ret_times = [sum(a)*1.0/len(a) for a in w_times]
         ret_data = [sum(a)*1.0/window_size for a in w_data]
