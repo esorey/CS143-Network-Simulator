@@ -80,33 +80,3 @@ def EventHandler(cur_event):
             constants.all_flows_done = True
             print("Time all flows done")
             print(cur_event.data[0])
-
-    ''' Dealing with events:
-        pckt_rcv:
-            needs: host/router, packet, time
-                changed to calling receive packet
-                if data packet: call host.receivePackets(packet)
-                if ack packet: call flow.getAck(packetID)
-                if routing table packet: 
-        flow_start:
-            needs: flow, time
-                call flow.flowSendPackets()
-
-        link_free:
-            needs: link, time
-                call handle_link_free
-
-        flow_src_send_packets
-            needs: host, packets to send (list)
-
-        ack_rcv:
-            needs: packet ID and flow ID 
-                call flow.getACK
-                this is called by a host when it realizes it has
-                received an ack
-
-        pckt_send:
-            needs: link, packet
-                call link.enqueue_packet(packet)
-
-        '''
