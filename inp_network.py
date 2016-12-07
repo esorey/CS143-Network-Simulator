@@ -1,5 +1,7 @@
 from link import Link
 from flow import Flow
+from flowReno import FlowReno
+from flowFast import FlowFast
 from host import Host
 from router import Router
 import network_map as nwm
@@ -124,7 +126,13 @@ def inp_network(file):
             if params[0] in nwm.flows:
                 print('Error: flow {} defined twice'.format(params[0]))
                 return False
-            nwm.flows[params[0]] = Flow(params[0],params[1],params[2],float(params[3]), float(params[4])*constants.SEC_TO_MS)
+            if constants.cngstn_ctrl == constants.NO_CNGSTN_CTRL:
+                nwm.flows[params[0]] = Flow(params[0],params[1],params[2],float(params[3]), float(params[4])*constants.SEC_TO_MS)
+            elif constants.cngstn_ctrl == constants.TCP_RENO:
+                nwm.flows[params[0]] = FlowReno(params[0],params[1],params[2],float(params[3]), float(params[4])*constants.SEC_TO_MS)
+            elif constants.cngstn_ctrl == constants.FAST_TCP:
+                nwm.flows[params[0]] = FlowFast(params[0],params[1],params[2],float(params[3]), float(params[4])*constants.SEC_TO_MS)
+
     f.close()
 
 

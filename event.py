@@ -10,6 +10,7 @@ class Event:
     pckt_timeout = 8    # Packet times out
     bellman_ford = 9    # Run bellman ford event
     flow_done = 10
+    flow_rcv_data = 11  # Flow gets a data packet 
 
     def __init__(self, ev_type, time, data):
         '''
@@ -39,7 +40,7 @@ class Event:
             Data: [linkID]
 
         flow_src_send_packets:
-            Description: Enables the flow to tell the flow's source (some host)
+            Description: Enables the flow to tell the flow's source/dest (some host)
                 to send packets.
             Data: [hostID, list of packets]
 
@@ -70,4 +71,8 @@ class Event:
             Description: Checks if all the flows are finished, and updates the global
                 constant that indicates all flows are finished.
             Data: None
+
+        flow_rcv_data:
+            Description: Flow receives a data packet and determines what ack to send
+            Data: [flowID, packet]
         '''

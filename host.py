@@ -23,6 +23,8 @@ class Host:
             print("Sending Packets: ")
             print("\t" + str(packetlist))
         for pckt in packetlist:
+            if type(pckt) is DataPacket:
+                print("Sending Data Packet ID %d on Host" %(pckt.packet_id))
             sendPckt = Event(Event.pckt_send, constants.system_EQ.currentTime, [self.out_link, pckt])
             constants.system_EQ.enqueue(sendPckt)
 
@@ -32,18 +34,24 @@ class Host:
             # make and enqueue an event for the event queue 
             # for acknowledging a received acknowledgment packet
             ackEvent = Event(Event.ack_rcv, constants.system_EQ.currentTime, 
-                    [pckt.packet_id, pckt.owner_flow, pckt.ack_sent_time])
+                    [pckt.packet_id, pckt.owner_flow, pckt.timestamp])
             constants.system_EQ.enqueue(ackEvent)
 
         if type(pckt) is DataPacket: # Data packet
             # create an acknowledgment packet
-            ackpckt = AckPacket(pckt.packet_id, pckt.origin_id, pckt.destination_id, pckt.owner_flow, constants.system_EQ.currentTime)
-            # push the new acknowledgment
-            sendAckPckt = Event(Event.pckt_send, constants.system_EQ.currentTime, [self.out_link, ackpckt])
-            constants.system_EQ.enqueue(sendAckPckt)
+            if constants.cngstn_ctrl == constants.NO_CNGSTN_CTRL:
+                ackpckt = AckPacket(pckt.packet_id, pckt.origin_id, pckt.destination_id, pckt.owner_flow, pckt.timestamp)
+                # push the new acknowledgment
+                sendAckPckt = Event(Event.pckt_send, constants.system_EQ.currentTime, [self.out_link, ackpckt])
+                constants.system_EQ.enqueue(sendAckPckt)
+            else:
+                flow_gets_data = Event(Event.flow_rcv_data, constants.system_EQ.currentTime, [pckt.owner_flow, pckt])
+                constants.system_EQ.enqueue(flow_gets_data)
             # Add to analytics
             if pckt.owner_flow in self.pckt_counters:
-                    self.pckt_counters[pckt.owner_flow] += 1
+                self.pckt_counters[pckt.owner_flow] += 1
             else:
-                    self.pckt_counters[pckt.owner_flow] = 1
+                self.pckt_counters[pckt.owner_flow] = 1
+
+            constants.system_analytics.log_packet_RTD(pckt.owner_flow, pckt.timestamp, constants.system_EQ.currentTime)
             constants.system_analytics.log_flow_receive_rate(pckt.owner_flow, constants.system_EQ.currentTime, self.pckt_counters[pckt.owner_flow])

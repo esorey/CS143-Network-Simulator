@@ -1,5 +1,6 @@
 from event import Event
 from flow import Flow 
+from flowReno import FlowReno
 from host import Host
 from router import Router
 import network_map as nwm 
@@ -44,10 +45,9 @@ def EventHandler(cur_event):
         packetID = cur_event.data[0]
         ack_time = cur_event.data[2]
 
-        if constants.cngstn_ctrl == constants.NO_CNGSTN_CTRL:
-            cur_flow.getACK(packetID, ack_time)
-        else:
-            cur_flow.congestionGetAck(packetID, ack_time)
+
+        cur_flow.getACK(packetID, ack_time)
+
 
     elif cur_event.event_type == Event.pckt_send:
         cur_link = nwm.links[cur_event.data[0]]
@@ -57,7 +57,7 @@ def EventHandler(cur_event):
 
     elif cur_event.event_type == Event.update_FAST:
         cur_flow = nwm.flows[cur_event.data[0]]
-        cur_flow.fastTCP_updateW()
+        cur_flow.updateW()
 
     elif cur_event.event_type == Event.pckt_timeout:
         cur_pckt = cur_event.data[0]
@@ -80,3 +80,8 @@ def EventHandler(cur_event):
             constants.all_flows_done = True
             print("Time all flows done")
             print(cur_event.data[0])
+
+    elif cur_event.event_type == Event.flow_rcv_data:
+        cur_flow = nwm.flows[cur_event.data[0]]
+        cur_pkt = cur_event.data[1]
+        cur_flow.flowReceiveDataPacket(cur_pkt)

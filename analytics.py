@@ -80,11 +80,22 @@ class Analytics:
 
     '''flow send rate should read the updating window sizes, which
     decide the send rate of each flow, and update it to the relevant time'''
-    def log_flow_send_rate(self, flowID, windowSize, currTime):
+    def log_flow_send_rate(self, flowID, numBytes, currTime):
+        currTime = round(currTime, constants.DEC_PLACES)
+        prev_data_sent = 0
+
         if flowID in self.flow_send_rate:
-            self.flow_send_rate[flowID].append((windowSize, currTime))
+            flow_send_rate_points = self.flow_send_rate[flowID]
+            flow_send_rate_times = [pt[0] for pt in flow_send_rate_points]
+
+            if currTime in flow_send_rate_times:
+                prev_ind = flow_send_rate_times.index(currTime)
+                prev_data_sent = flow_send_rate_points[prev_ind][1]
+                del self.flow_send_rate[flowID][prev_ind]
+
+            self.flow_send_rate[flowID].append((currTime, numBytes+prev_data_sent))
         else:
-            self.flow_send_rate[flowID] = [(windowSize, currTime)]
+            self.flow_send_rate[flowID] = [(currTime, numBytes)]
 
     '''flow receive rate should read the time that the packet was received
     at the host and add it to the corresponding packet in the flow'''
@@ -284,8 +295,8 @@ class Analytics:
 
         plt.subplot(614)
         color_ctr = 0
-        for flowID in self.flow_rate:
-            flow_rate_points = self.flow_rate[flowID]
+        for flowID in self.flow_send_rate:
+            flow_rate_points = self.flow_send_rate[flowID]
             flow_rate_points.sort(key=lambda x: x[0])
 
             time = [elt[0]*constants.MS_TO_SEC for elt in flow_rate_points]
