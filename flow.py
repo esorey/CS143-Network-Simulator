@@ -125,8 +125,8 @@ class Flow:
             constants.system_EQ.enqueue(timeout_ev)
 
 
-        # Send a "flow source send packets" event to send pkt_list
-        event_to_send = Event(Event.flow_src_send_packets, constants.system_EQ.currentTime, [self.source, pkt_list])
+        # Send a "flow send packets" event to send pkt_list
+        event_to_send = Event(Event.flow_send_packets, constants.system_EQ.currentTime, [self.source, pkt_list])
         constants.system_EQ.enqueue(event_to_send)
 
         # Log that packets were sent

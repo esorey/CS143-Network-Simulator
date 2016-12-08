@@ -49,11 +49,12 @@ class Link:
             
             self.log_link_rate(pkt.size, travel_time)   # Log link rate
             
-            self.in_use = True              # Indicate that the link is in use
+            self.in_use = True  # Indicate that the link is in use
             
-            # Generate link free and packet receive events at the appropriate times
+            # Generate link free and packet receive events
             link_free_event = Event(Event.link_free, travel_time, [self.ID])
-            pkt_receive_event = Event(Event.pckt_rcv, travel_time, [self.B, pkt])
+            pkt_receive_event = Event(Event.pckt_rcv, travel_time, 
+                                    [self.B, pkt])
 
             # Enqueue these events in global Event Queue
             constants.system_EQ.enqueue(link_free_event)
@@ -96,8 +97,8 @@ class Link:
 
     def get_packet_travel_time(self, pkt):
         '''
-        Compute the travel time for a packet. Will involve the current time and the transmission
-        time.
+        Compute the travel time for a packet. Will involve the current time 
+        and the transmission time.
         '''
         travel_time = self.delay + constants.SEC_TO_MS * \
                         (pkt.size * constants.BYTES_TO_MBITS * 1.0 / self.rate)
@@ -110,8 +111,9 @@ class Link:
 
     def get_buffer_occupancy(self):
         '''
-        Get the number of bytes in the bidirectional link that this link is a part of. This checks
-        the number of bytes in the buffer of the link that runs opposite to this one.
+        Get the number of bytes in the bidirectional link that this link is a 
+        part of. This checks the number of bytes in the buffer of the link 
+        that runs opposite to this one.
         '''
         other_link_obj = self.get_opposite_link_obj()
 
@@ -124,8 +126,9 @@ class Link:
 
     def get_buffer_pkts(self):
         '''
-        Get the number of bytes in the bidirectional link that this link is a part of. This checks
-        the number of bytes in the buffer of the link that runs opposite to this one.
+        Get the number of bytes in the bidirectional link that this link is a 
+        part of. This checks the number of bytes in the buffer of the link 
+        that runs opposite to this one.
         '''
         other_link_obj = self.get_opposite_link_obj()
         return self.buffer.qsize() + other_link_obj.buffer.qsize()

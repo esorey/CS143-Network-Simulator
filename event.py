@@ -3,7 +3,7 @@ class Event:
     flow_start = 1      # Flow begins at some time
     pckt_rcv = 2        # Packet is received by host or router
     link_free = 3       # Link is available to send packets over
-    flow_src_send_packets = 4       # Flow's source (host) is sending packets
+    flow_send_packets = 4       # Flow's source (host) is sending packets
     ack_rcv = 5         # Acknowledgement packet received by host
     pckt_send = 6       # Packet to be sent over a link
     update_FAST = 7     # Update FAST TCP window size
@@ -39,7 +39,7 @@ class Event:
                 and tells the link to send another packet if possible.
             Data: [linkID]
 
-        flow_src_send_packets:
+        flow_send_packets:
             Description: Enables the flow to tell the flow's source/dest (some host)
                 to send packets.
             Data: [hostID, list of packets]

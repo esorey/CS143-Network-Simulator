@@ -29,7 +29,7 @@ def EventHandler(cur_event):
         lnk = nwm.links[cur_event.data[0]]
         lnk.handle_link_free()
 
-    elif cur_event.event_type == Event.flow_src_send_packets:
+    elif cur_event.event_type == Event.flow_send_packets:
         src_host = nwm.hosts[cur_event.data[0]]
         pkts_to_send = cur_event.data[1]
         if constants.debug: 

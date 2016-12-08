@@ -20,14 +20,14 @@ ACK_PKT_SIZE = 64.0         # Bytes per acknowledgement packet
 RTABLE_PKT_SIZE = 64.0      # Bytes per routing table packet
 
 # Time Delays
-CONSECUTIVE_PKT_DELAY = 0.5     # Send new packets every 0.5 ms when sending consecutive packets
-TIMEOUT_TIME = 500             # Default packet timeout time, otherwise use avg RTT 
-FAST_PERIOD = 100                # Time to update window size for Fast TCP
-BELLMAN_PERIOD = 5000           # Time between each bellman ford event enqueued in ms
+CONSECUTIVE_PKT_DELAY = 0.5 # Send new consecutive packets every 0.5 ms 
+TIMEOUT_TIME = 500          # Default packet timeout time, otherwise use avg RTT 
+FAST_PERIOD = 100           # Time to update window size for Fast TCP
+BELLMAN_PERIOD = 5000       # Time between each bellman ford event enqueued (ms)
 
 # Other
-DEFAULT_NUM_WINDOWS = 1000      # Default window size for windowed averages
-DEC_PLACES = 2
+DEFAULT_NUM_WINDOWS = 1000  # Default window size for windowed averages
+DEC_PLACES = 2				# Round the decimal places for analytic's times
 
 # Global Variables
 global system_EQ            # the global event queue struct
