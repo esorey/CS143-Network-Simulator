@@ -52,12 +52,11 @@ class Analytics:
 
     def log_buff_occupancy(self, linkID, currTime, buffOccupancy):
         ''' Arrange dictionary by linkID followed by currTime'''
-        test = (linkID in self.plotlinks)
         if linkID in self.plotlinks:
             if linkID in self.link_buff_occupancy:
-                self.link_buff_occupancy[linkID].append((currTime, buffOccupancy/constants.DATA_PKT_SIZE))
+                self.link_buff_occupancy[linkID].append((currTime, buffOccupancy))
             else:
-                self.link_buff_occupancy[linkID] = [(currTime, buffOccupancy/constants.DATA_PKT_SIZE)]
+                self.link_buff_occupancy[linkID] = [(currTime, buffOccupancy)]
 
 
     def log_flow_rate(self, flowID, numBytes, RTT, currTime): 
@@ -92,13 +91,13 @@ class Analytics:
                 self.flow_send_rate[flowID] = [(currTime, numBytes)]
 
 
-    def log_packet_RTD(self, flowID, timeStart, timeEnd):
+    def log_packet_RTD(self, flowID, RTT, timeEnd):
         ''' The round trip delay for a packet for a specific packet '''
         if flowID in self.plotflows:
             if flowID in self.flow_packet_RTD:
-                self.flow_packet_RTD[flowID].append((timeEnd, timeEnd - timeStart))
+                self.flow_packet_RTD[flowID].append((timeEnd, RTT))
             else:
-                self.flow_packet_RTD[flowID] = [(timeEnd, timeEnd - timeStart)]
+                self.flow_packet_RTD[flowID] = [(timeEnd, RTT)]
 
         
    
