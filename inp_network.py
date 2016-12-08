@@ -28,6 +28,8 @@ def inp_network(file):
     sec_count = 0
     # Temporary host dictionary to keep track of the links attached to a host
     temp_H = {}
+    # Keep track of which line in the plot section we are on
+    plot_line = 0
     # Read each line in the file
     for line in f:
         # keep track of which section we're in
@@ -126,12 +128,18 @@ def inp_network(file):
             if params[0] in nwm.flows:
                 print('Error: flow {} defined twice'.format(params[0]))
                 return False
-            if constants.cngstn_ctrl == constants.NO_CNGSTN_CTRL:
+            if params[5] == 0:
                 nwm.flows[params[0]] = Flow(params[0],params[1],params[2],float(params[3]), float(params[4])*constants.SEC_TO_MS)
-            elif constants.cngstn_ctrl == constants.TCP_RENO:
+            elif params[5] == 'R':
                 nwm.flows[params[0]] = FlowReno(params[0],params[1],params[2],float(params[3]), float(params[4])*constants.SEC_TO_MS)
-            elif constants.cngstn_ctrl == constants.FAST_TCP:
+            elif params[5] == 'F':
                 nwm.flows[params[0]] = FlowFast(params[0],params[1],params[2],float(params[3]), float(params[4])*constants.SEC_TO_MS)
+
+        if sec_count == 2:
+            if plot_line == 0:
+                nwm.links2plot = params
+            elif plot_line == 1:
+                nwm.flows2plot = params
 
     f.close()
 
