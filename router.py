@@ -23,7 +23,7 @@ class Router:
         # Get dict of hosts
         routing_table = {}
         hosts_dict = nwm.hosts
-        print(nwm.hosts)
+        #print(nwm.hosts)
         for host_id in hosts_dict.keys():
             host_obj = nwm.get_host_from_id(host_id)
             host_link_id = host_obj.out_link
@@ -40,7 +40,7 @@ class Router:
             else:
                 routing_table[host_id] = [None, float("Inf"), self.id]
 
-        #print("Routing table for " + self.id + " is " + str(routing_table))
+        ##print("Routing table for " + self.id + " is " + str(routing_table))
         self.routingTable = routing_table
 
     def modify_routing_table(self):
@@ -64,7 +64,7 @@ class Router:
             else:
                 routing_table[host_id] = [flipped_link_id, float("Inf"), self.id]
 
-        print("Routing table for " + self.id + " is " + str(routing_table))
+        #print("Routing table for " + self.id + " is " + str(routing_table))
         self.routingTable = routing_table
         
     '''Bellman-Ford Algorithm: Update routing tables based
@@ -100,7 +100,7 @@ class Router:
  
         for u, v, w in self.graph:
             if bufTable[u] != float('Inf') and bufTable[u] + w < bufTable[v]:
-                print("!--Graph contains negative weight cycle--!")
+                #print("!--Graph contains negative weight cycle--!")
                 return
 
     # starts bellman ford             
@@ -119,7 +119,7 @@ class Router:
         self.changePrev = self.changeCurr
         self.changeCurr = False
         if type(pckt) is RoutingTablePacket:
-            #print("Routing table for " + self.id + " is " + str(self.routingTable))
+            ##print("Routing table for " + self.id + " is " + str(self.routingTable))
 
             # do bellman Ford
             # check the routing table of the packet
@@ -129,8 +129,8 @@ class Router:
             # is curr occupancy + value  in the routing table from the other guy
             for hosts in pckt.routing_table.keys():
                 new_cost = pckt.routing_table[hosts][1] + link_cost
-                #print("New Cost: " + str(new_cost))
-                #print("original cost: " + str(self.routingTable[hosts][1]))
+                ##print("New Cost: " + str(new_cost))
+                ##print("original cost: " + str(self.routingTable[hosts][1]))
                 if new_cost < self.routingTable[hosts][1]:
                     self.routingTable[hosts][1] = new_cost
                     # want to flip the ID because direction is reversed
@@ -138,7 +138,7 @@ class Router:
                     self.changeCurr = True
 
             if self.changeCurr == True:
-                print("CHECK: " + str(self.routingTable))
+                #print("CHECK: " + str(self.routingTable))
                 self.broadcastRTPackets()
             if self.changePrev == True and self.changeCurr == False:
                 constants.Bellman_not_done -= 1
