@@ -4,6 +4,8 @@ from packet import AckPacket, DataPacket
 from event_queue import EventQueue
 from event import Event
 from analytics import Analytics
+import network_map as nwm
+from flow import Flow
 
 class Host:
     '''
@@ -33,7 +35,7 @@ class Host:
             self.tellFlowAckReceived(pckt)
 
         elif type(pckt) is DataPacket:
-            if constants.cngstn_ctrl == constants.NO_CNGSTN_CTRL:
+            if type(nwm.flows[pckt.owner_flow]) is Flow:
                 self.directlySendAck(pckt)
             else:
                 self.tellFlowDataReceived(pckt)
