@@ -17,12 +17,14 @@ class FlowFast:
         self.data_amt = data_amt    # Size of data in MB
         self.start = start          # Time at which flow begins
         
-        self.windowSize = 1.0        # set in congestion control algorithm, initialize to 1 for RENO and FAST
+        self.windowSize = 1.0       # set in congestion control algorithm
+                                    # initialize to 1 for RENO and FAST
 
         self.done = False
 
         # Number of data packets the flow needs to send
-        self.num_packets = math.ceil(data_amt * constants.MB_TO_BYTES / constants.DATA_PKT_SIZE)
+        self.num_packets = math.ceil(data_amt * constants.MB_TO_BYTES / \
+            constants.DATA_PKT_SIZE)
 
         # Packet that we will send next, if this is equal to num_packets
         #   then we have attempted to send all packets. Packets should now be
@@ -53,7 +55,8 @@ class FlowFast:
             self.unreceivedpackets.remove(data_packet.packet_id)
 
         if len(self.unreceivedpackets) > 0:
-            next_expected_packet = self.unreceivedpackets[0]  # Update expected ACK ID
+            # Update expected ACK ID
+            next_expected_packet = self.unreceivedpackets[0]  
         else:
             next_expected_packet = self.num_packets
 
@@ -112,17 +115,23 @@ class FlowFast:
                 num_packets_sent += 1
 
         # Log that packets were sent
-        constants.system_analytics.log_flow_send_rate(self.ID, num_packets_sent*constants.DATA_PKT_SIZE, constants.system_EQ.currentTime)
+        constants.system_analytics.log_flow_send_rate(self.ID, \
+            num_packets_sent * constants.DATA_PKT_SIZE, \
+            constants.system_EQ.currentTime)
 
 
     # This will be called by event handler in the case of a packet timeout
     def handlePacketTimeout(self, packetID):
-        if packetID in self.unackPackets and packetID not in self.timeouts_to_cancel:               # If packet is unacknowledged
+        # If packet is unacknowledged
+        if packetID in self.unackPackets and \
+            packetID not in self.timeouts_to_cancel:    
             #print("Got timeout event for packet %d" % packetID)
             self.timeout_ctr += 1
-            self.unackPackets.remove(packetID)          # Remove packet from unacknowledged packets
+            # Remove packet from unacknowledged packets
+            self.unackPackets.remove(packetID)         
 
-            pkt = DataPacket(packetID, self.source, self.dest, self.ID, constants.system_EQ.currentTime)
+            pkt = DataPacket(packetID, self.source, self.dest, self.ID, \
+                    constants.system_EQ.currentTime)
             self.sendPacket(pkt)
 
         if packetID in self.timeouts_to_cancel:
@@ -135,13 +144,15 @@ class FlowFast:
         else:
             avgRTT = float(self.sumRTT)/float(self.numRTT)
             doubW = 2 * self.windowSize
-            eqW = (1-self.gamma) * float(self.windowSize) + self.gamma * float(self.minRTT/avgRTT * self.windowSize + self.alpha)
+            eqW = (1-self.gamma) * float(self.windowSize) + self.gamma * \
+                    float(self.minRTT/avgRTT * self.windowSize + self.alpha)
             self.windowSize = min(doubW, eqW)
 
         self.logWindowSize()
 
         # Enqueue an event to update Fast TCP W after certain time
-        FAST_event = Event(Event.update_FAST, constants.system_EQ.currentTime + constants.FAST_PERIOD, [self.ID])
+        FAST_event = Event(Event.update_FAST, constants.system_EQ.currentTime \
+                    + constants.FAST_PERIOD, [self.ID])
         constants.system_EQ.enqueue(FAST_event)
 
 
@@ -164,15 +175,18 @@ class FlowFast:
             self.unackPackets.append(pkt.packet_id)
 
             # Calculate the time at which to timeout
-            timeout_time = constants.system_EQ.currentTime + constants.TIMEOUT_TIME
+            timeout_time = constants.system_EQ.currentTime \
+                        + constants.TIMEOUT_TIME
 
             # Create and enqueue timeout event
             timeout_ev = Event(Event.pckt_timeout, timeout_time, [pkt])
             constants.system_EQ.enqueue(timeout_ev)
-            event_to_send = Event(Event.flow_src_send_packets, constants.system_EQ.currentTime, [self.source, [pkt]])
+            event_to_send = Event(Event.flow_send_packets, \
+                    constants.system_EQ.currentTime, [self.source, [pkt]])
 
         else:
-            event_to_send = Event(Event.flow_src_send_packets, constants.system_EQ.currentTime, [self.dest, [pkt]])
+            event_to_send = Event(Event.flow_send_packets, \
+                        constants.system_EQ.currentTime, [self.dest, [pkt]])
             #print("Sending ACK packet ID %d" %pkt.packet_id)
 
         constants.system_EQ.enqueue(event_to_send)
@@ -182,11 +196,11 @@ class FlowFast:
         for PID in self.unackPackets:
             if PID < self.last_unackd:
                 self.unackPackets.remove(PID)
-
         return (len(self.unackPackets)-cur_length)
 
     def logWindowSize(self):
-        constants.system_analytics.log_window_size(self.ID, constants.system_EQ.currentTime, self.windowSize)
+        constants.system_analytics.log_window_size(self.ID, \
+            constants.system_EQ.currentTime, self.windowSize)
 
 
 
