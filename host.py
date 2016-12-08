@@ -20,10 +20,6 @@ class Host:
         Send packets across this host's link
         '''
 
-        if constants.debug: 
-            print("Sending Packets: ")
-            print("\t" + str(packetlist))
-
         for pckt in packetlist:
             sendPckt = Event(Event.pckt_send, constants.system_EQ.currentTime,
                         [self.out_link, pckt])
