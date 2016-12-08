@@ -1,8 +1,8 @@
 # constants.py
 # Contains the constants that other classes and files will use
-testcase = 2                # Chose which test case to run
+testcase = 1                # Chose which test case to run
 
-cngstn_ctrl = 2             # Choose which congestion control algorithm to run
+cngstn_ctrl = 1             # Choose which congestion control algorithm to run
 NO_CNGSTN_CTRL = 0
 TCP_RENO = 1
 FAST_TCP = 2
@@ -33,7 +33,6 @@ DEC_PLACES = 2
 global system_EQ            # the global event queue struct
 global system_analytics     # the global analytics class
 
-global Bellman_not_done     # Determines if bellman ford is done running
 global debug                # When debugging
 global all_flows_done       # Indicates if all flows are completed
 global bellman_ford         # If we are running bellman ford

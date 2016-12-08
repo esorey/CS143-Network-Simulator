@@ -94,7 +94,7 @@ class Analytics:
         
    
     def log_link_rate(self, linkID, pktsize, currTime):
-         '''link rate should read the time that this delay was calculated for the 
+        '''link rate should read the time that this delay was calculated for the 
         link and update the relevant link delay'''
         link_key = linkID[0:-1]
         currTime = round(currTime, constants.DEC_PLACES)
