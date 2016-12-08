@@ -3,6 +3,8 @@ links = {}
 flows = {}
 hosts = {}
 routers = {}
+links2plot = []
+flows2plot = []
 
 
 

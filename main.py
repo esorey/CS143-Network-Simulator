@@ -28,6 +28,8 @@ if __name__ == "__main__":
     if not validNetwork:
         print("The network was not valid")
         exit(1)
+    Analytics.plotlinks = nwm.links2plot
+    Analytics.plotflows = nwm.flows2plot
     # Should run Bellman Ford first
     BellmanFord.runBellmanFord()
     # Continue to dequeue events until it is empty
