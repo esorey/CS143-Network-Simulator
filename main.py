@@ -1,13 +1,15 @@
 import sys
-from event_queue import EventQueue
 import constants
-import network_map as nwm
+import BellmanFord
+
+from event_queue import EventQueue
 from eventhandler import EventHandler
 from flow import Flow
 from inp_network import inp_network
 from event import Event
 from analytics import Analytics
-import BellmanFord
+
+import network_map as nwm
 
 if __name__ == "__main__":
     # Need absolute path

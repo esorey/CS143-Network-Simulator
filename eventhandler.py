@@ -8,16 +8,20 @@ import constants
 import BellmanFord
 
 def EventHandler(cur_event):
-    if cur_event.event_type == Event.flow_start:
+    ''' 
+    Based on the current event's event type, the event handler will perform
+    different functions. 
+    '''
+    if cur_event.event_type == Event.flow_start:    # Start the flow
         print(nwm.flows)
         print(cur_event.data[0])
         cur_flow = nwm.flows[cur_event.data[0]]    # Convert flow ID into flow
-
         cur_flow.flowStart()
 
-    elif cur_event.event_type == Event.pckt_rcv:
+    elif cur_event.event_type == Event.pckt_rcv:    
+        # notify host or router of packet it has received
         if cur_event.data[0][0] == 'H':
-            rcv_host = nwm.hosts[cur_event.data[0]]                # Convert host ID to host
+            rcv_host = nwm.hosts[cur_event.data[0]] # Convert host ID to host
             rcv_packet = cur_event.data[1]
             rcv_host.receivePacket(rcv_packet)
         elif cur_event.data[0][0] == 'R':
@@ -25,11 +29,13 @@ def EventHandler(cur_event):
             rcv_packet = cur_event.data[1]
             rcv_router.receivePackets(rcv_packet)
 
-    elif cur_event.event_type == Event.link_free:
+    elif cur_event.event_type == Event.link_free:   
+        # indicate the link is free to send more packets across it
         lnk = nwm.links[cur_event.data[0]]
         lnk.handle_link_free()
 
     elif cur_event.event_type == Event.flow_send_packets:
+        # Host is assigned a list of packets to send
         src_host = nwm.hosts[cur_event.data[0]]
         pkts_to_send = cur_event.data[1]
         if constants.debug: 
@@ -40,38 +46,42 @@ def EventHandler(cur_event):
         src_host.sendPackets(pkts_to_send)
 
     elif cur_event.event_type == Event.ack_rcv:
+        # Log the appropriate acknowledgment received in the correct flow
         if constants.debug: print("ACK data: %s" % cur_event.data)
         cur_flow = nwm.flows[cur_event.data[1]]
         packetID = cur_event.data[0]
         ack_time = cur_event.data[2]
-
-
         cur_flow.getACK(packetID, ack_time)
 
 
     elif cur_event.event_type == Event.pckt_send:
+        # Enqueues a packet onto cur_link's buffer
         cur_link = nwm.links[cur_event.data[0]]
         cur_pckt = cur_event.data[1]
 
         cur_link.enqueue_packet(cur_pckt)
 
     elif cur_event.event_type == Event.update_FAST:
+        # Fast TCP window size is updated peridically. 
         cur_flow = nwm.flows[cur_event.data[0]]
         cur_flow.updateW()
 
     elif cur_event.event_type == Event.pckt_timeout:
+        # Instruct the flow of the event to handle the packet timeout
         cur_pckt = cur_event.data[0]
         cur_flow = nwm.flows[cur_pckt.owner_flow]
         cur_flow.handlePacketTimeout(cur_pckt.packet_id)
 
     elif cur_event.event_type == Event.bellman_ford: 
+        # Run Bellman Ford and enqueue the next instance of bellman ford
         newTime = cur_event.time + constants.BELLMAN_PERIOD
-        print("TIME BF: " + str(newTime))
         bellman_event = Event(Event.bellman_ford, newTime, None)
         constants.system_EQ.enqueue(bellman_event)
         BellmanFord.runBellmanFord()
 
     elif cur_event.event_type == Event.flow_done:
+        # count how many flows are finished. Main will run analytics when all
+        # flows are done
         done_cnt = 0
         for flow in nwm.flows.keys():
             if nwm.flows[flow].done == True:
@@ -82,6 +92,7 @@ def EventHandler(cur_event):
             print(cur_event.data[0])
 
     elif cur_event.event_type == Event.flow_rcv_data:
+        # indicate to the appropriate flow that it has received a data packet
         cur_flow = nwm.flows[cur_event.data[0]]
         cur_pkt = cur_event.data[1]
         cur_flow.flowReceiveDataPacket(cur_pkt)

@@ -214,10 +214,10 @@ class FlowReno():
             # Create and enqueue timeout event
             timeout_ev = Event(Event.pckt_timeout, timeout_time, [pkt])
             constants.system_EQ.enqueue(timeout_ev)
-            event_to_send = Event(Event.flow_src_send_packets, constants.system_EQ.currentTime, [self.source, [pkt]])
+            event_to_send = Event(Event.flow_send_packets, constants.system_EQ.currentTime, [self.source, [pkt]])
 
         else:
-            event_to_send = Event(Event.flow_src_send_packets, constants.system_EQ.currentTime, [self.dest, [pkt]])
+            event_to_send = Event(Event.flow_send_packets, constants.system_EQ.currentTime, [self.dest, [pkt]])
             #print("Sending ACK packet ID %d" %pkt.packet_id)
 
         
