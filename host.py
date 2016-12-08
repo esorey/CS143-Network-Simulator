@@ -42,12 +42,13 @@ class Host:
 
             self.logReceivedDataPacket(pckt)
 
+    
     def logReceivedDataPacket(self, pkt):
         '''
         Log that a packet was received for packet delay analytics
         '''
-        constants.system_analytics.log_packet_RTD(pkt.owner_flow,
-            pkt.timestamp, constants.system_EQ.currentTime)
+        #constants.system_analytics.log_packet_RTD(pkt.owner_flow,
+        #    pkt.timestamp, constants.system_EQ.currentTime)
 
     def tellFlowAckReceived(self, ackpkt):
         '''

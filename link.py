@@ -122,6 +122,14 @@ class Link:
 
         return self.buffer_space_used + other_link_obj.buffer_space_used
 
+    def get_buffer_pkts(self):
+        '''
+        Get the number of bytes in the bidirectional link that this link is a part of. This checks
+        the number of bytes in the buffer of the link that runs opposite to this one.
+        '''
+        other_link_obj = self.get_opposite_link_obj()
+        return self.buffer.qsize() + other_link_obj.buffer.qsize()
+
     def get_opposite_link_obj(self):
         '''
         Get the link object that runs opposite to this one.
@@ -135,7 +143,7 @@ class Link:
         Log the total buffer occupancy for system analytics.
         '''
         constants.system_analytics.log_buff_occupancy(self.ID[0:-1],
-                constants.system_EQ.currentTime, self.get_buffer_occupancy())
+                constants.system_EQ.currentTime, self.get_buffer_pkts())
 
     def log_packet_dropped(self, num_packets):
         '''

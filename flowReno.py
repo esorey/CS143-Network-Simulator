@@ -192,6 +192,8 @@ class FlowReno():
 
     def updateRTTandLogRTD(self, ackTime):
         RTT = constants.system_EQ.currentTime - ackTime
+        constants.system_analytics.log_packet_RTD(self.ID,
+            RTT, constants.system_EQ.currentTime)
 
         if self.minRTT == 0:        # Save minimum RTT time
             self.minRTT = RTT
