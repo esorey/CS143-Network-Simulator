@@ -196,10 +196,11 @@ class FlowReno():
                 self.timeouts_to_cancel.append(packetID)
                 self.sendPacket(pkt)
 
-        if self.last_unackd == self.num_packets: # We're done with this flow...YAY!
+        if self.last_unackd == self.num_packets: # We're done with this flow
             self.unackPackets.clear()
             self.done = True
-            #print("Flow %s is done at time %s" % (self.ID, constants.system_EQ.currentTime))
+            #print("Flow %s is done at time %s" % (self.ID, 
+            # constants.system_EQ.currentTime))
             flow_done_event = Event(Event.flow_done, \
                 constants.system_EQ.currentTime, \
                 [constants.system_EQ.currentTime])
@@ -216,7 +217,7 @@ class FlowReno():
             self.minRTT = RTT
         elif RTT < self.minRTT:
             self.minRTT = RTT
-        # CHECK: is average only over current time period or over whole time
+        # is average only over current time period or over whole time
         self.sumRTT += RTT
 
 
