@@ -38,14 +38,14 @@ class Analytics:
         self.flow_window_size = {}
 
         self.plotlinks = plot_links # Links we care about logging/plotting
-        self.plotflow = plot_flows  # Flows we care about logging/plotting
+        self.plotflows = plot_flows  # Flows we care about logging/plotting
 
 
     def log_buff_occupancy(self, linkID, currTime, buffOccupancy):
         '''
         Log the buffer occupancy for this link.
         '''
-        currTime = currTime, constants.DEC_PLACES * constants.MS_TO_SEC
+        currTime = currTime * constants.MS_TO_SEC
 
         if linkID in self.plotlinks:
             if linkID in self.link_buff_occupancy:
@@ -258,7 +258,8 @@ class Analytics:
             time = [elt[0] for elt in self.link_buff_occupancy[linkID]]
             buff_occ_data = [elt[1] for elt in self.link_buff_occupancy[linkID]]
 
-            plt.plot(time, buff_occ_data, label=linkID, marker='o',
+            buff_occ_t, buff_occ_d = self.getAvg(time, buff_occ_data)
+            plt.plot(buff_occ_t, buff_occ_d, label=linkID, marker='o',
                         linestyle='--', markersize=1, color=colors[color_ctr],
                         markeredgecolor=colors[color_ctr])
 
@@ -281,9 +282,10 @@ class Analytics:
         for flowID in sorted_flowIDs:
             # Get packet delay times and data separately
             time = [elt[0] for elt in self.flow_packet_RTD[flowID]]
-            pkt_delay_S = [elt[1] for elt in self.flow_packet_RTD[flowID]]
+            pkt_delay_data = [elt[1] for elt in self.flow_packet_RTD[flowID]]
 
-            plt.plot(time, pkt_delay_S, label=flowID, marker='o',
+            pd_t, pd_d = self.getAvg(time, pkt_delay_data)
+            plt.plot(pd_t, pd_d, label=flowID, marker='o',
                         linestyle='--', markersize=1, color=colors[color_ctr],
                         markeredgecolor=colors[color_ctr])
 

@@ -14,7 +14,7 @@ class Link:
     def __init__(self, ID, rate, delay, A, B, buffer_cap):
         self.ID = ID
         self.rate = float(rate)     # Link rate in megabits per second
-        self.delay = float(delay)   # Link delay in ms
+        self.delay = 0              # Link delay in ms
         self.A = A                  # Link source
         self.B = B                  # Link destination
 
@@ -26,7 +26,7 @@ class Link:
         self.buffer = queue.Queue()
 
 
-    def handle_link_free(self, delay=0.0):
+    def handle_link_free(self):
         '''
         Respond to an event that frees the link. If there is something on the
         buffer, dequeue it and send it across the link (i.e. put link free
@@ -45,7 +45,7 @@ class Link:
 
             # Calculate when packet will reach end of link
             travel_time = float(constants.system_EQ.currentTime + 
-                            self.get_packet_travel_time(pkt) + delay)
+                            self.get_packet_travel_time(pkt))
             
             self.log_link_rate(pkt.size, travel_time)   # Log link rate
             
@@ -75,7 +75,7 @@ class Link:
             self.log_buffer_occupancy()
             self.log_packet_dropped(0)  # Log no packet dropped
 
-            self.handle_link_free(self.delay)
+            self.handle_link_free()
 
         # If buffer is full, log that we dropped a packet
         elif self.get_buffer_occupancy() + pkt.size > self.buffer_capacity: 
