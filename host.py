@@ -40,9 +40,6 @@ class Host:
             else:
                 self.tellFlowDataReceived(pckt)
 
-            self.logReceivedDataPacket(pckt)
-
-
     def tellFlowAckReceived(self, ackpkt):
         '''
         Send the acknowledgment packet to the flow (through the event queue)

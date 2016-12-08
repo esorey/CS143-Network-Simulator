@@ -1,7 +1,7 @@
 def flip_link_id(id):
-	'''
-	Flip the link ID given
-	'''
+    '''
+    Flip the link ID given
+    '''
     res = None
     if id[-1] == 'a':
         res = id[:-1] + 'b'

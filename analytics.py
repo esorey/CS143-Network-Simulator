@@ -4,43 +4,60 @@ import collections
 
 class Analytics:
 
-    def __init__(self, outFile):
-        time_step = []      # Holds the time step (from global time variable)
-                            #   at which data was recorded
-                            # Do we need this?
+    def __init__(self, plot_links, plot_flows):
+        '''
+        Logs and plots the relevant analytics for the network simulation
+
+        link_buff_occupancy (dictionary of lists) - key is the linkID (without 
+            direction specifier), values are lists of (time, buffer_occupancy)
+            tuples
+
+        link_packet_lost (dictionary of dictionaries) - key is the linkID 
+            (without direction specifier), second key is the time, value
+            is the number of packets lost at this time
+
+        link_flow_rate (dictionary of lists) - key is the linkID, values are
+            lists of (time, packets sent) tuples.
+
+        flow_send_rate (dictionary of lists) - key is the flowID, values are
+            lists of (time, data sent) tuples. 
+
+        flow_packet_RTD (dictionary of lists) - key is the flowID, values are
+            lists of (time, packet RTD) tuples.
+
+        flow_window_size (dictionary of lists) - key is the flowID, values are
+            lists of (time, window size) tuples.
 
         '''
-        The data types below are dictionaries with:
-            keys: Link IDs (strings)
-            values: list of tuples containing link information specific to
-                the dictionary and the associated time
-        '''
-        self.link_buff_occupancy = {}    # Stores buffer occupancy (number of
-                                    #   packes in the buffer at the time).
-                                    #   Updated any time packet is added to
-                                    #   any link buffer
-        self.link_packet_lost = {}       # Stores number of packets lost. Updated
-                                    #   every time a packet is added to a
-                                    #   full buffer
-        self.link_flow_rate = {}         # Stores number of packets sent over a
-                                    #   link. Updates every time a packet 
-                                    #   receive event occurs.
+        self.link_buff_occupancy = {}
+        self.link_packet_lost = {}
+        self.link_flow_rate = {}
 
-        # Still need per flow: send/receive rate, packet round trip delay
-        self.flow_rate = {}
         self.flow_send_rate = {}
         self.flow_packet_RTD = {}
         self.flow_window_size = {}
 
-        self.outFile = outFile      # A test file for writing output to
-        self.pckts = 0
+        self.plotlinks = plot_links # Links we care about logging/plotting
+        self.plotflow = plot_flows  # Flows we care about logging/plotting
 
-        self.plotlinks = []
-        self.plotflow = []
+
+    def log_buff_occupancy(self, linkID, currTime, buffOccupancy):
+        '''
+        Log the buffer occupancy for this link.
+        '''
+        currTime = currTime, constants.DEC_PLACES * constants.MS_TO_SEC
+
+        if linkID in self.plotlinks:
+            if linkID in self.link_buff_occupancy:
+                self.link_buff_occupancy[linkID].append((currTime, buffOccupancy))
+            else:
+                self.link_buff_occupancy[linkID] = [(currTime, buffOccupancy)]
 
     def log_dropped_packet(self, linkID, currTime, numPkts):
-        '''This logs that this link dropped a packet at the current time.'''
-        currTime = currTime * constants.MS_TO_SEC
+        '''
+        Log that linkID dropped numPkts packets at currTime.
+        '''
+        currTime = round(currTime, constants.DEC_PLACES) * constants.MS_TO_SEC 
 
         if linkID in self.plotlinks:
             if linkID in self.link_packet_lost:
@@ -52,41 +69,46 @@ class Analytics:
                 self.link_packet_lost[linkID] = {}
                 self.link_packet_lost[linkID][currTime] = numPkts
 
-    def log_buff_occupancy(self, linkID, currTime, buffOccupancy):
-        ''' Arrange dictionary by linkID followed by currTime'''
-        currTime = currTime * constants.MS_TO_SEC
-        if linkID in self.plotlinks:
-            if linkID in self.link_buff_occupancy:
-                self.link_buff_occupancy[linkID].append((currTime, buffOccupancy))
+    def log_link_rate(self, linkID, pktsize, currTime):
+        '''
+        Log that pktsize packets were sent at currTime over this link. Check 
+        if there's already data for link rate at this time, if there is then
+        just update it.
+        '''
+
+        link_key = linkID[0:-1]
+        currTime = round(currTime, constants.DEC_PLACES) * constants.MS_TO_SEC
+
+        if link_key in self.plotlinks:
+            if link_key in self.link_flow_rate:
+                prev_pkts_sent = 0
+                time_list = [pt[0] for pt in self.link_flow_rate[link_key]]
+
+                # If we already have data for this time, then just update the data
+                if currTime in time_list:
+                    prev_ind = time_list.index(currTime)
+                    prev_pkts_sent = self.link_flow_rate[link_key][prev_ind][1]
+                    del self.link_flow_rate[link_key][prev_ind]     # Remove previous data
+
+                self.link_flow_rate[link_key].append((currTime, pktsize+prev_pkts_sent))
             else:
-                self.link_buff_occupancy[linkID] = [(currTime, buffOccupancy)]
-
-
-    def log_flow_rate(self, flowID, numBytes, RTT, currTime): 
-        ''' link flow rate calculation stores number of packets properly
-        sent through flow in the span between current time to previous time'''
-        if flowID in self.plotflows:
-            if flowID in self.flow_rate:
-                self.flow_rate[flowID].append((currTime, numBytes))
-            else:
-                self.flow_rate[flowID] = [(currTime, numBytes)]
-
+                self.link_flow_rate[link_key] = [(currTime, pktsize)]
     
     def log_flow_send_rate(self, flowID, numBytes, currTime):
-        '''flow send rate should read the updating window sizes, which
-        decide the send rate of each flow, and update it to the relevant time'''
+        '''
+        Log how many packets a flow sends.
+        '''
         if flowID in self.plotflows:
-            currTime = round(currTime, constants.DEC_PLACES)
-            prev_data_sent = 0
+            currTime = round(currTime, constants.DEC_PLACES) * constants.MS_TO_SEC
 
             if flowID in self.flow_send_rate:
-                flow_send_rate_points = self.flow_send_rate[flowID]
-                flow_send_rate_times = [pt[0] for pt in flow_send_rate_points]
+                prev_data_sent = 0
+                time_list = [pt[0] for pt in self.flow_send_rate[flowID]]
 
                 # if send rate has previously been logged at the current time
-                if currTime in flow_send_rate_times:
-                    prev_ind = flow_send_rate_times.index(currTime)
-                    prev_data_sent = flow_send_rate_points[prev_ind][1]
+                if currTime in time_list:
+                    prev_ind = time_list.index(currTime)
+                    prev_data_sent = self.flow_send_rate[flowID][prev_ind][1]
                     del self.flow_send_rate[flowID][prev_ind]
 
                 self.flow_send_rate[flowID].append((currTime, numBytes+prev_data_sent))
@@ -95,40 +117,21 @@ class Analytics:
 
 
     def log_packet_RTD(self, flowID, RTT, timeEnd):
-        ''' The round trip delay for a packet for a specific packet '''
+        '''
+        Log the packet round trip delay for this flow.
+        '''
         timeEnd = timeEnd * constants.MS_TO_SEC
+
         if flowID in self.plotflows:
             if flowID in self.flow_packet_RTD:
                 self.flow_packet_RTD[flowID].append((timeEnd, RTT))
             else:
                 self.flow_packet_RTD[flowID] = [(timeEnd, RTT)]
 
-        
-   
-    def log_link_rate(self, linkID, pktsize, currTime):
-        '''link rate should read the time that this delay was calculated for the 
-        link and update the relevant link delay'''
-        link_key = linkID[0:-1]
-        if link_key in self.plotlinks:
-            
-            currTime = round(currTime, constants.DEC_PLACES)
-            prev_pkts_sent = 0
-
-            if link_key in self.link_flow_rate:
-                link_flow_rate_points = self.link_flow_rate[link_key]
-                link_flow_rate_times = [pt[0] for pt in link_flow_rate_points]
-
-                # If we already have data for this time, then just update the data
-                if currTime in link_flow_rate_times:
-                    prev_ind = link_flow_rate_times.index(currTime)
-                    prev_pkts_sent = link_flow_rate_points[prev_ind][1]
-                    del self.link_flow_rate[link_key][prev_ind]     # Remove previous data
-
-                self.link_flow_rate[link_key].append((currTime, pktsize+prev_pkts_sent))
-            else:
-                self.link_flow_rate[link_key] = [(currTime, pktsize)]
-
     def log_window_size(self, flowID, currTime, windowSize):
+        '''
+        Log the flow's window size.
+        '''
         currTime = currTime * constants.MS_TO_SEC
 
         if flowID in self.plotflows:
@@ -137,19 +140,13 @@ class Analytics:
             else:
                 self.flow_window_size[flowID] = [(currTime, windowSize)]
 
-
-    def writeOutput(self):
-        '''This is a test function for writing output to a test text file. '''
-        self.outFile.write("link buff occupancy: ")
-        self.outFile.write(str(self.link_buff_occupancy))
-        self.outFile.write("link packet lost:  ")
-        self.outFile.write(str(self.link_packet_lost))
-        self.outFile.write("link flow rate: ")
-        self.outFile.write(str(self.link_flow_rate))
-        self.outFile.write("\n\n\n\n Total Number of Packets: %d" % self.pckts)
-
     def convertToWindow(self, times, data, numWindows=None):
-        # times should be sorted
+        '''
+        Converts the input times and data into numWindows discrete windows. The
+        return value ret_times is a list of lists where each row represents the
+        times in a particular window. Similarly ret_data is a list of lists
+        where each row represents the data in that window.
+        '''
         if numWindows == None:
             numWindows = constants.DEFAULT_NUM_WINDOWS
 
@@ -185,6 +182,10 @@ class Analytics:
 
 
     def getRate(self, times, data, numWindows=None):
+        '''
+        This function takes the times and data input and converts it to a rate
+        by using the discrete windows.
+        '''
         if numWindows == None:
             numWindows = constants.DEFAULT_NUM_WINDOWS
 
@@ -194,156 +195,190 @@ class Analytics:
 
         ret_times = [sum(a)*1.0/len(a) for a in w_times]
         ret_data = [sum(a)*1.0/window_size for a in w_data]
+
+        return ret_times, ret_data
+
+    def getAvg(self, times, data, numWindows=None):
+        if numWindows == None:
+            numWindows = constants.DEFAULT_NUM_WINDOWS
+
+        window_size = max(times)/numWindows
+
+        w_times, w_data = self.convertToWindow(times, data, numWindows)
+
+        ret_times = [sum(a)*1.0/len(a) for a in w_times]
+        ret_data = [sum(a)*1.0/len(a) for a in w_data]
+
         return ret_times, ret_data
 
     def plotOutput(self):
-        #fig, axes = plt.subplots(nrows=4, ncols=1)
-        #fig.tight_layout()
         colors = ['k', 'r', 'b', 'g', 'm', 'y', 'c', '0.5', '0.75', '#B62828',
         '#0F644D', '#87C41C']
 
+        # Create figure 1: link rate
         color_ctr = 0
-        #plt.subplot(611)        # link rate plot
         plt.figure(num=1, figsize=(7,2))
-        sorted_linkIDs = sorted(self.link_flow_rate.keys())
-        for linkID in sorted_linkIDs:
-            if constants.debug:
-                print("LINK FLOW RATE LINK ID:")
-                print(linkID + " " + colors[color_ctr])
-            #if list(self.link_flow_rate.keys()).index(linkID) is not 1:
-            # Get time out of [time, rate] pairs
-            link_points = self.link_flow_rate[linkID]
-            link_points.sort(key=lambda x: x[0])
-            time = [elt[0]*constants.MS_TO_SEC for elt in link_points]
-            l_flow_rate_MBPS = [elt[1]*constants.BYTES_TO_MBITS for elt in link_points]
 
-            # Turned off windows
-            #LFR_t, LFR_d = self.getRate(time, l_flow_rate_MBPS)
-            plt.plot(time, l_flow_rate_MBPS, label=linkID, marker='o', linestyle='--', markersize=1, color=colors[color_ctr], markeredgecolor=colors[color_ctr])
+        sorted_linkIDs = sorted(self.link_flow_rate.keys())
+
+        for linkID in sorted_linkIDs:
+            link_points = self.link_flow_rate[linkID]   # Get (time, value)
+            link_points.sort(key=lambda x: x[0])        # Sort by time
+
+            # Get the link rate times and data separately
+            time = [elt[0] for elt in link_points]
+            link_rate_data = [elt[1]*constants.BYTES_TO_MBITS \
+                                for elt in link_points]
+
+            # Convert into window averaged rates
+            LFR_t, LFR_d = self.getRate(time, link_rate_data)
+
+            plt.plot(LFR_t, LFR_d, label=linkID, marker='o', linestyle='--',
+                        markersize=1, color=colors[color_ctr],
+                        markeredgecolor=colors[color_ctr])
+
             color_ctr += 1
 
         lgd = plt.legend(loc=7, bbox_to_anchor=(1.25,0.5))
         plt.xlabel('time (ms)')
         plt.ylabel('Link Rate (Mbps)')
-        plt.savefig("./Figures/Figure1-LinkRate", additional_artists=[lgd], bbox_inches="tight")
-        #plt.show()
 
+        plt.savefig("./Figures/Figure1-LinkRate", additional_artists=[lgd],
+                    bbox_inches="tight")
+
+
+        # Create figure 2: buffer occupancy
         color_ctr = 0
-        #plt.subplot(612)        # buffer occupancy plot
         plt.figure(num=2, figsize=(7,2))
+
         sorted_linkIDs = sorted(self.link_buff_occupancy.keys())
+
         for linkID in sorted_linkIDs:
-            if constants.debug:
-                print("LINK BUFF OCCUPANCY: ")
-                print(linkID + " " + colors[color_ctr])
+            # Get the link buffer occupancy times and data separately
             time = [elt[0] for elt in self.link_buff_occupancy[linkID]]
-            l_buff_occ_pkt = [elt[1] for elt in self.link_buff_occupancy[linkID]]
-            plt.plot(time, l_buff_occ_pkt, label=linkID, marker='o', linestyle='--', markersize=1, color=colors[color_ctr], markeredgecolor=colors[color_ctr])
+            buff_occ_data = [elt[1] for elt in self.link_buff_occupancy[linkID]]
+
+            plt.plot(time, buff_occ_data, label=linkID, marker='o',
+                        linestyle='--', markersize=1, color=colors[color_ctr],
+                        markeredgecolor=colors[color_ctr])
+
             color_ctr += 1
 
         lgd = plt.legend(loc=7, bbox_to_anchor=(1.25,0.5))
         plt.xlabel('time (ms)')
         plt.ylabel('Buffer Occupancy (KB)')
-        plt.savefig("./Figures/Figure2-BufferOccupancy", additional_artists=[lgd], bbox_inches="tight")
-        #plt.show()
 
+        plt.savefig("./Figures/Figure2-BufferOccupancy",
+                    additional_artists=[lgd], bbox_inches="tight")
+
+
+        # Create figure 3: packet delay
         color_ctr = 0
-        #plt.subplot(613)
-        '''
-        #old
-        time_RTD_list = list(self.flow_packet_RTD.values())
-        time = [tup[0] for tup in time_RTD_list]
-        pkt_RTD = [tup[1] for tup in time_RTD_list]
-        plt.plot(time, pkt_RTD, color='k')
-        plt.xlabel('time (ms)')
-        plt.ylabel('Packet Delay (ms)')
-        '''
-        #new
         plt.figure(num=3, figsize=(7,2))
+
         sorted_flowIDs = sorted(self.flow_packet_RTD.keys())
+
         for flowID in sorted_flowIDs:
-            if constants.debug:
-                print("PACKET DELAY FLOW ID:")
-                print(flowID + " " + colors[color_ctr])
-            #if list(self.link_flow_rate.keys()).index(linkID) is not 1:
-            # Get time out of [time, delay] pairs
+            # Get packet delay times and data separately
             time = [elt[0] for elt in self.flow_packet_RTD[flowID]]
-            # Get delay out of [time, delay] pairs
             pkt_delay_S = [elt[1] for elt in self.flow_packet_RTD[flowID]]
-            plt.plot(time, pkt_delay_S, label=flowID, marker='o', linestyle='--', markersize=1, color=colors[color_ctr], markeredgecolor=colors[color_ctr])
+
+            plt.plot(time, pkt_delay_S, label=flowID, marker='o',
+                        linestyle='--', markersize=1, color=colors[color_ctr],
+                        markeredgecolor=colors[color_ctr])
+
             color_ctr += 1
 
         lgd = plt.legend(loc=7, bbox_to_anchor=(1.25,0.5))
         plt.xlabel('time (ms)')
         plt.ylabel('Packet Delay (ms)')
-        plt.savefig("./Figures/Figure3-PacketDelay", additional_artists=[lgd], bbox_inches="tight")
 
-        #plt.show()
+        plt.savefig("./Figures/Figure3-PacketDelay", additional_artists=[lgd],
+                    bbox_inches="tight")
 
-        #plt.subplot(614)
-        plt.figure(num=4, figsize=(7,2))
+
+        # Create figure 4: flow rate
         color_ctr = 0
-        for flowID in self.flow_send_rate:
-            flow_rate_points = self.flow_send_rate[flowID]
-            flow_rate_points.sort(key=lambda x: x[0])
+        plt.figure(num=4, figsize=(7,2))
+        
+        sorted_flowIDs = sorted(self.flow_send_rate.keys())
+        for flowID in sorted_flowIDs:
+            flow_rate_points = self.flow_send_rate[flowID]  # Get (time, value)
+            flow_rate_points.sort(key=lambda x: x[0])       # Sort by time
 
-            time = [elt[0]*constants.MS_TO_SEC for elt in flow_rate_points]
-            f_flow_rate = [elt[1]*constants.BYTES_TO_MBITS for elt in flow_rate_points]
+            # Get flow rate times and data separately
+            time = [elt[0] for elt in flow_rate_points]
+            flow_rate_data = [elt[1]*constants.BYTES_TO_MBITS \
+                                for elt in flow_rate_points]
 
-            #FR_t, FR_d = self.getRate(time, f_flow_rate)
-            if constants.debug:
-                print(time)
-                print(f_flow_rate)
+            # Convert to window averaged rates
+            FR_t, FR_d = self.getRate(time, flow_rate_data)
 
-            #Turned off windows
-            plt.plot(time, f_flow_rate, label=flowID, marker='o', linestyle='--', markersize=1, color=colors[color_ctr], markeredgecolor=colors[color_ctr])
+            plt.plot(FR_t, FR_d, label=flowID, marker='o', linestyle='--',
+                        markersize=1, color=colors[color_ctr],
+                        markeredgecolor=colors[color_ctr])
+
             color_ctr += 1
 
         lgd = plt.legend(loc=7, bbox_to_anchor=(1.25,0.5))
         plt.xlabel('time (ms)')
         plt.ylabel('Flow Rate (Mbps)')
-        plt.savefig("./Figures/Figure4-FlowRate", additional_artists=[lgd], bbox_inches="tight")
 
-        #plt.show()
+        plt.savefig("./Figures/Figure4-FlowRate", additional_artists=[lgd],
+                    bbox_inches="tight")
 
+
+        # Create figure 5: packets dropped
         color_ctr = 0
-        #plt.subplot(615)
         plt.figure(num=5, figsize=(7,2))
+
         sorted_linkIDs = sorted(self.link_packet_lost.keys())
+
         for linkID in sorted_linkIDs:
             link_dict = self.link_packet_lost[linkID]
-            sorted_time = sorted(link_dict)
-            l_pkt_lost = []
+
+            sorted_time = sorted(link_dict)     # Get sorted list of times
+
+            l_pkt_lost = []                     # Create list of data  
             for time in sorted_time:
                 l_pkt_lost.append(link_dict[time])
-            plt.plot(sorted_time, l_pkt_lost, label=linkID, marker='o', linestyle='--', markersize=1, color=colors[color_ctr], markeredgecolor=colors[color_ctr])
+
+            plt.plot(sorted_time, l_pkt_lost, label=linkID, marker='o',
+                        linestyle='--', markersize=1, color=colors[color_ctr],
+                        markeredgecolor=colors[color_ctr])
+
             color_ctr += 1
+
         lgd = plt.legend(loc=7, bbox_to_anchor=(1.25,0.5))
         plt.xlabel('time (ms)')
         plt.ylabel('Packets Dropped')
-        plt.savefig("./Figures/Figure5-PacketsDropped", additional_artists=[lgd], bbox_inches="tight")
 
-        #plt.show()
+        plt.savefig("./Figures/Figure5-PacketsDropped",
+                    additional_artists=[lgd], bbox_inches="tight")
 
+
+        # Create figure 6: window size
         color_ctr = 0
-        #plt.subplot(616)        # link rate plot
         plt.figure(num=6, figsize=(7,2))
+
         sorted_flowIDs = sorted(self.flow_window_size.keys())
+
         for flowID in sorted_flowIDs:
-            if constants.debug:
-                print("WINDOW SIZE FLOW ID:")
-                print(flowID + " " + colors[color_ctr])
-            #if list(self.link_flow_rate.keys()).index(linkID) is not 1:
-            # Get time out of [time, rate] pairs
+            # Get time and data separately
             time = [elt[0] for elt in self.flow_window_size[flowID]]
-            # Get rate out of [time, rate] pairs
             flow_ws = [elt[1] for elt in self.flow_window_size[flowID]]
-            plt.plot(time, flow_ws, label=flowID, marker='o', linestyle='--', markersize=1, color=colors[color_ctr], markeredgecolor=colors[color_ctr])
+
+            plt.plot(time, flow_ws, label=flowID, marker='o', linestyle='--',
+                        markersize=1, color=colors[color_ctr],
+                        markeredgecolor=colors[color_ctr])
+
             color_ctr += 1
+
         lgd = plt.legend(loc=7, bbox_to_anchor=(1.25,0.5))
         plt.xlabel('time (ms)')
         plt.ylabel('Window Size (pkts)')
-        plt.savefig("./Figures/Figure6-WindowSize", additional_artists=[lgd], bbox_inches="tight")
-        # ALSO FIX UNITS
+
+        plt.savefig("./Figures/Figure6-WindowSize", additional_artists=[lgd],
+                    bbox_inches="tight")
 
         plt.show()
