@@ -46,18 +46,18 @@ class Flow:
 
     def getACK(self, packetID, ackTime):
 
-        print("Received acknowledgement %s" % packetID)
+        #print("Received acknowledgement %s" % packetID)
         #print("Unacknowledged packets")
         #print(self.unackPackets)
 
-        if self.numRTT != 0:
-            print("Avg RTT %f" % (self.sumRTT/self.numRTT))
+        #if self.numRTT != 0:
+        #    print("Avg RTT %f" % (self.sumRTT/self.numRTT))
 
         self.updateRTTandLogRTD(ackTime)
 
-        if packetID == 0:
-            print("First ack")
-            print(constants.system_EQ.currentTime)
+        #if packetID == 0:
+        #    print("First ack")
+        #    print(constants.system_EQ.currentTime)
 
         if (len(self.unackPackets) > 0) and (packetID == self.unackPackets[0]):    # Packet wasn't dropped
             self.unackPackets.remove(packetID)  # Mark as acknowledged
@@ -68,7 +68,7 @@ class Flow:
             for i in range(indofpkt):
                 PID = self.unackPackets[i]
                 self.packetsToSend.put_nowait(PID)
-                print("%s was lost" % PID)
+                #print("%s was lost" % PID)
 
             for i in range(indofpkt):
                 del self.unackPackets[0]
@@ -76,13 +76,13 @@ class Flow:
 
         if len(self.unackPackets) == 0 and self.packetsToSend.empty(): # We're done with this flow...YAY!
             self.done = True
-            print("Flow %s is done at time %s" % (self.ID, constants.system_EQ.currentTime))
+            #print("Flow %s is done at time %s" % (self.ID, constants.system_EQ.currentTime))
             flow_done_event = Event(Event.flow_done, constants.system_EQ.currentTime, [constants.system_EQ.currentTime])
             constants.system_EQ.enqueue(flow_done_event)
             return
 
         elif len(self.unackPackets) == 0: # We're finished with this window; send a new one
-            print("Send a new flow")
+            #print("Send a new flow")
             self.flowSendNPackets(self.windowSize)
 
 
@@ -137,7 +137,7 @@ class Flow:
     # This will be called by event handler in the case of a packet timeout
     def handlePacketTimeout(self, packetID):
         if packetID in self.unackPackets:               # If packet is unacknowledged
-            print("Got timeout event for packet %d" % packetID)
+            #print("Got timeout event for packet %d" % packetID)
             self.unackPackets.remove(packetID)          # Remove packet from unacknowledged packets
             self.packetsToSend.put_nowait(packetID)     # Send packet again
             # If the packet we timed out was the next packet we were expecting (and we are still
