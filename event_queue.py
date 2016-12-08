@@ -1,40 +1,45 @@
 from event import Event
 import constants
+
 class EventQueue:
     def __init__(self):
-        self.currentTime = 0       # Current time
-        self.eventList = []         # List of events (sorted by time property)
+        '''
+        Event Queue is a priority queue of Event objects that are sorted
+        based on their time property when they are enqueued.
+        '''
+        self.currentTime = 0    # Current time
+        self.eventList = []     # Sorted queue of events
 
     def dequeue(self):
         '''
-            Returns the event with the smallest time property
-            The function gets the first event in the eventList, removes it
-            from the list, and returns it
+            Returns the next chronological event (event with the smallest 
+            time property).
         '''
         if constants.debug: 
             print("Event is getting dequeued")
             print("\tevent: %s" %self.eventList[0].event_type)
+
         ret_event = self.eventList[0]   # Get event to dequeue
         del self.eventList[0]           # Remove this event from queue
 
-        # Update time variable
-        self.currentTime = ret_event.time
-        return ret_event                # And return this event
+        self.currentTime = ret_event.time   # Update current time
+        return ret_event                    # And return this event
 
     def enqueue(self, event):
         '''
             Enqueues the passed event to the event_queue.
-            The function enqueues the event by inserting it into the list of
-            events in order of the time the event should be executed.
         '''
         # Determine index to insert event based on time property
         ind_to_insert = self.getIndextoInsert(event.time)
+
         if constants.debug: 
             print("Currently Enqueueing...")
             print("\tInserting at index: %s" % ind_to_insert)
             print("\tInserting time: %s " % event.time)
             print("\tInserting event type: %s" % event.event_type)
-        self.eventList.insert(ind_to_insert, event)  # Insert/enqueue event
+
+        # Insert/enqueue event
+        self.eventList.insert(ind_to_insert, event)  
 
         return True
 
@@ -58,25 +63,28 @@ class EventQueue:
         '''
 
         if self.getSize() == 0:     # If the list is empty, insert element  
-            return 0                   #   at index 0
+            return 0                #   at index 0
 
-        # If the value is smaller than the first element in the array
+        # If the value is smaller than the first element in the array, insert
+        #   element at the beginning of the queue
         if event_time < self.eventList[0].time:
             return 0
 
-        # If the value is greater than or equal to the last element in the array
+        # If the value is greater than or equal to the last element in the
+        #   array, insert it at the end
         if event_time >= self.eventList[-1].time:
             return self.getSize()
 
         left = 0
         right = self.getSize()
 
+        # Binary search for index to insert
         while True:
             m = (left + right)//2       # Get index between left and right
             event_m = self.eventList[m] # Get the event at this middle index
 
             if right - left == 1:       # If left and right are adjacent
-                return right            # Insert element at right index
+                return right            # Insert element between them
 
             # Otherwise narrow the interval
             elif event_time >= event_m.time:
@@ -85,9 +93,13 @@ class EventQueue:
                 right = m
 
             # If the event_time is the same as event_m time, insert event
-            #   next to middle element
+            #   after all events with the same time
             elif event_time == event_m.time:
-                return m+1
+                ret_ind = m+1
+                while self.eventList[ret_ind].time == event_time:
+                    ret_ind += 1
+
+                return ret_ind
 
 
 

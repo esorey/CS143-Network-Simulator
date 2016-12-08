@@ -19,9 +19,6 @@ if __name__ == "__main__":
     validNetwork = False
     # Initialize arrays
 
-
-    constants.cngstn_ctrl = 1
-
     # Initialize event queue
     constants.system_EQ = EventQueue()
     # Initialize analytics
@@ -52,8 +49,6 @@ if __name__ == "__main__":
         constants.system_EQ.enqueue(flow_event)
 
     bellman_event = Event(Event.bellman_ford, constants.BELLMAN_PERIOD, None)
-    constants.system_EQ.enqueue(bellman_event)
-    bellman_event = Event(Event.bellman_ford, 300, None)
     constants.system_EQ.enqueue(bellman_event)
     # Continue to dequeue events until it is empty
     while((not constants.system_EQ.isempty()) and (not constants.all_flows_done)):

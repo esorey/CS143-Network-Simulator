@@ -1,49 +1,88 @@
 import constants
 from packet import Packet
+from packet import AckPacket, DataPacket
 from event_queue import EventQueue
 from event import Event
 from analytics import Analytics
-from packet import AckPacket, DataPacket
 
 class Host:
-    """A Host: end points of the network"""
+    '''
+    A Host: end points of the network. Hosts send and receive data and 
+    acknowledgement packets.
+    '''
     def __init__(self, id, out_link):
         super(Host, self).__init__()
         self.id = id
-        self.out_link = out_link
-        self.pckt_counters = {}
-        # possibly needed for host send/receive rate
-        self.num_received = 0
-        self.num_sent = 0
+        self.out_link = out_link    # ID of link connected to host
 
-    '''Add the passed packets to the link queue of the 
-    outlink it is connected to'''
     def sendPackets(self, packetlist):
+        '''
+        Send packets across this host's link
+        '''
+
         if constants.debug: 
             print("Sending Packets: ")
             print("\t" + str(packetlist))
+
         for pckt in packetlist:
-            sendPckt = Event(Event.pckt_send, constants.system_EQ.currentTime, [self.out_link, pckt])
+            sendPckt = Event(Event.pckt_send, constants.system_EQ.currentTime,
+                        [self.out_link, pckt])
             constants.system_EQ.enqueue(sendPckt)
 
-    '''Receive the packets from the inlink queue'''
     def receivePacket(self, pckt):
-        if type(pckt) is AckPacket: # Acknowledgment packet
-            # make and enqueue an event for the event queue 
-            # for acknowledging a received acknowledgment packet
-            ackEvent = Event(Event.ack_rcv, constants.system_EQ.currentTime, 
-                    [pckt.packet_id, pckt.owner_flow, pckt.ack_sent_time])
-            constants.system_EQ.enqueue(ackEvent)
+        '''
+        Receive packets from the link and determine what to do 
+        '''
+        if type(pckt) is AckPacket:
+            self.tellFlowAckReceived(pckt)
 
-        if type(pckt) is DataPacket: # Data packet
-            # create an acknowledgment packet
-            ackpckt = AckPacket(pckt.packet_id, pckt.origin_id, pckt.destination_id, pckt.owner_flow, constants.system_EQ.currentTime)
-            # push the new acknowledgment
-            sendAckPckt = Event(Event.pckt_send, constants.system_EQ.currentTime, [self.out_link, ackpckt])
-            constants.system_EQ.enqueue(sendAckPckt)
-            # Add to analytics
-            if pckt.owner_flow in self.pckt_counters:
-                    self.pckt_counters[pckt.owner_flow] += 1
+        elif type(pckt) is DataPacket:
+            if constants.cngstn_ctrl == constants.NO_CNGSTN_CTRL:
+                self.directlySendAck(pckt)
             else:
-                    self.pckt_counters[pckt.owner_flow] = 1
-            constants.system_analytics.log_flow_receive_rate(pckt.owner_flow, constants.system_EQ.currentTime, self.pckt_counters[pckt.owner_flow])
+                self.tellFlowDataReceived(pckt)
+
+            self.logReceivedDataPacket(pckt)
+
+    def logReceivedDataPacket(self, pkt):
+        '''
+        Log that a packet was received for packet delay analytics
+        '''
+        constants.system_analytics.log_packet_RTD(pkt.owner_flow,
+            pkt.timestamp, constants.system_EQ.currentTime)
+
+    def tellFlowAckReceived(self, ackpkt):
+        '''
+        Send the acknowledgment packet to the flow (through the event queue)
+        to deal with packet losses/sending new packets.
+        '''
+        ackEvent = Event(Event.ack_rcv, constants.system_EQ.currentTime, 
+                    [ackpkt.packet_id, ackpkt.owner_flow, ackpkt.timestamp])
+
+        constants.system_EQ.enqueue(ackEvent)
+
+    def tellFlowDataReceived(self, datapkt):
+        '''
+        If we're running any congestion control, tell the flow that a data
+        packet was received so the flow can keep track of unreceived packets
+        and send an ack for the next expected packet.
+        '''
+        flow_gets_data = Event(Event.flow_rcv_data, constants.system_EQ.currentTime,
+                            [datapkt.owner_flow, datapkt])
+
+        constants.system_EQ.enqueue(flow_gets_data)
+
+    def directlySendAck(self, datapkt):
+        '''
+        If we're not running any congestion control, send an acknowledgement 
+        for the exact packet we received.
+        '''
+        src = datapkt.destination_id        # Ack goes in opposite direction
+        dest = datapkt.origin_id
+        ackpckt = AckPacket(datapkt.packet_id, src, dest, datapkt.owner_flow,
+                    datapkt.timestamp)
+
+        sendAckEvent = Event(Event.pckt_send, constants.system_EQ.currentTime,
+                        [self.out_link, ackpckt])
+
+        constants.system_EQ.enqueue(sendAckEvent)
