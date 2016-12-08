@@ -74,9 +74,10 @@ class Link:
 
         # If buffer is full, log that we dropped a packet
         elif self.get_buffer_occupancy() + pkt.size > self.buffer_capacity: 
-            print(self.ID)
-            print("Packet dropped, buffer occupancy is %s" % self.get_buffer_occupancy())
-            print("buffer capacity is %s" % self.buffer_capacity)   
+            if constants.debug:
+                print(self.ID)
+                print("Packet dropped, buffer occupancy is %s" % self.get_buffer_occupancy())
+                print("buffer capacity is %s" % self.buffer_capacity)   
 
             self.log_packet_dropped(1)              # Log that a packet was dropped
 
