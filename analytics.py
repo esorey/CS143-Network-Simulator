@@ -217,8 +217,9 @@ class Analytics:
             time = [elt[0]*constants.MS_TO_SEC for elt in link_points]
             l_flow_rate_MBPS = [elt[1]*constants.BYTES_TO_MBITS for elt in link_points]
 
-            LFR_t, LFR_d = self.getRate(time, l_flow_rate_MBPS)
-            plt.plot(LFR_t, LFR_d, label=linkID, marker='o', linestyle='--', markersize=1, color=colors[color_ctr], markeredgecolor=colors[color_ctr])
+            # Turned off windows
+            #LFR_t, LFR_d = self.getRate(time, l_flow_rate_MBPS)
+            plt.plot(time, l_flow_rate_MBPS, label=linkID, marker='o', linestyle='--', markersize=1, color=colors[color_ctr], markeredgecolor=colors[color_ctr])
             color_ctr += 1
 
         lgd = plt.legend(loc=7, bbox_to_anchor=(1.25,0.5))
@@ -289,12 +290,13 @@ class Analytics:
             time = [elt[0]*constants.MS_TO_SEC for elt in flow_rate_points]
             f_flow_rate = [elt[1]*constants.BYTES_TO_MBITS for elt in flow_rate_points]
 
-            FR_t, FR_d = self.getRate(time, f_flow_rate)
+            #FR_t, FR_d = self.getRate(time, f_flow_rate)
             if constants.debug:
                 print(time)
                 print(f_flow_rate)
 
-            plt.plot(FR_t, FR_d, label=flowID, marker='o', linestyle='--', markersize=1, color=colors[color_ctr], markeredgecolor=colors[color_ctr])
+            #Turned off windows
+            plt.plot(time, f_flow_rate, label=flowID, marker='o', linestyle='--', markersize=1, color=colors[color_ctr], markeredgecolor=colors[color_ctr])
             color_ctr += 1
 
         lgd = plt.legend(loc=7, bbox_to_anchor=(1.25,0.5))
