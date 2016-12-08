@@ -40,7 +40,7 @@ class Router:
             else:
                 routing_table[host_id] = [None, float("Inf"), self.id]
 
-        print("Routing table for " + self.id + " is " + str(routing_table))
+        #print("Routing table for " + self.id + " is " + str(routing_table))
         self.routingTable = routing_table
 
     def modify_routing_table(self):
@@ -119,7 +119,7 @@ class Router:
         self.changePrev = self.changeCurr
         self.changeCurr = False
         if type(pckt) is RoutingTablePacket:
-            print("Routing table for " + self.id + " is " + str(self.routingTable))
+            #print("Routing table for " + self.id + " is " + str(self.routingTable))
 
             # do bellman Ford
             # check the routing table of the packet
@@ -138,7 +138,7 @@ class Router:
                     self.changeCurr = True
 
             if self.changeCurr == True:
-                #print("CHECK: " + str(self.routingTable))
+                print("CHECK: " + str(self.routingTable))
                 self.broadcastRTPackets()
             if self.changePrev == True and self.changeCurr == False:
                 constants.Bellman_not_done -= 1
