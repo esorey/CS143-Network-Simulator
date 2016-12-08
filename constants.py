@@ -21,7 +21,7 @@ RTABLE_PKT_SIZE = 64.0      # Bytes per routing table packet
 
 # Time Delays
 CONSECUTIVE_PKT_DELAY = 0.5     # Send new packets every 0.5 ms when sending consecutive packets
-TIMEOUT_TIME = 1000             # Default packet timeout time, otherwise use avg RTT 
+TIMEOUT_TIME = 500             # Default packet timeout time, otherwise use avg RTT 
 FAST_PERIOD = 100                # Time to update window size for Fast TCP
 BELLMAN_PERIOD = 5000           # Time between each bellman ford event enqueued in ms
 
