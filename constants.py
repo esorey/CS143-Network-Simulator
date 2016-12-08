@@ -1,7 +1,7 @@
 # constants.py
 # Contains the constants that other classes and files will use
-testcase = 1                # Chose which test case to run
-cngstn_ctrl = 1             # Choose which congestion control algorithm to run
+testcase = 2                # Chose which test case to run
+cngstn_ctrl = 2             # Choose which congestion control algorithm to run
 
 NO_CNGSTN_CTRL = 0
 TCP_RENO = 1
