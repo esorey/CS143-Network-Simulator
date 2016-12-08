@@ -99,7 +99,7 @@ class Link:
         Compute the travel time for a packet. Will involve the current time and the transmission
         time.
         '''
-        travel_time = self.delay + constants.SEC_TO_MS *
+        travel_time = self.delay + constants.SEC_TO_MS * \
                         (pkt.size * constants.BYTES_TO_MBITS * 1.0 / self.rate)
         
         if constants.debug:
