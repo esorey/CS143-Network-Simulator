@@ -160,7 +160,8 @@ class FlowReno():
 
             # If we're in the fast recovery phase and we received a 
             # packet request for a packet in this window, then send it
-            if self.fast_recovery and self.last_unackd <= self.fast_recovery_pkts:
+            if self.fast_recovery and \
+                self.last_unackd <= self.fast_recovery_pkts:
                 pkt = DataPacket(self.last_unackd, self.source, self.dest, \
                     self.ID, constants.system_EQ.currentTime)
                 self.timeouts_to_cancel.append(self.last_unackd)
