@@ -62,12 +62,13 @@ class Router:
         for Bellman Ford
         '''
         for link in self.links:
-            # make routing table packets
-            # format of routing table: packet_id, origin_id, size, link_id, routing_table
-            pckt = RoutingTablePacket(None, self.id, constants.RTABLE_PKT_SIZE, link, self.routingTable)
-            # enqueue each routing table packet and send it down each link that the
-            # router is attached to
-            send_pckt_event = Event(Event.pckt_send, constants.system_EQ.currentTime, [link, pckt])
+            # make routing table packets for each link
+            pckt = RoutingTablePacket(None, self.id, \
+                constants.RTABLE_PKT_SIZE, link, self.routingTable)
+            # enqueue each routing table packet and send it down each link that
+            # the router is attached to
+            send_pckt_event = Event(Event.pckt_send, \
+                constants.system_EQ.currentTime, [link, pckt])
             constants.system_EQ.enqueue(send_pckt_event)
 
 
@@ -87,19 +88,18 @@ class Router:
             # Check the routing table of the packet
             origin_link = nwm.get_link_from_id(pckt.link_id)
             link_cost = origin_link.get_buffer_occupancy()
+
             for hosts in pckt.routing_table.keys():
                 new_cost = pckt.routing_table[hosts][1] + link_cost
-                #print("New Cost: " + str(new_cost))
-                #print("original cost: " + str(self.routingTable[hosts][1]))
                 if new_cost < self.routingTable[hosts][1]:
                     self.routingTable[hosts][1] = new_cost
                     # want to flip the ID because direction is reversed
-                    self.routingTable[hosts][0] = util.flip_link_id(pckt.link_id)
+                    self.routingTable[hosts][0] = \
+                        util.flip_link_id(pckt.link_id)
                     self.changeCurr = True
 
             # A change has been made to the routing table
             if self.changeCurr == True:
-                #print("CHECK: " + str(self.routingTable))
                 self.broadcastRTPackets()
         else:
             next_link = self.routingTable[pckt.destination_id][0]

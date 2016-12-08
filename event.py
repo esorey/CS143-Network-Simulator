@@ -40,8 +40,8 @@ class Event:
             Data: [linkID]
 
         flow_send_packets:
-            Description: Enables the flow to tell the flow's source/dest (some host)
-                to send packets.
+            Description: Enables the flow to tell the flow's source/dest 
+                (some host) to send packets.
             Data: [hostID, list of packets]
 
         ack_rcv:
@@ -49,8 +49,8 @@ class Event:
             Data: [packetID, flowID, acknowledgement time]
 
         pckt_send:
-            Description: Hands off the packet to the link to send, hold in buffer,
-                or drop.
+            Description: Hands off the packet to the link to send, hold in 
+                buffer, or drop.
             Data: [linkID, packet]
 
         update_FAST:
@@ -59,20 +59,23 @@ class Event:
             Data: [flowID]
 
         pckt_timeout:
-            Description: Tells the flow that a packet with a certain ID has timed out
+            Description: Tells the flow that a packet with a certain ID has 
+                timed out
             Data: [packet, flowID]
 
         bellman_ford:
-            Description: Enqueues another Bellman Ford event at a fixed time, and begins
-                Bellman Ford algorithm to dynamically update routing tables.
+            Description: Enqueues another Bellman Ford event at a fixed time, 
+                and begins Bellman Ford algorithm to dynamically update 
+                routing tables.
             Data: None
 
         flow_done:
-            Description: Checks if all the flows are finished, and updates the global
-                constant that indicates all flows are finished.
+            Description: Checks if all the flows are finished, and updates the 
+                global constant that indicates all flows are finished.
             Data: None
 
         flow_rcv_data:
-            Description: Flow receives a data packet and determines what ack to send
+            Description: Flow receives a data packet and determines what ack 
+                to send
             Data: [flowID, packet]
         '''
