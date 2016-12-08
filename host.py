@@ -13,7 +13,7 @@ class Host:
     def __init__(self, id, out_link):
         super(Host, self).__init__()
         self.id = id
-        self.out_link = out_link
+        self.out_link = out_link    # ID of link connected to host
 
     def sendPackets(self, packetlist):
         '''
