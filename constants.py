@@ -1,11 +1,5 @@
 # constants.py
 # Contains the constants that other classes and files will use
-testcase = 2                # Chose which test case to run
-cngstn_ctrl = 2             # Choose which congestion control algorithm to run
-
-NO_CNGSTN_CTRL = 0
-TCP_RENO = 1
-FAST_TCP = 2
 
 # Unit Conversions
 MB_TO_BYTES = 1000000.0     # Multiplier to convert MB to bytes
@@ -26,7 +20,7 @@ FAST_PERIOD = 100           # Time to update window size for Fast TCP
 BELLMAN_PERIOD = 5000       # Time between each bellman ford event enqueued (ms)
 
 # Other
-DEFAULT_NUM_WINDOWS = 1000  # Default window size for windowed averages
+DEFAULT_NUM_WINDOWS = 500   # Default window size for windowed averages
 DEC_PLACES = 2				# Round the decimal places for analytic's times
 
 # Global Variables
