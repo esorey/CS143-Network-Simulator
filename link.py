@@ -17,32 +17,36 @@ class Link:
         self.delay = 0              # Link delay in ms
         self.A = A                  # Link source
         self.B = B                  # Link destination
-        self.buffer_capacity = buffer_cap * constants.KB_TO_BYTES       # Buffer capacity in bytes
 
-        self.in_use = False         # Indicates if a packet is being sent over the link
+        # Buffer capacity in bytes
+        self.buffer_capacity = buffer_cap * constants.KB_TO_BYTES       
+
+        self.in_use = False         # If a packet is being sent over the link
         self.buffer_space_used = float(0)       # Space used in link buffer
-        self.buffer = queue.Queue()             # Link buffer is a queue
+        self.buffer = queue.Queue()
 
 
     def handle_link_free(self):
         '''
-        Respond to an event that frees the link. If there is something on the buffer,
-        dequeue it and send it across the link (i.e. put link free event on the EQ,
-        along with a packet received event for the destination of this link). If the buffer
-        is empty, mark the link as free.
+        Respond to an event that frees the link. If there is something on the
+        buffer, dequeue it and send it across the link (i.e. put link free
+        event on the EQ, along with a packet received event for the destination
+        of this link). If the buffer is empty, mark the link as free.
         '''
 
-        if self.buffer.empty():         # No more packets to send
+        if self.buffer.empty():                 # No more packets to send
             self.in_use = False
 
         else:
-            pkt = self.buffer.get_nowait()      # Get a packet to send
-            self.buffer_space_used -= pkt.size  # Update buffer space
+            pkt = self.buffer.get_nowait()
+            self.buffer_space_used -= pkt.size
 
-            # Calculate time it takes packet to travel over link
-            travel_time = float(constants.system_EQ.currentTime + self.get_packet_travel_time(pkt))
+            self.log_buffer_occupancy()
+
+            # Calculate when packet will reach end of link
+            travel_time = float(constants.system_EQ.currentTime + 
+                            self.get_packet_travel_time(pkt))
             
-            self.log_buffer_occupancy()                 # Log buffer size
             self.log_link_rate(pkt.size, travel_time)   # Log link rate
             
             self.in_use = True              # Indicate that the link is in use
@@ -57,44 +61,46 @@ class Link:
 
     def enqueue_packet(self, pkt):
         '''
-        Enqueue a packet to the buffer of this link. If the buffer is full, log a dropped
-        packet in the analytics class. If the buffer is empty then send the packet immediately
-        across the link.
+        Enqueue a packet to the buffer of this link. If the buffer is full,
+        log a dropped packet in analytics. If the buffer is empty then send the
+        packet immediately across the link.
         '''
         
-        # If the buffer is empty and the link is free, immediately send the packet over the link
+        # If the buffer is empty and link is free, immediately send packet
         if self.buffer.empty() and self.in_use == False:
-            self.buffer.put_nowait(pkt)             # Enqueue the packet
-            self.buffer_space_used += pkt.size      # Update buffer size
+            self.buffer.put_nowait(pkt)
+            self.buffer_space_used += pkt.size
   
-            self.log_buffer_occupancy()               # Log buffer occupancy
-            self.log_packet_dropped(0)              # Log that no packets were dropped
+            self.log_buffer_occupancy()
+            self.log_packet_dropped(0)  # Log no packet dropped
 
-            self.handle_link_free()                 # Handle the fact that link is free by putting link in use
+            self.handle_link_free()
 
         # If buffer is full, log that we dropped a packet
         elif self.get_buffer_occupancy() + pkt.size > self.buffer_capacity: 
             if constants.debug:
                 print(self.ID)
-                print("Packet dropped, buffer occupancy is %s" % self.get_buffer_occupancy())
+                print("Packet dropped, buffer occupancy is %s"
+                        % self.get_buffer_occupancy())
                 print("buffer capacity is %s" % self.buffer_capacity)   
 
-            self.log_packet_dropped(1)              # Log that a packet was dropped
+            self.log_packet_dropped(1)      # Log that a packet was dropped
 
-        # Otherwise either link is in use and/or buffer has some elements, so add packet to buffer
+        # Otherwise link is in use/buffer is not empty, so add packet to buffer
         else:       
-            self.buffer.put_nowait(pkt)             # Enqueue the packet into link buffer
-            self.buffer_space_used += pkt.size      # Update buffer size
+            self.buffer.put_nowait(pkt)
+            self.buffer_space_used += pkt.size
             
-            self.log_buffer_occupancy()             # Log the buffer occupancy
-            self.log_packet_dropped(0)              # Log that no packets were dropped
+            self.log_buffer_occupancy()
+            self.log_packet_dropped(0)
 
     def get_packet_travel_time(self, pkt):
         '''
         Compute the travel time for a packet. Will involve the current time and the transmission
         time.
         '''
-        travel_time = self.delay + constants.SEC_TO_MS * (pkt.size * constants.BYTES_TO_MBITS * 1.0 / self.rate)
+        travel_time = self.delay + constants.SEC_TO_MS *
+                        (pkt.size * constants.BYTES_TO_MBITS * 1.0 / self.rate)
         
         if constants.debug:
             print("Travel Time:")
@@ -108,11 +114,13 @@ class Link:
         the number of bytes in the buffer of the link that runs opposite to this one.
         '''
         other_link_obj = self.get_opposite_link_obj()
+
         if constants.debug:
             print(self.ID)
-            print((self.buffer_space_used + other_link_obj.buffer_space_used)/float(1024))
-        return self.buffer_space_used + other_link_obj.buffer_space_used
+            print((self.buffer_space_used + other_link_obj.buffer_space_used)/
+                    float(1024))
 
+        return self.buffer_space_used + other_link_obj.buffer_space_used
 
     def get_opposite_link_obj(self):
         '''
@@ -126,13 +134,15 @@ class Link:
         '''
         Log the total buffer occupancy for system analytics.
         '''
-        constants.system_analytics.log_buff_occupancy(self.ID[0:-1], constants.system_EQ.currentTime, self.get_buffer_occupancy())
+        constants.system_analytics.log_buff_occupancy(self.ID[0:-1],
+                constants.system_EQ.currentTime, self.get_buffer_occupancy())
 
     def log_packet_dropped(self, num_packets):
         '''
         Log that num_packets were dropped for system analytics.
         '''
-        constants.system_analytics.log_dropped_packet(self.ID[0:-1], constants.system_EQ.currentTime, num_packets)
+        constants.system_analytics.log_dropped_packet(self.ID[0:-1],
+                constants.system_EQ.currentTime, num_packets)
 
     def log_link_rate(self, pktsize, time):
         '''
