@@ -56,7 +56,9 @@ class FlowReno():
         self.timeout_ctr = 0
 
     def flowStart(self):
-        # Initialize unreceived packets to contain all the packets in order 
+        ''' 
+        Initialize unreceived packets to contain all the packets in order 
+        '''
         for pkt_ID in range(self.num_packets):
             self.unreceivedpackets.append(pkt_ID)
 
@@ -77,8 +79,11 @@ class FlowReno():
             self.ID, data_packet.timestamp)
         self.sendPacket(ackpckt)
 
-    # Sends N new packets starting from the expected ack packet
+
     def flowSendNPackets(self, N):
+        '''
+        Sends N new packets starting from the expected ack packet
+        '''
         num_packets_sent = 0       # list of packets to send
 
         for PID in range(self.last_unackd, self.last_unackd+N):
@@ -97,9 +102,10 @@ class FlowReno():
             constants.system_EQ.currentTime)
 
 
-
-    # This will be called by event handler in the case of a packet timeout
     def handlePacketTimeout(self, packetID):
+        '''
+        This will be called by event handler in the case of a packet timeout
+        '''
         # If packet is unacknowledged
         if packetID in self.unackPackets and\
              packetID not in self.timeouts_to_cancel:   
@@ -124,6 +130,9 @@ class FlowReno():
 
 
     def updateW(self):
+        ''' 
+        The window size is updated according to the TCP Reno algorithm. 
+        '''
         if self.fast_recovery:
             self.fast_recovery = False
             self.windowSize = math.ceil(self.sst)
@@ -139,6 +148,11 @@ class FlowReno():
         self.logWindowSize()
 
     def getACK(self, packetID, ackTime):
+        '''
+        When an acknowledgment packet is received, the ID is compared to the
+        last acknowledged packet to check for dropped packets. Appropriate
+        actions are made based on the phase the simulation is in. 
+        '''
         self.updateRTTandLogRTD(ackTime)
         #print("Flow received an acknowledgement with ID %d" %packetID)
         #print("Last Unack'd: %d" %self.last_unackd)
@@ -210,6 +224,10 @@ class FlowReno():
 
 
     def updateRTTandLogRTD(self, ackTime):
+        '''
+        Round Trip Time and Round Trip Delay are updated and logged in 
+        analytics. 
+        '''
         RTT = constants.system_EQ.currentTime - ackTime
         constants.system_analytics.log_packet_RTD(self.ID,
             RTT, constants.system_EQ.currentTime)
@@ -223,6 +241,12 @@ class FlowReno():
 
 
     def sendPacket(self, pkt):
+        '''
+        A packet is sent by the flow. If it is a data packet, and event is
+        created and enqueued, so the data packet will be sent. Otherwise, the
+        packet is an acknowledgment packet and an event of that type will be
+        enqueued. 
+        '''
         if type(pkt) is DataPacket:
             #print("Sending DATA packet ID %d" %pkt.packet_id)
             self.unackPackets.append(pkt.packet_id)
@@ -246,10 +270,17 @@ class FlowReno():
         constants.system_EQ.enqueue(event_to_send)
 
     def logWindowSize(self):
+        '''
+        The window size is logged in system analytics at a specified current 
+        time. 
+        '''
         constants.system_analytics.log_window_size(self.ID, \
             constants.system_EQ.currentTime, self.windowSize)
 
     def removeAckdPackets(self):
+        '''
+        The packet is removed from the list of unacknowledged packets.
+        '''
         cur_length = len(self.unackPackets)
         for PID in self.unackPackets:
             if PID < self.last_unackd:
@@ -258,6 +289,9 @@ class FlowReno():
         return (len(self.unackPackets)-cur_length)
 
     def getWindowSize(self):
+        '''
+        The window size is returned. 
+        '''
         if self.fast_recovery:
             ret_WS = self.windowSize + self.dupAckCtr
         else:
