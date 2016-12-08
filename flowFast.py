@@ -58,14 +58,14 @@ class FlowFast:
             next_expected_packet = self.num_packets
 
         # Create and send an acknowledgement packet
-        print("Sending ACK packet ID %d for data packet ID %d" %(next_expected_packet, data_packet.packet_id))
+        #print("Sending ACK packet ID %d for data packet ID %d" %(next_expected_packet, data_packet.packet_id))
         ackpckt = AckPacket(next_expected_packet, self.dest, self.source, self.ID, data_packet.timestamp)
         self.sendPacket(ackpckt)
 
     def getACK(self, packetID, ackTime):
         self.updateRTTandLogRTD(ackTime)
-        print("Flow received an acknowledgement with ID %d" %packetID)
-        print("Last Unack'd: %d" %self.last_unackd)
+        #print("Flow received an acknowledgement with ID %d" %packetID)
+        #print("Last Unack'd: %d" %self.last_unackd)
 
         if packetID > self.last_unackd:
             self.last_unackd = packetID
@@ -75,8 +75,8 @@ class FlowFast:
             if self.last_unackd == self.num_packets:
                 self.unackPackets.clear()
                 self.done = True
-                print("Flow %s is done at time %s" % (self.ID, constants.system_EQ.currentTime))
-                print("Number of timeouts %d" %self.timeout_ctr)
+                #print("Flow %s is done at time %s" % (self.ID, constants.system_EQ.currentTime))
+                #print("Number of timeouts %d" %self.timeout_ctr)
                 flow_done_event = Event(Event.flow_done, constants.system_EQ.currentTime, [constants.system_EQ.currentTime])
                 constants.system_EQ.enqueue(flow_done_event)
                 return
@@ -99,7 +99,7 @@ class FlowFast:
 
     # Sends N packets from teh packetsToSendQueue
     def flowSendNPackets(self, N):
-        print("FlowSendNPackets: Sending %d packets" %N)
+        #print("FlowSendNPackets: Sending %d packets" %N)
         num_packets_sent = 0       # list of packets to send
 
         for PID in range(self.last_unackd, self.last_unackd+N):
@@ -118,7 +118,7 @@ class FlowFast:
     # This will be called by event handler in the case of a packet timeout
     def handlePacketTimeout(self, packetID):
         if packetID in self.unackPackets and packetID not in self.timeouts_to_cancel:               # If packet is unacknowledged
-            print("Got timeout event for packet %d" % packetID)
+            #print("Got timeout event for packet %d" % packetID)
             self.timeout_ctr += 1
             self.unackPackets.remove(packetID)          # Remove packet from unacknowledged packets
 
@@ -158,7 +158,7 @@ class FlowFast:
 
     def sendPacket(self, pkt):
         if type(pkt) is DataPacket:
-            print("Sending DATA packet ID %d" %pkt.packet_id)
+            #print("Sending DATA packet ID %d" %pkt.packet_id)
             self.unackPackets.append(pkt.packet_id)
 
             # Calculate the time at which to timeout
@@ -171,7 +171,7 @@ class FlowFast:
 
         else:
             event_to_send = Event(Event.flow_src_send_packets, constants.system_EQ.currentTime, [self.dest, [pkt]])
-            print("Sending ACK packet ID %d" %pkt.packet_id)
+            #print("Sending ACK packet ID %d" %pkt.packet_id)
 
         constants.system_EQ.enqueue(event_to_send)
     

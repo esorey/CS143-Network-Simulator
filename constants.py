@@ -2,7 +2,7 @@
 # Contains the constants that other classes and files will use
 testcase = 2                # Chose which test case to run
 
-cngstn_ctrl = 1             # Choose which congestion control algorithm to run
+cngstn_ctrl = 2             # Choose which congestion control algorithm to run
 NO_CNGSTN_CTRL = 0
 TCP_RENO = 1
 FAST_TCP = 2
