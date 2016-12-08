@@ -147,6 +147,8 @@ class FlowFast:
 
     def updateRTTandLogRTD(self, pktMadeTime):
         RTT = constants.system_EQ.currentTime - pktMadeTime
+        constants.system_analytics.log_packet_RTD(self.ID,
+            RTT, constants.system_EQ.currentTime)
 
         if self.minRTT == 0:        # Save minimum RTT time
             self.minRTT = RTT
