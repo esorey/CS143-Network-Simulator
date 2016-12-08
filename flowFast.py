@@ -62,8 +62,8 @@ class FlowFast:
         ackpckt = AckPacket(next_expected_packet, self.dest, self.source, self.ID, data_packet.timestamp)
         self.sendPacket(ackpckt)
 
-    def getACK(self, packetID, ackTime):
-        self.updateRTTandLogRTD(ackTime)
+    def getACK(self, packetID, pktMadeTime):
+        self.updateRTTandLogRTD(pktMadeTime)
         #print("Flow received an acknowledgement with ID %d" %packetID)
         #print("Last Unack'd: %d" %self.last_unackd)
 
@@ -145,8 +145,8 @@ class FlowFast:
         constants.system_EQ.enqueue(FAST_event)
 
 
-    def updateRTTandLogRTD(self, ackTime):
-        RTT = constants.system_EQ.currentTime - ackTime
+    def updateRTTandLogRTD(self, pktMadeTime):
+        RTT = constants.system_EQ.currentTime - pktMadeTime
 
         if self.minRTT == 0:        # Save minimum RTT time
             self.minRTT = RTT

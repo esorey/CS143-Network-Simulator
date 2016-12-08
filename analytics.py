@@ -32,17 +32,11 @@ class Analytics:
         self.flow_packet_RTD = {}
         self.flow_window_size = {}
 
-        # and per host: send/receive rate
-        self.host_send_rate = {}
-        self.host_receive_rate = {}
-
-        # not sure how to implement/compute these
-        # file that we are writing to
-        self.outFile = outFile
+        self.outFile = outFile      # A test file for writing output to
         self.pckts = 0
 
-    '''This logs that this link dropped a packet at the current time.'''
     def log_dropped_packet(self, linkID, currTime, numPkts):
+        '''This logs that this link dropped a packet at the current time.'''
         if linkID in self.link_packet_lost:
             if currTime in self.link_packet_lost[linkID]:
                 self.link_packet_lost[linkID][currTime] += numPkts
@@ -52,35 +46,26 @@ class Analytics:
             self.link_packet_lost[linkID] = {}
             self.link_packet_lost[linkID][currTime] = numPkts
 
-    ''' Arrange dictionary by linkID followed by currTime'''
     def log_buff_occupancy(self, linkID, currTime, buffOccupancy):
+        ''' Arrange dictionary by linkID followed by currTime'''
         if linkID in self.link_buff_occupancy:
             self.link_buff_occupancy[linkID].append((currTime, buffOccupancy/constants.DATA_PKT_SIZE))
         else:
             self.link_buff_occupancy[linkID] = [(currTime, buffOccupancy/constants.DATA_PKT_SIZE)]
 
-    ''' link flow rate calculation stores number of packets properly
-    sent through flow in the span between current time to previous time'''
-    # changed to flowID because I think this should be flow? i.e. when a flow
-    # decides to put first packet in iink buffer to when host receives last
-    # packet
-    #def log_flow_rate(self, flowID, numBytes, currTime, prevTime):
+
     def log_flow_rate(self, flowID, numBytes, RTT, currTime): 
-        #rate = numBytes*constants.BYTES_TO_MBITS/(RTT/constants.SEC_TO_MS)
-        #if flowID in self.flow_rate:
-        #    self.flow_rate[flowID].append((currTime, rate))
-        #else:
-        #    self.flow_rate[flowID] = [(currTime, rate)]
-        #if constants.debug:
-        #   print(rate)
+        ''' link flow rate calculation stores number of packets properly
+        sent through flow in the span between current time to previous time'''
         if flowID in self.flow_rate:
             self.flow_rate[flowID].append((currTime, numBytes))
         else:
             self.flow_rate[flowID] = [(currTime, numBytes)]
 
-    '''flow send rate should read the updating window sizes, which
-    decide the send rate of each flow, and update it to the relevant time'''
+    
     def log_flow_send_rate(self, flowID, numBytes, currTime):
+        '''flow send rate should read the updating window sizes, which
+        decide the send rate of each flow, and update it to the relevant time'''
         currTime = round(currTime, constants.DEC_PLACES)
         prev_data_sent = 0
 
@@ -88,6 +73,7 @@ class Analytics:
             flow_send_rate_points = self.flow_send_rate[flowID]
             flow_send_rate_times = [pt[0] for pt in flow_send_rate_points]
 
+            # if send rate has previously been logged at the current time
             if currTime in flow_send_rate_times:
                 prev_ind = flow_send_rate_times.index(currTime)
                 prev_data_sent = flow_send_rate_points[prev_ind][1]
@@ -97,38 +83,19 @@ class Analytics:
         else:
             self.flow_send_rate[flowID] = [(currTime, numBytes)]
 
-    '''flow receive rate should read the time that the packet was received
-    at the host and add it to the corresponding packet in the flow'''
-    def log_flow_receive_rate(self, flowID, currTime, receive_order):
-        self.pckts += 1
-        if flowID in self.flow_send_rate:
-            # If the number of the received packet is greater than window size,
-            #   there is an issue
-            if constants.debug: print(self.flow_send_rate[flowID])
-            if receive_order <= self.flow_send_rate[flowID][-1][0]:
-                pass
-                # Log the flow rate
-                #self.log_flow_rate(flowID, constants.DATA_PKT_SIZE, currTime, self.flow_send_rate[flowID][-1][1])
 
-    # time start is queued in immediately
-    # time end is when the ack with the right packetID is sent
-    # get the time for that ack in event queue
     def log_packet_RTD(self, flowID, timeStart, timeEnd):
+        ''' The round trip delay for a packet for a specific packet '''
         if flowID in self.flow_packet_RTD:
             self.flow_packet_RTD[flowID].append((timeEnd, timeEnd - timeStart))
         else:
             self.flow_packet_RTD[flowID] = [(timeEnd, timeEnd - timeStart)]
 
-
-    def log_host_send_rate():
-        pass
-
-    def log_host_receive_rate():
-        pass
         
-    '''link rate should read the time that this delay was calculated for the 
-    link and update the relevant link delay'''
+   
     def log_link_rate(self, linkID, pktsize, currTime):
+         '''link rate should read the time that this delay was calculated for the 
+        link and update the relevant link delay'''
         link_key = linkID[0:-1]
         currTime = round(currTime, constants.DEC_PLACES)
         prev_pkts_sent = 0
@@ -153,10 +120,9 @@ class Analytics:
         else:
             self.flow_window_size[flowID] = [(currTime, windowSize)]
 
-    def generatePlots():
-        pass
 
     def writeOutput(self):
+        '''This is a test function for writing output to a test text file. '''
         self.outFile.write("link buff occupancy: ")
         self.outFile.write(str(self.link_buff_occupancy))
         self.outFile.write("link packet lost:  ")
