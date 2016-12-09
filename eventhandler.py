@@ -78,6 +78,7 @@ def EventHandler(cur_event):
         bellman_event = Event(Event.bellman_ford, newTime, None)
         constants.system_EQ.enqueue(bellman_event)
         BellmanFord.runBellmanFord()
+        print("Bellman Ford, time = %f" %cur_event.time)
 
     elif cur_event.event_type == Event.flow_done:
         # count how many flows are finished. Main will run analytics when all

@@ -37,8 +37,8 @@ class Analytics:
         self.flow_packet_RTD = {}
         self.flow_window_size = {}
 
-        self.plotlinks = plot_links # Links we care about logging/plotting
-        self.plotflows = plot_flows  # Flows we care about logging/plotting
+        self.plotlinks = plot_links     # Links we care about logging/plotting
+        self.plotflows = plot_flows     # Flows we care about logging/plotting
 
 
     def log_buff_occupancy(self, linkID, currTime, buffOccupancy):

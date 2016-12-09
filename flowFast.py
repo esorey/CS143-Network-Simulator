@@ -89,8 +89,8 @@ class FlowFast:
             if self.last_unackd == self.num_packets:
                 self.unackPackets.clear()
                 self.done = True
-                #print("Flow %s is done at time %s" % (self.ID, constants.system_EQ.currentTime))
-                #print("Number of timeouts %d" %self.timeout_ctr)
+                print("Flow %s is done at time %s" % (self.ID, constants.system_EQ.currentTime))
+                
                 flow_done_event = Event(Event.flow_done, \
                     constants.system_EQ.currentTime, \
                     [constants.system_EQ.currentTime])
@@ -180,9 +180,11 @@ class FlowFast:
         self.logWindowSize()
 
         # Enqueue an event to update Fast TCP W after certain time
-        FAST_event = Event(Event.update_FAST, constants.system_EQ.currentTime \
-                    + constants.FAST_PERIOD, [self.ID])
-        constants.system_EQ.enqueue(FAST_event)
+        if self.done == False:
+            FAST_event = Event(Event.update_FAST,
+                                constants.system_EQ.currentTime \
+                                    + constants.FAST_PERIOD, [self.ID])
+            constants.system_EQ.enqueue(FAST_event)
 
 
     def updateRTTandLogRTD(self, pktMadeTime):

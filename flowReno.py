@@ -52,7 +52,7 @@ class FlowReno():
         self.fast_recovery = False
         self.fast_recovery_pkts = -1    # Max packet received in fast recovery
         self.timeouts_to_cancel = []
-
+        self.last_timeout_time = -100000.0
         self.timeout_ctr = 0
 
     def flowStart(self):
@@ -108,13 +108,23 @@ class FlowReno():
         '''
         # If packet is unacknowledged
         if packetID in self.unackPackets and\
-             packetID not in self.timeouts_to_cancel:   
+             packetID not in self.timeouts_to_cancel:
+
+            if self.numRTT == 0:
+                rtt = 0
+            else:
+                rtt = float(self.sumRTT)/self.numRTT
+
+            if constants.system_EQ.currentTime > self.last_timeout_time + rtt:
+                self.sst = max(float(self.windowSize)/2.0, 1.0)
+                self.windowSize = 1.0
+                self.last_timeout_time = constants.system_EQ.currentTime
             #print("Got timeout event for packet %d" % packetID)
             self.timeout_ctr += 1
             # Remove packet from unacknowledged packets
             self.unackPackets.remove(packetID)          
-            self.sst = max(float(self.windowSize)/2.0, 1.0)
-            self.windowSize = 1.0
+            #self.sst = max(float(self.windowSize)/2.0, 1.0)
+            #self.windowSize = 1.0
             self.dupAckCtr = 0
 
             self.unackPackets.clear()
@@ -164,7 +174,7 @@ class FlowReno():
             if self.last_unackd == self.num_packets:
                 self.unackPackets.clear()
                 self.done = True
-                #print("Flow %s is done at time %s" % (self.ID, constants.system_EQ.currentTime))
+                print("Flow %s is done at time %s" % (self.ID, constants.system_EQ.currentTime))
                 #print("Number of timeouts %d" %self.timeout_ctr)
                 flow_done_event = Event(Event.flow_done, \
                     constants.system_EQ.currentTime, \
@@ -238,6 +248,7 @@ class FlowReno():
             self.minRTT = RTT
         # is average only over current time period or over whole time
         self.sumRTT += RTT
+        self.numRTT += 1.0
 
 
     def sendPacket(self, pkt):
