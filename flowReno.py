@@ -153,7 +153,7 @@ class FlowReno():
                 
             else:                          # Congestion avoidance phase
                 self.windowSize = float(self.windowSize) + \
-                    1.0 / float(math.floor(self.windowSize))
+                    1.0 / float(self.windowSize)
 
         self.logWindowSize()
 

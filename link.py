@@ -14,7 +14,7 @@ class Link:
     def __init__(self, ID, rate, delay, A, B, buffer_cap):
         self.ID = ID
         self.rate = float(rate)     # Link rate in megabits per second
-        self.delay = 0              # Link delay in ms
+        self.delay = float(delay)   # Link delay in ms
         self.A = A                  # Link source
         self.B = B                  # Link destination
 
@@ -100,7 +100,7 @@ class Link:
         Compute the travel time for a packet. Will involve the current time 
         and the transmission time.
         '''
-        travel_time = self.delay + constants.SEC_TO_MS * \
+        travel_time = constants.SEC_TO_MS * \
                         (pkt.size * constants.BYTES_TO_MBITS * 1.0 / self.rate)
         
         if constants.debug:

@@ -267,7 +267,7 @@ class Analytics:
 
         lgd = plt.legend(loc=7, bbox_to_anchor=(1.25,0.5))
         plt.xlabel('time (ms)')
-        plt.ylabel('Buffer Occupancy (KB)')
+        plt.ylabel('Buffer Occupancy (pkts)')
 
         plt.savefig("./Figures/Figure2-BufferOccupancy",
                     additional_artists=[lgd], bbox_inches="tight")
