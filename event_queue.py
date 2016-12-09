@@ -1,5 +1,6 @@
 from event import Event
 import constants
+import heapq
 
 class EventQueue:
     def __init__(self):
@@ -10,6 +11,8 @@ class EventQueue:
         self.currentTime = 0    # Current time
         self.eventList = []     # Sorted queue of events
 
+        self.event_ctr = 0
+
     def dequeue(self):
         '''
             Returns the next chronological event (event with the smallest 
@@ -19,18 +22,22 @@ class EventQueue:
             print("Event is getting dequeued")
             print("\tevent: %s" %self.eventList[0].event_type)
 
-        ret_event = self.eventList[0]   # Get event to dequeue
-        del self.eventList[0]           # Remove this event from queue
+        #ret_event = self.eventList[0]   # Get event to dequeue
+        #del self.eventList[0]           # Remove this event from queue
 
-        self.currentTime = ret_event.time   # Update current time
-        return ret_event                    # And return this event
+        #self.currentTime = ret_event.time   # Update current time
+        #return ret_event                    # And return this event
+
+        ret_event_tuple = heapq.heappop(self.eventList)
+        self.currentTime = ret_event_tuple[0]
+        return ret_event_tuple[2]
 
     def enqueue(self, event):
         '''
             Enqueues the passed event to the event_queue.
         '''
         # Determine index to insert event based on time property
-        ind_to_insert = self.getIndextoInsert(event.time)
+        #ind_to_insert = self.getIndextoInsert(event.time)
 
         if constants.debug: 
             print("Currently Enqueueing...")
@@ -39,7 +46,9 @@ class EventQueue:
             print("\tInserting event type: %s" % event.event_type)
 
         # Insert/enqueue event
-        self.eventList.insert(ind_to_insert, event)  
+        heapq.heappush(self.eventList, (event.time, self.event_ctr, event))
+        self.event_ctr += 1
+        #self.eventList.insert(ind_to_insert, event)  
 
         return True
 
